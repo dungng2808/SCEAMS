@@ -270,6 +270,24 @@ creation returns `201 Created` with safe account fields; a duplicate email or
 student code returns `409 Conflict`. Ready-to-run requests are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
 
+## MVC Admin create user
+
+After signing in as Admin, select **Tạo tài khoản** from the user list or open:
+
+```text
+https://localhost:7034/Admin/Users/Create
+```
+
+The form exposes only the four API-supported roles and applies the same name,
+email, student-code, phone and password rules before submitting. Student code
+is required when the selected role is `Student`; the Admin can also choose
+whether the new account starts active.
+
+API validation and conflicts are returned to the corresponding form field. On
+successful creation, MVC redirects to `/Admin/Users` with the new email as the
+search filter, reloads the list from the API and displays a success
+notification so the Admin can confirm the persisted account is present.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

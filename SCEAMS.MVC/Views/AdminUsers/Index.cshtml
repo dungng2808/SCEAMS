@@ -28,12 +28,38 @@
                 Tra cứu tài khoản, theo dõi vai trò và trạng thái hoạt động trên toàn hệ thống.
             </p>
         </div>
-        <div class="users-heading__summary" aria-label="Tổng số tài khoản">
-            <span>Tổng tài khoản</span>
-            <strong>@Model.TotalItems</strong>
-            <small>Dữ liệu mới nhất từ API</small>
+        <div class="users-heading__aside">
+            <div class="users-heading__summary" aria-label="Tổng số tài khoản">
+                <span>Tổng tài khoản</span>
+                <strong>@Model.TotalItems</strong>
+                <small>Dữ liệu mới nhất từ API</small>
+            </div>
+            <a class="btn-app btn-app--primary"
+               asp-controller="AdminUsers"
+               asp-action="Create">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Tạo tài khoản
+            </a>
         </div>
     </div>
+
+    @if (TempData["UserCreatedSuccess"] is string successMessage)
+    {
+        <div class="users-success" role="status" aria-live="polite">
+            <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8 12 2.5 2.5L16 9" />
+                </svg>
+            </span>
+            <div>
+                <strong>Tạo tài khoản thành công</strong>
+                <p>@successMessage Tài khoản đang được hiển thị bên dưới.</p>
+            </div>
+        </div>
+    }
 
     @if (Model.IsForbidden)
     {

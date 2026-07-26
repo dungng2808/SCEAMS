@@ -13,6 +13,20 @@ namespace SCEAMS.MVC.Controllers;
 [Route("Admin/Users")]
 public sealed class AdminUsersController : Controller
 {
+    private static readonly HashSet<string> CreateUserFields =
+        new(
+        [
+            nameof(CreateAdminUserViewModel.FullName),
+            nameof(CreateAdminUserViewModel.Email),
+            nameof(CreateAdminUserViewModel.StudentCode),
+            nameof(CreateAdminUserViewModel.PhoneNumber),
+            nameof(CreateAdminUserViewModel.Role),
+            nameof(CreateAdminUserViewModel.IsActive),
+            nameof(CreateAdminUserViewModel.Password),
+            nameof(CreateAdminUserViewModel.ConfirmPassword)
+        ],
+        StringComparer.OrdinalIgnoreCase);
+
     private static readonly string[] AllowedRoles =
         ["Admin", "Staff", "Organizer", "Student"];
 
@@ -145,6 +159,119 @@ public sealed class AdminUsersController : Controller
                 errorMessage:
                     "Không thể kết nối tới API. Vui lòng thử lại sau."));
         }
+    }
+
+    [HttpGet("Create")]
+    public IActionResult Create()
+    {
+        return View(new CreateAdminUserViewModel());
+    }
+
+    [HttpPost("Create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        CreateAdminUserViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _userApiClient.CreateUserAsync(
+                new CreateUserApiRequest(
+                    model.FullName,
+                    model.Email,
+                    model.StudentCode,
+                    model.PhoneNumber,
+                    model.Role,
+                    model.IsActive,
+                    model.Password,
+                    model.ConfirmPassword),
+                cancellationToken);
+
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (result.IsSuccess && result.User is not null)
+            {
+                TempData["UserCreatedSuccess"] =
+                    $"Đã tạo tài khoản {result.User.Email} thành công.";
+
+                return RedirectToAction(
+                    nameof(Index),
+                    new
+                    {
+                        search = result.User.Email
+                    });
+            }
+
+            AddApiValidationErrors(result.FieldErrors);
+
+            if (result.FieldErrors.Count == 0)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage ??
+                    "Không thể tạo tài khoản vào lúc này.");
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to create a user from the Admin portal.");
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Không thể kết nối tới API. Vui lòng thử lại sau.");
+        }
+
+        return View(model);
+    }
+
+    private void AddApiValidationErrors(
+        IReadOnlyDictionary<string, string[]> fieldErrors)
+    {
+        foreach (var (field, messages) in fieldErrors)
+        {
+            var modelField = NormalizeCreateUserField(field);
+
+            foreach (var message in messages)
+            {
+                ModelState.AddModelError(modelField, message);
+            }
+        }
+    }
+
+    private static string NormalizeCreateUserField(string field)
+    {
+        var candidate = field
+            .TrimStart('$', '.')
+            .Split('.')
+            .LastOrDefault() ?? string.Empty;
+
+        return CreateUserFields.TryGetValue(
+            candidate,
+            out var modelField)
+            ? modelField
+            : string.Empty;
     }
 
     private async Task<IActionResult> EndInvalidSessionAsync(

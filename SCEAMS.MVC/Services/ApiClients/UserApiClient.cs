@@ -18,6 +18,86 @@ public sealed class UserApiClient : IUserApiClient
         _httpClient = httpClient;
     }
 
+    public async Task<CreateUserApiResult> CreateUserAsync(
+        CreateUserApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/users",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var user = await response.Content
+                .ReadFromJsonAsync<CreatedUserApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new CreateUserApiResult
+            {
+                IsSuccess = user is not null,
+                User = user,
+                ErrorMessage = user is null
+                    ? "API trả về tài khoản vừa tạo không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var validationProblem =
+                DeserializeOrDefault<ValidationProblemApiResponse>(
+                    content);
+
+            if (validationProblem?.Errors is { Count: > 0 })
+            {
+                return new CreateUserApiResult
+                {
+                    FieldErrors = validationProblem.Errors
+                };
+            }
+
+            var badRequest = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return CreateBadRequestResult(badRequest?.Message);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var conflict = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return CreateConflictResult(conflict?.Message);
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized =>
+                new CreateUserApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new CreateUserApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền tạo tài khoản người dùng."
+                },
+            _ => new CreateUserApiResult
+            {
+                ErrorMessage =
+                    "Không thể tạo tài khoản vào lúc này."
+            }
+        };
+    }
+
     public async Task<UserListApiResult> GetUsersAsync(
         UserListApiQuery query,
         CancellationToken cancellationToken = default)
@@ -297,6 +377,75 @@ public sealed class UserApiClient : IUserApiClient
         }
 
         return $"api/users?{string.Join('&', parameters)}";
+    }
+
+    private static CreateUserApiResult CreateBadRequestResult(
+        string? message)
+    {
+        if (message == "StudentCode is required for Student role.")
+        {
+            return CreateFieldErrorResult(
+                "StudentCode",
+                "Vui lòng nhập mã sinh viên cho tài khoản sinh viên.");
+        }
+
+        if (message == "Role is invalid.")
+        {
+            return CreateFieldErrorResult(
+                "Role",
+                "Vai trò không hợp lệ.");
+        }
+
+        if (message ==
+            "FullName must contain at least 2 characters.")
+        {
+            return CreateFieldErrorResult(
+                "FullName",
+                "Họ và tên phải có ít nhất 2 ký tự.");
+        }
+
+        return new CreateUserApiResult
+        {
+            ErrorMessage = message ??
+                "Thông tin tạo tài khoản không hợp lệ."
+        };
+    }
+
+    private static CreateUserApiResult CreateConflictResult(
+        string? message)
+    {
+        if (message == "Email is already registered.")
+        {
+            return CreateFieldErrorResult(
+                "Email",
+                "Email này đã được sử dụng.");
+        }
+
+        if (message == "StudentCode is already registered.")
+        {
+            return CreateFieldErrorResult(
+                "StudentCode",
+                "Mã sinh viên này đã được sử dụng.");
+        }
+
+        return new CreateUserApiResult
+        {
+            ErrorMessage = message ??
+                "Email hoặc mã sinh viên đã tồn tại."
+        };
+    }
+
+    private static CreateUserApiResult CreateFieldErrorResult(
+        string field,
+        string message)
+    {
+        return new CreateUserApiResult
+        {
+            FieldErrors = new Dictionary<string, string[]>
+            {
+                [field] = [message]
+            }
+        };
     }
 
     private sealed record ApiErrorResponse(string? Message);

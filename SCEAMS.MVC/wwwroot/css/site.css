@@ -2105,6 +2105,126 @@ svg {
   color: #854d0e;
 }
 
+.user-create-layout {
+  grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.55fr);
+}
+
+.user-create-section {
+  border: 0;
+  border-top: 1px solid var(--sceams-border);
+  margin: 1.5rem 0 0;
+  padding: 1.5rem 0 0;
+}
+
+.user-create-section:first-of-type {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.user-create-section legend {
+  color: var(--sceams-navy-950);
+  float: none;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  width: auto;
+}
+
+.user-create-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.user-create-field--wide {
+  grid-column: 1 / -1;
+}
+
+.profile-edit-input select.form-control {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.user-create-status {
+  align-items: center;
+  background: var(--sceams-background);
+  border: 1px solid var(--sceams-border);
+  border-radius: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.user-create-status:hover {
+  background: var(--sceams-blue-50);
+  border-color: #bfdbfe;
+}
+
+.user-create-status > input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.user-create-status__toggle {
+  background: var(--sceams-text-faint);
+  border-radius: 999px;
+  flex: 0 0 auto;
+  height: 1.45rem;
+  position: relative;
+  transition: background 160ms ease;
+  width: 2.65rem;
+}
+
+.user-create-status__toggle::after {
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+  content: "";
+  height: 1.05rem;
+  left: 0.2rem;
+  position: absolute;
+  top: 0.2rem;
+  transition: transform 160ms ease;
+  width: 1.05rem;
+}
+
+.user-create-status > input:checked + .user-create-status__toggle {
+  background: var(--sceams-success);
+}
+
+.user-create-status > input:checked + .user-create-status__toggle::after {
+  transform: translateX(1.2rem);
+}
+
+.user-create-status > input:focus-visible + .user-create-status__toggle {
+  outline: 2px solid var(--sceams-blue-600);
+  outline-offset: 3px;
+}
+
+.user-create-status > span:last-child {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.user-create-status strong {
+  color: var(--sceams-text);
+  font-size: 0.8rem;
+}
+
+.user-create-status small {
+  color: var(--sceams-text-faint);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
 .users-page {
   display: grid;
   gap: 1.5rem;
@@ -2147,6 +2267,25 @@ svg {
   max-width: 42rem;
 }
 
+.users-heading__aside {
+  align-items: stretch;
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.75rem;
+  min-width: 12rem;
+}
+
+.users-heading__aside .btn-app {
+  background: #ffffff;
+  color: var(--sceams-navy-900);
+  width: 100%;
+}
+
+.users-heading__aside .btn-app:hover {
+  background: var(--sceams-sky-100);
+  color: var(--sceams-navy-950);
+}
+
 .users-heading__summary {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -2173,6 +2312,46 @@ svg {
   font-size: 2.25rem;
   line-height: 1.1;
   margin-block: 0.2rem;
+}
+
+.users-success {
+  align-items: center;
+  background: var(--sceams-success-soft);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--sceams-radius-md);
+  color: var(--sceams-success);
+  display: flex;
+  gap: 0.9rem;
+  padding: 1rem 1.15rem;
+}
+
+.users-success > span {
+  align-items: center;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  flex: 0 0 auto;
+  height: 2.4rem;
+  justify-content: center;
+  width: 2.4rem;
+}
+
+.users-success svg {
+  height: 1.25rem;
+  stroke-width: 2;
+  width: 1.25rem;
+}
+
+.users-success strong {
+  color: #14532d;
+  display: block;
+  font-size: 0.85rem;
+}
+
+.users-success p {
+  color: #166534;
+  font-size: 0.78rem;
+  margin: 0.15rem 0 0;
 }
 
 .users-filters {
@@ -2680,6 +2859,10 @@ svg {
     grid-template-columns: 1fr;
   }
 
+  .user-create-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2750,6 +2933,10 @@ svg {
 
   .users-heading__summary {
     min-width: 0;
+    width: 100%;
+  }
+
+  .users-heading__aside {
     width: 100%;
   }
 
@@ -2871,6 +3058,14 @@ svg {
 
   .profile-edit-actions .btn-app {
     width: 100%;
+  }
+
+  .user-create-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .user-create-field--wide {
+    grid-column: auto;
   }
 
   .users-filters {

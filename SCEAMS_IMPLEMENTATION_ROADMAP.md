@@ -296,9 +296,9 @@ Domain entity/enum
 
 ### Phase 22 - MVC: Admin tạo tài khoản
 
-- [ ] Tạo form create user với danh sách role hợp lệ.
-- [ ] Hiển thị validation từ API.
-- [ ] Sau khi tạo, quay về danh sách và xác nhận user xuất hiện.
+- [x] Tạo form create user với danh sách role hợp lệ.
+- [x] Hiển thị validation từ API.
+- [x] Sau khi tạo, quay về danh sách và xác nhận user xuất hiện.
 
 ### Phase 23 - API: Admin sửa tài khoản
 
