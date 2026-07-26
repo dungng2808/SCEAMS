@@ -9,5 +9,6 @@ public sealed class UpdateVenueApiResult
     public bool IsConflict { get; init; }
     public bool IsValidationError { get; init; }
     public VenueApiResponse? Venue { get; init; }
+    public IReadOnlyList<VenueMaintenanceConflictApiResponse> Conflicts { get; init; } = [];
     public string? ErrorMessage { get; init; }
 }

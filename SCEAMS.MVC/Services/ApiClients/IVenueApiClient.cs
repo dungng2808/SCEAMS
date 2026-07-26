@@ -17,6 +17,11 @@ public interface IVenueApiClient
         UpdateVenueApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<UpdateVenueApiResult> UpdateMaintenanceAsync(
+        int venueId,
+        UpdateVenueMaintenanceApiRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<VenueListApiResult> GetVenuesAsync(
         string? search,
         bool? maintenance,

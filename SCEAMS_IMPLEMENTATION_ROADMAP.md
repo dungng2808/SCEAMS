@@ -596,9 +596,9 @@ Domain entity/enum
 
 ### Phase 66 - MVC: Cập nhật bảo trì
 
-- [ ] Tạo action maintenance riêng với cảnh báo.
-- [ ] Hiển thị các Event xung đột nếu API trả `409`.
-- [ ] Cập nhật badge sau khi thành công.
+- [x] Tạo action maintenance riêng với cảnh báo.
+- [x] Hiển thị các Event xung đột nếu API trả `409`.
+- [x] Cập nhật badge sau khi thành công.
 
 ### Phase 67 - API: Xóa địa điểm
 

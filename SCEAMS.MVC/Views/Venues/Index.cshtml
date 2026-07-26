@@ -68,6 +68,14 @@
         <div class="alert alert-success" role="status">@successMessage</div>
     }
 
+    @if (TempData["VenueMaintenanceError"] is string maintenanceError)
+    {
+        <div class="alert alert-danger" role="alert">
+            <strong>Không thể cập nhật bảo trì.</strong>
+            <span>@maintenanceError</span>
+        </div>
+    }
+
     @if (Model.CanManage)
     {
         <aside class="category-admin surface-card" aria-label="Quyền quản trị địa điểm">
@@ -155,12 +163,26 @@
                                 @if (Model.CanManage)
                                 {
                                     <td class="text-end">
-                                        <a class="btn-app btn-app--ghost btn-sm"
-                                           asp-controller="Venues"
-                                           asp-action="Edit"
-                                           asp-route-id="@venue.Id">
-                                            Sửa
-                                        </a>
+                                        <div style="display: inline-flex; gap: .4rem; align-items: center;">
+                                            <a class="btn-app btn-app--ghost btn-sm"
+                                               asp-controller="Venues"
+                                               asp-action="Edit"
+                                               asp-route-id="@venue.Id">
+                                                Sửa
+                                            </a>
+                                            <form asp-controller="Venues"
+                                                  asp-action="Maintenance"
+                                                  asp-route-id="@venue.Id"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('@(venue.IsUnderMaintenance ? "Tắt" : "Bật") bảo trì cho địa điểm này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="isUnderMaintenance" value="@(!venue.IsUnderMaintenance)" />
+                                                <button type="submit" class="btn-app btn-app--ghost btn-sm">
+                                                    @(venue.IsUnderMaintenance ? "Tắt bảo trì" : "Bảo trì")
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 }
                             </tr>

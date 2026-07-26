@@ -190,6 +190,73 @@ public sealed class VenueApiClient : IVenueApiClient
         };
     }
 
+    public async Task<UpdateVenueApiResult> UpdateMaintenanceAsync(
+        int venueId,
+        UpdateVenueMaintenanceApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/venues/{venueId}/maintenance",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var venue = await response.Content
+                .ReadFromJsonAsync<VenueApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateVenueApiResult
+            {
+                IsSuccess = venue is not null,
+                Venue = venue,
+                ErrorMessage = venue is null
+                    ? "API trả về trạng thái địa điểm không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var conflictResponse = response.StatusCode == HttpStatusCode.Conflict
+            ? DeserializeOrDefault<MaintenanceConflictApiResponse>(content)
+            : null;
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest => new UpdateVenueApiResult
+            {
+                IsValidationError = true,
+                ErrorMessage = "Trạng thái bảo trì chưa hợp lệ."
+            },
+            HttpStatusCode.Unauthorized => new UpdateVenueApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new UpdateVenueApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Chỉ Admin hoặc Staff mới có thể đổi trạng thái bảo trì."
+            },
+            HttpStatusCode.NotFound => new UpdateVenueApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = "Địa điểm không tồn tại."
+            },
+            HttpStatusCode.Conflict => new UpdateVenueApiResult
+            {
+                IsConflict = true,
+                Conflicts = conflictResponse?.Conflicts ?? [],
+                ErrorMessage = conflictResponse?.Message ??
+                    "Không thể bật bảo trì vì địa điểm đang có Event xung đột."
+            },
+            _ => new UpdateVenueApiResult
+            {
+                ErrorMessage = "Không thể cập nhật trạng thái bảo trì vào lúc này."
+            }
+        };
+    }
+
     public async Task<VenueListApiResult> GetVenuesAsync(
         string? search,
         bool? maintenance,
@@ -261,6 +328,10 @@ public sealed class VenueApiClient : IVenueApiClient
 
     private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);
 
+    private sealed record MaintenanceConflictApiResponse(
+        string? Message,
+        List<VenueMaintenanceConflictApiResponse>? Conflicts);
+
     private static string? ExtractApiMessage(string content)
     {
         try
@@ -273,6 +344,20 @@ public sealed class VenueApiClient : IVenueApiClient
         catch (JsonException)
         {
             return null;
+        }
+    }
+
+    private static T? DeserializeOrDefault<T>(string content)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(
+                content,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+        catch (JsonException)
+        {
+            return default;
         }
     }
 }

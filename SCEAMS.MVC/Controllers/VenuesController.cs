@@ -296,6 +296,74 @@ public sealed class VenuesController : Controller
         }
     }
 
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Staff")]
+    [HttpPost("{id:int}/Maintenance")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Maintenance(
+        int id,
+        bool isUnderMaintenance,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _venueApiClient.UpdateMaintenanceAsync(
+                id,
+                new UpdateVenueMaintenanceApiRequest(isUnderMaintenance),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess && result.Venue is not null)
+            {
+                TempData["SuccessMessage"] = result.Venue.IsUnderMaintenance
+                    ? $"Đã bật bảo trì cho địa điểm '{result.Venue.Name}'."
+                    : $"Đã tắt bảo trì cho địa điểm '{result.Venue.Name}'.";
+            }
+            else if (result.IsConflict)
+            {
+                var conflictLines = result.Conflicts.Count == 0
+                    ? "API không cung cấp chi tiết Event xung đột."
+                    : string.Join(
+                        " | ",
+                        result.Conflicts.Select(conflict =>
+                            $"#{conflict.EventId} {conflict.Title} ({conflict.Status}, {conflict.StartTime:dd/MM/yyyy HH:mm} - {conflict.EndTime:HH:mm})"));
+
+                TempData["VenueMaintenanceError"] =
+                    $"{result.ErrorMessage ?? "Không thể bật bảo trì."} {conflictLines}";
+            }
+            else if (result.IsNotFound)
+            {
+                TempData["VenueMaintenanceError"] =
+                    result.ErrorMessage ?? "Địa điểm không tồn tại.";
+            }
+            else
+            {
+                TempData["VenueMaintenanceError"] =
+                    result.ErrorMessage ?? "Không thể cập nhật trạng thái bảo trì.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to update maintenance for venue {VenueId}.", id);
+            TempData["VenueMaintenanceError"] =
+                "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     private static VenueListItemViewModel MapVenue(VenueApiResponse venue)
     {
         return new VenueListItemViewModel

@@ -916,5 +916,13 @@ dùng venue. Nếu có xung đột, API trả `409 Conflict` với mảng `confl
 bị thay đổi. Tắt bảo trì không có điều kiện xung đột. Request kiểm thử nằm trong
 Postman **Venues** folder.
 
+## MVC cập nhật bảo trì địa điểm
+
+Trong danh sách địa điểm, Admin và Staff có thể dùng nút **Bảo trì** hoặc
+**Tắt bảo trì**. MVC gửi form POST có anti-forgery token và hộp xác nhận trước
+khi gọi API. Sau khi thành công, badge được tải lại từ API; nếu API trả `409`,
+trang hiển thị thông báo cùng mã, tên, trạng thái và thời gian của các Event
+đang xung đột, đồng thời giữ nguyên trạng thái venue.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.
