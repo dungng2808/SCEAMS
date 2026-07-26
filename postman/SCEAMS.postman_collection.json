@@ -5245,6 +5245,198 @@
       "response": []
     }
       ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Phase 71 - List Public Approved Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Public event list is filtered and has capacity data\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.value).to.be.an(\"array\");",
+                  "    body.value.forEach(function (event) {",
+                  "        pm.expect(event.status).to.eql(\"Approved\");",
+                  "        pm.expect(event.slotsRemaining).to.be.at.least(0);",
+                  "        pm.expect(event.capacity).to.be.above(0);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events?$filter=Status eq 'Approved'&$orderby=StartTime asc&$top=10&$count=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "$filter",
+                  "value": "Status eq 'Approved'"
+                },
+                {
+                  "key": "$orderby",
+                  "value": "StartTime asc"
+                },
+                {
+                  "key": "$top",
+                  "value": "10"
+                },
+                {
+                  "key": "$count",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Phase 71 public list chỉ thấy Event Approved và sắp xếp StartTime tăng dần."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 71 - Admin OData Select Expand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Select and expand fields are available\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.value).to.be.an(\"array\");",
+                  "    if (body.value.length > 0) {",
+                  "        pm.expect(body.value[0]).to.have.property(\"title\");",
+                  "        pm.expect(body.value[0]).to.have.property(\"club\");",
+                  "        pm.expect(body.value[0]).to.have.property(\"venue\");",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events?$select=Id,Title,Status,SlotsRemaining&$expand=Club,Venue&$orderby=StartTime desc&$skip=0&$top=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "$select",
+                  "value": "Id,Title,Status,SlotsRemaining"
+                },
+                {
+                  "key": "$expand",
+                  "value": "Club,Venue"
+                },
+                {
+                  "key": "$orderby",
+                  "value": "StartTime desc"
+                },
+                {
+                  "key": "$skip",
+                  "value": "0"
+                },
+                {
+                  "key": "$top",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Phase 71 Admin/Staff kiểm thử $select, $expand, $skip và $top."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 71 - Organizer Scoped Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"OData response is returned\", function () {",
+                  "    pm.expect(pm.response.json().value).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events?$orderby=StartTime asc&$top=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "$orderby",
+                  "value": "StartTime asc"
+                },
+                {
+                  "key": "$top",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Phase 71 Organizer chỉ xem Event thuộc scope Club/Event của mình."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

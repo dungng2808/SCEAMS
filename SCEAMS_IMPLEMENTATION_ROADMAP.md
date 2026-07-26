@@ -630,9 +630,9 @@ Domain entity/enum
 
 ### Phase 71 - API: Danh sách sự kiện có OData
 
-- [ ] Thêm `GET /api/events` hỗ trợ `$filter`, `$orderby`, `$top`, `$skip`, `$select`, `$expand` phù hợp.
-- [ ] Public/Student chỉ thấy Event `Approved` còn công khai; role nội bộ xem theo scope.
-- [ ] Trả `slotsRemaining` được tính từ registration hợp lệ.
+- [x] Thêm `GET /api/events` hỗ trợ `$filter`, `$orderby`, `$top`, `$skip`, `$select`, `$expand` phù hợp.
+- [x] Public/Student chỉ thấy Event `Approved` còn công khai; role nội bộ xem theo scope.
+- [x] Trả `slotsRemaining` được tính từ registration hợp lệ.
 
 ### Phase 72 - MVC: Danh sách sự kiện
 

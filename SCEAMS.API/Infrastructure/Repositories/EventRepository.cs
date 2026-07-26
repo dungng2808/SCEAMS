@@ -14,6 +14,11 @@ public sealed class EventRepository
     {
     }
 
+    public IQueryable<Event> GetQueryable()
+    {
+        return DbSet.AsNoTracking();
+    }
+
     public Task<Event?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken = default)

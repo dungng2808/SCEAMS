@@ -972,3 +972,19 @@ trang hiển thị thông báo cùng mã, tên, trạng thái và thời gian c�
 
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.
+
+## API danh sách sự kiện có OData
+
+`GET /api/events` hỗ trợ `$filter`, `$orderby`, `$top`, `$skip`, `$select`,
+`$expand` và `$count`. Public/Student chỉ thấy Event `Approved`; Organizer chỉ
+thấy Event thuộc scope mình tạo hoặc Club mình phụ trách; Admin/Staff xem toàn
+bộ Event. Response có `registeredCount` và `slotsRemaining`, trong đó chỉ
+registration `Confirmed`/`Attended` được tính vào số chỗ đã dùng.
+
+Ví dụ:
+
+```text
+GET http://localhost:5195/api/events?$filter=Status eq 'Approved'&$orderby=StartTime asc&$top=10
+```
+
+Request OData mẫu nằm trong Postman **Events** folder.

@@ -4,6 +4,8 @@ namespace SCEAMS.Application.Interfaces;
 
 public interface IEventRepository : IGenericRepository<Event>
 {
+    IQueryable<Event> GetQueryable();
+
     Task<Event?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken = default);
