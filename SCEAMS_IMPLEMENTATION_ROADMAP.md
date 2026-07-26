@@ -766,9 +766,9 @@ Domain entity/enum
 
 ### Phase 93 - API: Student hủy đăng ký
 
-- [ ] Thêm `PUT /api/registrations/{id}/cancel`.
-- [ ] Chỉ chủ sở hữu được hủy; áp dụng mốc 24 giờ trước StartTime theo BR4.
-- [ ] Lưu `CancelledAt`, không xóa registration.
+- [x] Thêm `PUT /api/registrations/{id}/cancel`.
+- [x] Chỉ chủ sở hữu được hủy; áp dụng mốc 24 giờ trước StartTime theo BR4.
+- [x] Lưu `CancelledAt`, không xóa registration.
 
 ### Phase 94 - MVC: Hủy đăng ký
 

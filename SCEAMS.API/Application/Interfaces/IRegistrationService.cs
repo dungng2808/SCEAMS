@@ -10,4 +10,9 @@ public interface IRegistrationService
         CreateRegistrationRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<RegistrationResponseDto>> CancelAsync(
+        int registrationId,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

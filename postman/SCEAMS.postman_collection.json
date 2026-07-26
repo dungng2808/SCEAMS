@@ -5725,6 +5725,24 @@
             "description": "Phase 91 Student đăng ký Event Approved; API kiểm tra deadline, capacity và registration trùng."
           },
           "response": []
+        },
+        {
+          "name": "Phase 93 - Cancel Registration - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/registrations/{{registrationId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registrations", "{{registrationId}}", "cancel"]
+            },
+            "description": "Phase 93 Student chỉ hủy registration của mình trước StartTime ít nhất 24 giờ."
+          },
+          "response": []
         }
       ]
     }

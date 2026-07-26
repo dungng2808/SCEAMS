@@ -1196,6 +1196,21 @@ anti-forgery token và hộp xác nhận; sau khi thành công tải lại detai
 nhật slots remaining và hiển thị trạng thái `Confirmed`. Lỗi hết chỗ, quá hạn
 hoặc đăng ký trùng được hiển thị trực tiếp trên trang.
 
+## API Student hủy đăng ký
+
+Student dùng endpoint:
+
+```text
+PUT http://localhost:5195/api/registrations/{registrationId}/cancel
+Authorization: Bearer <student-access-token>
+```
+
+Chỉ chủ sở hữu registration ở trạng thái `Confirmed` được hủy và phải còn ít
+nhất 24 giờ trước `StartTime`. API đổi status sang `CancelledByStudent`, lưu
+`CancelledAt`, không xóa bản ghi; slots remaining được tính lại sau khi hủy.
+Nếu quá mốc 24 giờ, đã điểm danh hoặc không phải chủ sở hữu, API trả lỗi nghiệp
+vụ tương ứng.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

@@ -40,4 +40,23 @@ public sealed class RegistrationsController : ApiControllerBase
 
         return StatusCode(StatusCodes.Status201Created, result.Data);
     }
+
+    [HttpPut("{id:int}/cancel")]
+    [Authorize(Roles = "Student")]
+    [ProducesResponseType<RegistrationResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Cancel(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _registrationService.CancelAsync(
+            id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }
