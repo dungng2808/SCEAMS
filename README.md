@@ -159,13 +159,25 @@ POST http://localhost:5195/api/auth/login
 ```
 
 The request accepts `email` and `password`. A successful response contains a
-Bearer access token, its UTC expiry and safe user information. The JWT is signed
-with HMAC SHA-256 and contains `sub`, `email`, `role` and `jti` claims. Invalid
-credentials return `401`; an inactive account returns `403`.
+Bearer access token, a refresh token, their UTC expiries and safe user
+information. The JWT is signed with HMAC SHA-256 and contains `sub`, `email`,
+`role` and `jti` claims. Invalid credentials return `401`; an inactive account
+returns `403`.
+
+Refresh an expired access token with:
+
+```text
+POST http://localhost:5195/api/auth/refresh
+```
+
+Send only the current `refreshToken` in the JSON body. Each successful refresh
+rotates both tokens. Only the SHA-256 hash of the refresh token is stored in
+SQL Server; the previous token, an expired token or a revoked token returns
+`401`.
 
 Use the Swagger **Authorize** action or the Phase 09 requests in
-`postman/SCEAMS.postman_collection.json`. Password variables and the captured
-access token are marked secret and have no committed values.
+`postman/SCEAMS.postman_collection.json`. Password variables and captured
+access/refresh tokens are marked secret and have no committed values.
 
 ## MVC login and server-side token session
 

@@ -16,6 +16,26 @@ Content-Type: application/json
 
 ###
 
+# Define RefreshToken from a successful login response.
+POST {{SCEAMS.API_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{RefreshToken}}"
+}
+
+###
+
+# Reusing the previous refresh token after rotation must return 401.
+POST {{SCEAMS.API_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{UsedRefreshToken}}"
+}
+
+###
+
 POST {{SCEAMS.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 

@@ -11,15 +11,21 @@ public sealed class AuthService : IAuthService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordService _passwordService;
     private readonly IAccessTokenService _accessTokenService;
+    private readonly IRefreshTokenService _refreshTokenService;
+    private readonly TimeProvider _timeProvider;
 
     public AuthService(
         IUnitOfWork unitOfWork,
         IPasswordService passwordService,
-        IAccessTokenService accessTokenService)
+        IAccessTokenService accessTokenService,
+        IRefreshTokenService refreshTokenService,
+        TimeProvider timeProvider)
     {
         _unitOfWork = unitOfWork;
         _passwordService = passwordService;
         _accessTokenService = accessTokenService;
+        _refreshTokenService = refreshTokenService;
+        _timeProvider = timeProvider;
     }
 
     public async Task<Result<RegisteredStudentResponseDto>>
@@ -108,11 +114,20 @@ public sealed class AuthService : IAuthService
                 StatusCodes.Status403Forbidden);
         }
 
-        var token = _accessTokenService.Create(user);
+        var accessToken = _accessTokenService.Create(user);
+        var refreshToken = _refreshTokenService.Create();
+
+        user.RefreshTokenHash = refreshToken.Hash;
+        user.RefreshTokenExpiresAt = refreshToken.ExpiresAtUtc;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         var response = new LoginResponseDto(
-            AccessToken: token.Value,
+            AccessToken: accessToken.Value,
+            RefreshToken: refreshToken.Value,
             TokenType: "Bearer",
-            ExpiresAtUtc: token.ExpiresAtUtc,
+            ExpiresAtUtc: accessToken.ExpiresAtUtc,
+            RefreshTokenExpiresAtUtc:
+                refreshToken.ExpiresAtUtc,
             User: new AuthenticatedUserDto(
                 Id: user.Id,
                 FullName: user.FullName,
@@ -123,6 +138,66 @@ public sealed class AuthService : IAuthService
         return Result<LoginResponseDto>.Ok(
             response,
             "Login successful.");
+    }
+
+    public async Task<Result<RefreshTokenResponseDto>> RefreshAsync(
+        RefreshTokenRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var suppliedRefreshToken = request.RefreshToken.Trim();
+        var currentRefreshTokenHash =
+            _refreshTokenService.ComputeHash(
+                suppliedRefreshToken);
+        var user = await _unitOfWork.Users
+            .GetByRefreshTokenHashAsync(
+                currentRefreshTokenHash,
+                cancellationToken);
+        var utcNow = _timeProvider.GetUtcNow().UtcDateTime;
+
+        if (user is null ||
+            !user.IsActive ||
+            user.RefreshTokenExpiresAt is null ||
+            user.RefreshTokenExpiresAt <= utcNow)
+        {
+            return InvalidRefreshToken();
+        }
+
+        var replacementRefreshToken =
+            _refreshTokenService.Create();
+        var accessToken = _accessTokenService.Create(user);
+        var rotated = await _unitOfWork.Users
+            .TryRotateRefreshTokenAsync(
+                user.Id,
+                currentRefreshTokenHash,
+                replacementRefreshToken.Hash,
+                replacementRefreshToken.ExpiresAtUtc,
+                utcNow,
+                cancellationToken);
+
+        if (!rotated)
+        {
+            return InvalidRefreshToken();
+        }
+
+        return Result<RefreshTokenResponseDto>.Ok(
+            new RefreshTokenResponseDto(
+                AccessToken: accessToken.Value,
+                RefreshToken:
+                    replacementRefreshToken.Value,
+                TokenType: "Bearer",
+                ExpiresAtUtc: accessToken.ExpiresAtUtc,
+                RefreshTokenExpiresAtUtc:
+                    replacementRefreshToken
+                        .ExpiresAtUtc),
+            "Token refreshed successfully.");
+    }
+
+    private static Result<RefreshTokenResponseDto>
+        InvalidRefreshToken()
+    {
+        return Result<RefreshTokenResponseDto>.Fail(
+            "Refresh token is invalid, expired, or already used.",
+            StatusCodes.Status401Unauthorized);
     }
 
     private static string? NormalizeOptionalValue(string? value)

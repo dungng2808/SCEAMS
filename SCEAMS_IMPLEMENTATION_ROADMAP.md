@@ -262,9 +262,9 @@ Domain entity/enum
 
 ### Phase 17 - API: Refresh token
 
-- [ ] Thêm `POST /api/auth/refresh` và lưu refresh token dạng hash.
-- [ ] Áp dụng rotation; token đã dùng hoặc đã revoke không được dùng lại.
-- [ ] Test access token hết hạn và refresh token không hợp lệ.
+- [x] Thêm `POST /api/auth/refresh` và lưu refresh token dạng hash.
+- [x] Áp dụng rotation; token đã dùng hoặc đã revoke không được dùng lại.
+- [x] Test access token hết hạn và refresh token không hợp lệ.
 
 ### Phase 18 - MVC: Tự refresh và logout
 

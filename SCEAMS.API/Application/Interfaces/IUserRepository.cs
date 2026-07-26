@@ -8,6 +8,18 @@ public interface IUserRepository : IGenericRepository<User>
         string email,
         CancellationToken cancellationToken = default);
 
+    Task<User?> GetByRefreshTokenHashAsync(
+        string refreshTokenHash,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> TryRotateRefreshTokenAsync(
+        int userId,
+        string currentRefreshTokenHash,
+        string replacementRefreshTokenHash,
+        DateTime replacementExpiresAtUtc,
+        DateTime utcNow,
+        CancellationToken cancellationToken = default);
+
     Task<bool> EmailExistsAsync(
         string email,
         CancellationToken cancellationToken = default);

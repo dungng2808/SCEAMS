@@ -50,4 +50,21 @@ public sealed class AuthController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [ProducesResponseType<RefreshTokenResponseDto>(
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Refresh(
+        [FromBody] RefreshTokenRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _authService.RefreshAsync(
+            request,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

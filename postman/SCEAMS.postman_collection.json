@@ -45,6 +45,16 @@
       "key": "accessToken",
       "value": "",
       "type": "secret"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "usedRefreshToken",
+      "value": "",
+      "type": "secret"
     }
   ],
   "item": [
@@ -198,10 +208,13 @@
                   "    const body = pm.response.json();",
                   "    pm.expect(body.tokenType).to.eql(\"Bearer\");",
                   "    pm.expect(body.accessToken).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(body.refreshToken).to.be.a(\"string\").and.not.empty;",
                   "    pm.expect(body.expiresAtUtc).to.be.a(\"string\");",
+                  "    pm.expect(body.refreshTokenExpiresAtUtc).to.be.a(\"string\");",
                   "    pm.expect(body.user.role).to.be.oneOf([\"Admin\", \"Staff\", \"Organizer\", \"Student\"]);",
                   "    pm.expect(body.user).not.to.have.property(\"passwordHash\");",
                   "    pm.collectionVariables.set(\"accessToken\", body.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
                   "});",
                   "",
                   "pm.test(\"JWT contains sub, email and role\", function () {",
@@ -244,7 +257,178 @@
                 "login"
               ]
             },
-            "description": "Phase 09 successful login. Saves the returned access token as a secret collection variable."
+            "description": "Phase 09/17 successful login. Saves the returned access and refresh tokens as secret collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token - Rotate",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(",
+                  "    \"usedRefreshToken\",",
+                  "    pm.collectionVariables.get(\"refreshToken\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Refresh token is rotated\", function () {",
+                  "    const body = pm.response.json();",
+                  "    const usedToken = pm.collectionVariables.get(\"usedRefreshToken\");",
+                  "    pm.expect(body.accessToken).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(body.refreshToken).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(body.refreshToken).not.to.eql(usedToken);",
+                  "    pm.expect(body.refreshTokenExpiresAtUtc).to.be.a(\"string\");",
+                  "    pm.collectionVariables.set(\"accessToken\", body.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Phase 17 rotates a valid refresh token and saves the replacement token."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token - Reused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Used refresh token is rejected\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(",
+                  "        \"Refresh token is invalid, expired, or already used.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{usedRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Phase 17 verifies that a rotated refresh token cannot be reused."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token - Invalid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"invalid-refresh-token-value-for-phase-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Phase 17 invalid refresh-token path."
           },
           "response": []
         },

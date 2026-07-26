@@ -45,7 +45,11 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasDefaultValue(true);
 
         builder.Property(user => user.RefreshTokenHash)
-            .HasMaxLength(512);
+            .HasMaxLength(64);
+
+        builder.HasIndex(user => user.RefreshTokenHash)
+            .IsUnique()
+            .HasFilter("[RefreshTokenHash] IS NOT NULL");
 
         builder.Property(user => user.CreatedAt)
             .HasColumnType("datetime2")

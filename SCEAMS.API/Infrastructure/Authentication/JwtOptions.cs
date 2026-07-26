@@ -8,6 +8,7 @@ public sealed class JwtOptions
     public string Audience { get; init; } = string.Empty;
     public string SigningKey { get; init; } = string.Empty;
     public int AccessTokenMinutes { get; init; } = 60;
+    public int RefreshTokenDays { get; init; } = 7;
 
     public void Validate()
     {
@@ -34,6 +35,12 @@ public sealed class JwtOptions
         {
             throw new InvalidOperationException(
                 "Jwt:AccessTokenMinutes must be between 1 and 1440.");
+        }
+
+        if (RefreshTokenDays is < 1 or > 90)
+        {
+            throw new InvalidOperationException(
+                "Jwt:RefreshTokenDays must be between 1 and 90.");
         }
     }
 }

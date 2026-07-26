@@ -124,6 +124,7 @@ builder.Services.AddScoped<IHealthService, HealthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<
     IDatabaseHealthService,
     DatabaseHealthService>();
