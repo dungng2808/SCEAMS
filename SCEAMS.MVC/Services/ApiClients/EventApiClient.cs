@@ -728,21 +728,30 @@ public sealed class EventApiClient : IEventApiClient
         query.Add($"$top={normalizedPageSize}");
         query.Add("$count=true");
 
-        using var response = await _httpClient.GetAsync(
-            $"api/events?{string.Join("&", query)}",
-            cancellationToken);
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"api/events?{string.Join("&", query)}");
+        request.Headers.Accept.ParseAdd("application/json");
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.OK)
         {
-            var payload = await response.Content
-                .ReadFromJsonAsync<EventODataListApiResponse>(
-                    cancellationToken: cancellationToken);
-            var events = payload?.Value ?? [];
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            var parsed = ParseEventODataResponse(content);
+            if (parsed is not { } payload)
+            {
+                return new EventListApiResult
+                {
+                    ErrorMessage = "API trả về dữ liệu danh sách Event không đúng định dạng JSON."
+                };
+            }
+
+            var events = payload.Value;
             return new EventListApiResult
             {
                 IsSuccess = true,
                 Events = events,
-                TotalItems = payload?.Count ?? events.Count,
+                TotalItems = payload.Count ?? events.Count,
                 Page = normalizedPage,
                 PageSize = normalizedPageSize
             };
@@ -776,6 +785,39 @@ public sealed class EventApiClient : IEventApiClient
     {
         return dateTime.ToUniversalTime()
             .ToString("O", CultureInfo.InvariantCulture);
+    }
+
+    private static (List<EventApiResponse> Value, int? Count)? ParseEventODataResponse(
+        string content)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+            using var document = JsonDocument.Parse(content);
+            if (document.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                var items = JsonSerializer.Deserialize<List<EventApiResponse>>(
+                    document.RootElement.GetRawText(),
+                    options) ?? [];
+                return (items, items.Count);
+            }
+
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            var payload = JsonSerializer.Deserialize<EventODataListApiResponse>(
+                document.RootElement.GetRawText(),
+                options);
+            return payload?.Value is null
+                ? null
+                : (payload.Value, payload.Count);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     private static string? ExtractMessage(string content)
