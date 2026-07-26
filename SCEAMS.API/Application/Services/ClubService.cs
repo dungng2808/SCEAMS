@@ -208,7 +208,6 @@ public sealed class ClubService : IClubService
         club.ReviewedByUserId = reviewerUserId;
         club.ReviewedAt = DateTime.UtcNow;
 
-        _unitOfWork.Clubs.Update(club);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
@@ -272,7 +271,6 @@ public sealed class ClubService : IClubService
         club.ReviewedByUserId = reviewerUserId;
         club.ReviewedAt = DateTime.UtcNow;
 
-        _unitOfWork.Clubs.Update(club);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
@@ -358,8 +356,8 @@ public sealed class ClubService : IClubService
         club.Name = clubNameTrimmed;
         club.Description = request.Description?.Trim();
         club.CategoryId = request.CategoryId;
+        club.Category = category;
 
-        _unitOfWork.Clubs.Update(club);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
@@ -410,7 +408,6 @@ public sealed class ClubService : IClubService
         club.Status = ClubStatus.Dissolved;
         club.DissolvedAt = DateTime.UtcNow;
 
-        _unitOfWork.Clubs.Update(club);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
