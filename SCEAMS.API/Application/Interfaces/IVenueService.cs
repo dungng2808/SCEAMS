@@ -5,6 +5,10 @@ namespace SCEAMS.Application.Interfaces;
 
 public interface IVenueService
 {
+    Task<Result<VenueResponseDto>> CreateVenueAsync(
+        CreateVenueRequestDto request,
+        CancellationToken cancellationToken = default);
+
     Task<Result<PagedResult<VenueResponseDto>>> GetVenuesAsync(
         string? search,
         bool? maintenance,

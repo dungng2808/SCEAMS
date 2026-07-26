@@ -822,5 +822,28 @@ MVC có bộ lọc tên/vị trí, tình trạng bảo trì và page size; danh 
 badge `Sẵn sàng`/`Đang bảo trì` cùng sức chứa. Admin và Staff nhìn thấy khu vực
 quản trị địa điểm; các nút tạo/sửa/bảo trì sẽ được mở ở các phase tiếp theo.
 
+## API tạo địa điểm
+
+Admin và Staff có thể tạo venue bằng:
+
+```text
+POST http://localhost:5195/api/venues
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Innovation Hall",
+  "location": "Building A - Floor 2",
+  "capacity": 120
+}
+```
+
+Tên, vị trí và sức chứa được validate; venue mới luôn bắt đầu ở trạng thái
+`isUnderMaintenance: false`. Cặp `name + location` không được trùng, kể cả
+khác hoa thường; lỗi trùng trả `409 Conflict`. Request Phase 61 nằm trong
+Postman **Venues** folder.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

@@ -566,9 +566,9 @@ Domain entity/enum
 
 ### Phase 61 - API: Tạo địa điểm
 
-- [ ] Thêm `POST /api/venues` cho Admin/Staff.
-- [ ] Validate tên, location và capacity lớn hơn 0.
-- [ ] Chặn venue trùng tên/location theo quy tắc đã chốt.
+- [x] Thêm `POST /api/venues` cho Admin/Staff.
+- [x] Validate tên, location và capacity lớn hơn 0.
+- [x] Chặn venue trùng tên/location theo quy tắc đã chốt.
 
 ### Phase 62 - MVC: Tạo địa điểm
 

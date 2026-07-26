@@ -17,6 +17,24 @@ public sealed class VenuesController : ApiControllerBase
         _venueService = venueService;
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Admin,Staff")]
+    [ProducesResponseType<VenueResponseDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateVenue(
+        [FromBody] CreateVenueRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _venueService.CreateVenueAsync(
+            request,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType<PagedResult<VenueResponseDto>>(StatusCodes.Status200OK)]

@@ -4494,14 +4494,126 @@
             "description": "Phase 59 tìm theo tên/vị trí và lọc venue không bảo trì."
           },
           "response": []
+        },
+        {
+          "name": "Phase 61 - Create Venue - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Venue is available by default\", function () {",
+                  "    pm.expect(pm.response.json().isUnderMaintenance).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Innovation Hall\",\n  \"location\": \"Building A - Floor 2\",\n  \"capacity\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "Phase 61 Admin/Staff tạo venue với capacity hợp lệ; venue mới không ở trạng thái bảo trì."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 61 - Create Venue - Duplicate Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"innovation hall\",\n  \"location\": \"building a - floor 2\",\n  \"capacity\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ]
+            },
+            "description": "Phase 61 rejects duplicate Name + Location regardless of casing with 409 Conflict."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
-
-
-
-
 
 
