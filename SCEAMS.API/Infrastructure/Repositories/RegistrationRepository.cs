@@ -91,6 +91,7 @@ public sealed class RegistrationRepository
             .AsNoTracking()
             .Include(registration => registration.Student)
             .Include(registration => registration.Attendance)
+                .ThenInclude(attendance => attendance!.CheckedInByUser)
             .Where(registration => registration.EventId == eventId);
         if (status.HasValue)
         {

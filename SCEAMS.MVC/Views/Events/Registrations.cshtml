@@ -62,6 +62,7 @@
                             <th>Status</th>
                             <th>Đăng ký lúc</th>
                             <th>Điểm danh</th>
+                            <th class="text-end">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,10 +80,27 @@
                                         {
                                             <small style="display:block;color:var(--sceams-text-soft);">@item.CheckInTime.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
                                         }
+                                        @if (!string.IsNullOrWhiteSpace(item.CheckedInByUserName))
+                                        {
+                                            <small style="display:block;color:var(--sceams-text-soft);">bởi @item.CheckedInByUserName</small>
+                                        }
                                     }
                                     else
                                     {
                                         <span class="status-badge status-badge--neutral">Chưa điểm danh</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (item.Status == "Confirmed")
+                                    {
+                                        <form asp-controller="Events" asp-action="CheckIn" asp-route-registrationId="@item.Id" asp-route-eventId="@Model.EventId" asp-route-status="@Model.Status" asp-route-search="@Model.Search" asp-route-page="@Model.Page" asp-route-pageSize="@Model.PageSize" method="post" onsubmit="var button = this.querySelector('button'); button.disabled = true; button.textContent = 'Đang xử lý...'; return true;" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-app btn-app--primary btn-sm">Check-in</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:var(--sceams-text-soft);">Đã xử lý</span>
                                     }
                                 </td>
                             </tr>

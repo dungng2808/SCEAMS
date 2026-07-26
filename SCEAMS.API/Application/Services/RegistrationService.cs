@@ -317,12 +317,16 @@ public sealed class RegistrationService : IRegistrationService
                 Id = registration.Id,
                 StudentCode = registration.Student.StudentCode ?? string.Empty,
                 StudentName = registration.Student.FullName,
+                EventStartTime = registration.Event.StartTime,
+                EventEndTime = registration.Event.EndTime,
                 Status = registration.Status,
                 RegisteredAt = registration.RegisteredAt,
                 CancelledAt = registration.CancelledAt,
                 IsAttended = registration.Attendance is not null ||
                               registration.Status == RegistrationStatus.Attended,
                 CheckInTime = registration.Attendance?.CheckInTime
+                ,CheckedInByUserId = registration.Attendance?.CheckedInByUserId
+                ,CheckedInByUserName = registration.Attendance?.CheckedInByUser?.FullName
             }).ToList();
 
         return Result<PagedResult<EventRegistrationListItemDto>>.Ok(

@@ -808,9 +808,9 @@ Domain entity/enum
 
 ### Phase 100 - MVC: Điểm danh
 
-- [ ] Thêm action Check-in trong danh sách registrations.
-- [ ] Chống double-click và hiển thị thời gian/người check-in.
-- [ ] Kiểm thử check-in trùng không tạo Attendance thứ hai.
+- [x] Thêm action Check-in trong danh sách registrations.
+- [x] Chống double-click và hiển thị thời gian/người check-in.
+- [x] Kiểm thử check-in trùng không tạo Attendance thứ hai.
 
 ### Phase 101 - API: Student gửi Feedback
 

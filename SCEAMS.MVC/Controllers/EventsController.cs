@@ -726,11 +726,15 @@ public sealed class EventsController : Controller
                     Id = item.Id,
                     StudentCode = item.StudentCode,
                     StudentName = item.StudentName,
+                    EventStartTime = item.EventStartTime,
+                    EventEndTime = item.EventEndTime,
                     Status = item.Status,
                     RegisteredAt = item.RegisteredAt,
                     CancelledAt = item.CancelledAt,
                     IsAttended = item.IsAttended,
                     CheckInTime = item.CheckInTime
+                    ,CheckedInByUserId = item.CheckedInByUserId
+                    ,CheckedInByUserName = item.CheckedInByUserName
                 }).ToList()
             });
         }
@@ -748,6 +752,51 @@ public sealed class EventsController : Controller
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
+    }
+
+    [Authorize(Roles = "Organizer")]
+    [HttpPost("Registrations/{registrationId:int}/CheckIn")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CheckIn(
+        int registrationId,
+        int eventId,
+        string? status,
+        string? search,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventRegistrationApiClient.CheckInAsync(
+                registrationId,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            TempData[result.IsSuccess ? "SuccessMessage" : "EventErrorMessage"] =
+                result.IsSuccess
+                    ? "Điểm danh thành công. Registration đã chuyển sang Attended."
+                    : result.ErrorMessage ?? "Không thể điểm danh registration.";
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to check in registration {RegistrationId}.", registrationId);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Registrations), new
+        {
+            eventId,
+            status,
+            search,
+            page,
+            pageSize
+        });
     }
 
     [HttpGet("{id:int}")]

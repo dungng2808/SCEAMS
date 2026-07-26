@@ -86,6 +86,59 @@ public sealed class EventRegistrationApiClient : IEventRegistrationApiClient
         };
     }
 
+    public async Task<CheckInApiResult> CheckInAsync(
+        int registrationId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync(
+            $"api/registrations/{registrationId}/check-in",
+            content: null,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var payload = await response.Content
+                .ReadFromJsonAsync<CheckInApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new CheckInApiResult
+            {
+                IsSuccess = payload is not null,
+                RegistrationId = payload?.RegistrationId ?? registrationId,
+                CheckInTime = payload?.CheckInTime ?? DateTime.UtcNow,
+                CheckedInByUserId = payload?.CheckedInByUserId ?? 0,
+                ErrorMessage = payload is null ? "API trả về kết quả điểm danh không hợp lệ." : null
+            };
+        }
+
+        var errorMessage = await TryReadErrorMessageAsync(response, cancellationToken);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new CheckInApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new CheckInApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = errorMessage ?? "Bạn không có quyền điểm danh."
+            },
+            HttpStatusCode.NotFound => new CheckInApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = errorMessage ?? "Registration không tồn tại."
+            },
+            HttpStatusCode.Conflict => new CheckInApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = errorMessage ?? "Registration không thể điểm danh ở thời điểm hiện tại."
+            },
+            _ => new CheckInApiResult
+            {
+                ErrorMessage = errorMessage ?? "Không thể điểm danh registration."
+            }
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)
@@ -107,4 +160,11 @@ public sealed class EventRegistrationApiClient : IEventRegistrationApiClient
         int TotalItems);
 
     private sealed record ErrorResponse(string? Message);
+
+    private sealed record CheckInApiResponse(
+        int RegistrationId,
+        int EventId,
+        string Status,
+        DateTime CheckInTime,
+        int CheckedInByUserId);
 }

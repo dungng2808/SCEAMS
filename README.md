@@ -1275,6 +1275,13 @@ API chỉ cho điểm danh registration `Confirmed` của Event đang `Ongoing` 
 đa một Attendance và chuyển registration sang `Attended`; điểm danh trùng hoặc
 ngoài thời gian cho phép trả `409`.
 
+## MVC điểm danh
+
+Trong danh sách registration của Event, Organizer thấy nút **Check-in** cho
+registration `Confirmed`. Nút bị khóa ngay khi submit để chống double-click;
+sau khi thành công danh sách tải lại với status `Attended`, thời gian và người
+check-in. API từ chối check-in trùng nên không tạo Attendance thứ hai.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:
