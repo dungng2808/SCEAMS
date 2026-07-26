@@ -211,4 +211,32 @@ public sealed class VenueService : IVenueService
             IsUnderMaintenance = venue.IsUnderMaintenance
         });
     }
+
+    public async Task<Result> DeleteVenueAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var venue = await _unitOfWork.Venues.GetByIdAsync(id, cancellationToken);
+        if (venue == null)
+        {
+            return Result.Fail(
+                $"Địa điểm với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isReferenced = await _unitOfWork.Events.AnyAsync(
+            eventEntity => eventEntity.VenueId == id,
+            cancellationToken);
+
+        if (isReferenced)
+        {
+            return Result.Fail(
+                "Không thể xóa địa điểm đã từng được Event tham chiếu. Hãy bật trạng thái bảo trì thay vì xóa.",
+                StatusCodes.Status409Conflict);
+        }
+
+        _unitOfWork.Venues.Delete(venue);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.NoContent("Địa điểm đã được xóa.");
+    }
 }

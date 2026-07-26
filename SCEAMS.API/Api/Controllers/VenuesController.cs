@@ -77,6 +77,24 @@ public sealed class VenuesController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DeleteVenue(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _venueService.DeleteVenueAsync(
+            id,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType<PagedResult<VenueResponseDto>>(StatusCodes.Status200OK)]

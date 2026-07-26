@@ -19,6 +19,10 @@ public interface IVenueService
         UpdateVenueMaintenanceRequestDto request,
         CancellationToken cancellationToken = default);
 
+    Task<Result> DeleteVenueAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
     Task<Result<PagedResult<VenueResponseDto>>> GetVenuesAsync(
         string? search,
         bool? maintenance,

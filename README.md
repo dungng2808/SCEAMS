@@ -894,6 +894,20 @@ MVC giữ nguyên dữ liệu trên form và hiển thị lý do để người 
 Lưu thành công sẽ redirect về danh sách, lọc theo venue vừa cập nhật để xác nhận
 dữ liệu mới.
 
+## API xóa địa điểm
+
+Chỉ Admin được gọi:
+
+```text
+DELETE http://localhost:5195/api/venues/{id}
+Authorization: Bearer <access-token>
+```
+
+Venue chưa từng được Event tham chiếu sẽ được hard-delete và trả `204 No Content`.
+Nếu venue đã xuất hiện trong bất kỳ Event nào, API không xóa dữ liệu và trả
+`409 Conflict` với hướng dẫn chuyển venue sang trạng thái bảo trì. Request kiểm
+thử hai trường hợp nằm trong Postman **Venues** folder.
+
 ## API bật/tắt bảo trì địa điểm
 
 Admin và Staff dùng endpoint riêng để thay đổi trạng thái bảo trì:

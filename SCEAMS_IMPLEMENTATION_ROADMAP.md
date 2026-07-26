@@ -602,9 +602,9 @@ Domain entity/enum
 
 ### Phase 67 - API: Xóa địa điểm
 
-- [ ] Thêm `DELETE /api/venues/{id}` cho Admin.
-- [ ] Chỉ hard-delete Venue chưa từng được Event tham chiếu; nếu đã dùng thì trả `409` và hướng dẫn maintenance.
-- [ ] Test đủ hai trường hợp.
+- [x] Thêm `DELETE /api/venues/{id}` cho Admin.
+- [x] Chỉ hard-delete Venue chưa từng được Event tham chiếu; nếu đã dùng thì trả `409` và hướng dẫn maintenance.
+- [x] Test đủ hai trường hợp.
 
 ### Phase 68 - MVC: Xóa địa điểm
 

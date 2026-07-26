@@ -140,6 +140,11 @@
       "key": "updatedVenueName",
       "value": "Innovation Hall Updated",
       "type": "string"
+    },
+    {
+      "key": "deleteVenueId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -4991,7 +4996,95 @@
             "maintenance"
           ]
         },
-        "description": "Chọn venueId đang có Event Approved/Ongoing để kiểm thử 409 và danh sách conflicts."
+      "description": "Chọn venueId đang có Event Approved/Ongoing để kiểm thử 409 và danh sách conflicts."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 67 - Delete Venue - Admin - Never Referenced",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{deleteVenueId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{deleteVenueId}}"
+          ]
+        },
+        "description": "Phase 67 xóa cứng venue chưa từng được Event tham chiếu. Nhập deleteVenueId trước khi chạy."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 67 - Delete Venue - Referenced Conflict",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"Maintenance guidance is returned\", function () {",
+              "    pm.expect(pm.response.json().message).to.contain(\"bảo trì\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "1"
+          ]
+        },
+        "description": "Phase 67 dùng venueId đã được seed và Event tham chiếu để kiểm thử 409; API hướng dẫn bật maintenance."
       },
       "response": []
     }
