@@ -3884,11 +3884,96 @@
             "description": "Phase 49 returns 409 Conflict when attempting to dissolve a club that is not in Approved status."
           },
           "response": []
+        },
+        {
+          "name": "Phase 51 - Request Join Club - Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1",
+                "members"
+              ]
+            },
+            "description": "Phase 51 allows a Student to submit a membership application for an Approved club."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 51 - Request Join Club - Duplicate Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1",
+                "members"
+              ]
+            },
+            "description": "Phase 51 returns 409 Conflict when a Student attempts to submit a duplicate application while one is already Pending or Active."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 

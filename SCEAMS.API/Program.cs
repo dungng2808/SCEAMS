@@ -138,7 +138,9 @@ builder.Services.AddScoped<
     IClubCategoryService,
     ClubCategoryService>();
 builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
+
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<
     IDatabaseHealthService,

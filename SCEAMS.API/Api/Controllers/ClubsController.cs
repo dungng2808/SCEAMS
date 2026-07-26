@@ -12,10 +12,14 @@ namespace SCEAMS.Api.Controllers;
 public sealed class ClubsController : ApiControllerBase
 {
     private readonly IClubService _clubService;
+    private readonly IClubMembershipService _membershipService;
 
-    public ClubsController(IClubService clubService)
+    public ClubsController(
+        IClubService clubService,
+        IClubMembershipService membershipService)
     {
         _clubService = clubService;
+        _membershipService = membershipService;
     }
 
     [HttpGet]
@@ -124,6 +128,21 @@ public sealed class ClubsController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _clubService.DissolveClubAsync(id, User, cancellationToken);
+        return ToActionResult(result);
+    }
+
+    [HttpPost("{id:int}/members")]
+    [Authorize(Roles = $"{nameof(UserRole.Student)}")]
+    [ProducesResponseType<ClubMembershipResponseDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RequestJoinClub(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _membershipService.RequestJoinClubAsync(id, User, cancellationToken);
         return ToActionResult(result);
     }
 }

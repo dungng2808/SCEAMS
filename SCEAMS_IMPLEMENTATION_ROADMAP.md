@@ -498,9 +498,10 @@ Domain entity/enum
 
 ### Phase 51 - API: Student xin gia nhập CLB
 
-- [ ] Thêm `POST /api/clubs/{id}/members`.
-- [ ] Tạo membership `Pending`; chặn đơn trùng đang Pending/Active.
-- [ ] Chỉ nhận Student ID từ JWT.
+- [x] Thêm `POST /api/clubs/{id}/members`.
+- [x] Tạo membership `Pending`; chặn đơn trùng đang Pending/Active.
+- [x] Chỉ nhận Student ID từ JWT.
+
 
 ### Phase 52 - MVC: Nút xin gia nhập CLB
 

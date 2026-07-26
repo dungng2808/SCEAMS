@@ -625,6 +625,22 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Phase 51 - POST /api/clubs/{id}/members (Student requests to join an Approved club)
+POST {{SCEAMS.API_HostAddress}}/api/clubs/1/members
+Accept: application/json
+Authorization: Bearer {{StudentAccessToken}}
+
+###
+
+# Phase 51 - POST /api/clubs/{id}/members (Conflict when Student re-requests joining while Pending)
+POST {{SCEAMS.API_HostAddress}}/api/clubs/1/members
+Accept: application/json
+Authorization: Bearer {{StudentAccessToken}}
+
+###
+
+
+
 
 
 
