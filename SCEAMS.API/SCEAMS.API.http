@@ -109,6 +109,49 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Define UpdateUserId from an existing account.
+# Role and active status are intentionally absent from this DTO.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "fullName": "Updated Staff Account",
+  "email": "updated.staff@sceams.edu.vn",
+  "studentCode": null,
+  "phoneNumber": "0912345678"
+}
+
+###
+
+# An unknown user ID must return 404.
+PUT {{SCEAMS.API_HostAddress}}/api/users/2147483647
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "fullName": "Missing Account",
+  "email": "missing.user@sceams.edu.vn",
+  "studentCode": null,
+  "phoneNumber": null
+}
+
+###
+
+# Invalid profile data must return 400 with field errors.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "fullName": " ",
+  "email": "invalid-email",
+  "studentCode": null,
+  "phoneNumber": "invalid-phone"
+}
+
+###
+
 # Define AccessToken from a successful login in your local HTTP client environment.
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json

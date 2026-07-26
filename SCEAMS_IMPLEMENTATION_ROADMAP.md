@@ -302,9 +302,9 @@ Domain entity/enum
 
 ### Phase 23 - API: Admin sửa tài khoản
 
-- [ ] Thêm `PUT /api/users/{id}` cho `Admin`.
-- [ ] Chỉ sửa thông tin hồ sơ; chưa đổi role và trạng thái trong endpoint này.
-- [ ] Test user không tồn tại và dữ liệu không hợp lệ.
+- [x] Thêm `PUT /api/users/{id}` cho `Admin`.
+- [x] Chỉ sửa thông tin hồ sơ; chưa đổi role và trạng thái trong endpoint này.
+- [x] Test user không tồn tại và dữ liệu không hợp lệ.
 
 ### Phase 24 - MVC: Admin sửa tài khoản
 

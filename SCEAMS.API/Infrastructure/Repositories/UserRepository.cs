@@ -158,4 +158,28 @@ public sealed class UserRepository
             user => user.StudentCode == studentCode,
             cancellationToken);
     }
+
+    public Task<bool> EmailBelongsToOtherUserAsync(
+        string email,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AnyAsync(
+            user =>
+                user.Id != userId &&
+                user.Email == email,
+            cancellationToken);
+    }
+
+    public Task<bool> StudentCodeBelongsToOtherUserAsync(
+        string studentCode,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AnyAsync(
+            user =>
+                user.Id != userId &&
+                user.StudentCode == studentCode,
+            cancellationToken);
+    }
 }

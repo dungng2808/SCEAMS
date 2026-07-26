@@ -975,6 +975,7 @@
                   "",
                   "pm.test(\"Created account is safe and normalized\", function () {",
                   "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set(\"createdUserId\", body.id);",
                   "    pm.expect(body.id).to.be.a(\"number\");",
                   "    pm.expect(body.email).to.eql(pm.collectionVariables.get(\"createUserEmail\"));",
                   "    pm.expect(body.role).to.eql(\"Staff\");",
@@ -1144,6 +1145,261 @@
               ]
             },
             "description": "Phase 21 verifies that Staff cannot create accounts."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Profile changes but role and status remain unchanged\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"createdUserId\")));",
+                  "    pm.expect(body.fullName).to.eql(\"Updated Staff Account\");",
+                  "    pm.expect(body.email).to.eql(pm.collectionVariables.get(\"createUserEmail\"));",
+                  "    pm.expect(body.phoneNumber).to.eql(\"0912345678\");",
+                  "    pm.expect(body.role).to.eql(\"Staff\");",
+                  "    pm.expect(body.isActive).to.eql(true);",
+                  "    pm.expect(body).not.to.have.property(\"passwordHash\");",
+                  "    pm.expect(body).not.to.have.property(\"refreshTokenHash\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Staff Account\",\n  \"email\": \"{{createUserEmail}}\",\n  \"studentCode\": null,\n  \"phoneNumber\": \"0912345678\",\n  \"role\": \"Admin\",\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}"
+              ]
+            },
+            "description": "Phase 23 Admin updates profile fields only. Run Create User - Admin first; role and isActive in the JSON are ignored because they are not part of the request DTO."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Missing user is reported\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"User account does not exist.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Missing Account\",\n  \"email\": \"missing.user@sceams.edu.vn\",\n  \"studentCode\": null,\n  \"phoneNumber\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "2147483647"
+              ]
+            },
+            "description": "Phase 23 unknown-user path."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile - Invalid Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Field validation errors are returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.errors).to.have.property(\"FullName\");",
+                  "    pm.expect(body.errors).to.have.property(\"Email\");",
+                  "    pm.expect(body.errors).to.have.property(\"PhoneNumber\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \" \",\n  \"email\": \"invalid-email\",\n  \"studentCode\": null,\n  \"phoneNumber\": \"invalid-phone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}"
+              ]
+            },
+            "description": "Phase 23 DataAnnotations validation path."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile - Staff Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Forbidden Update\",\n  \"email\": \"{{createUserEmail}}\",\n  \"studentCode\": null,\n  \"phoneNumber\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}"
+              ]
+            },
+            "description": "Phase 23 verifies that Staff cannot update another user."
           },
           "response": []
         },

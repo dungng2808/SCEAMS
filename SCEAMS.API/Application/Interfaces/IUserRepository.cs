@@ -42,4 +42,14 @@ public interface IUserRepository : IGenericRepository<User>
     Task<bool> StudentCodeExistsAsync(
         string studentCode,
         CancellationToken cancellationToken = default);
+
+    Task<bool> EmailBelongsToOtherUserAsync(
+        string email,
+        int userId,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> StudentCodeBelongsToOtherUserAsync(
+        string studentCode,
+        int userId,
+        CancellationToken cancellationToken = default);
 }

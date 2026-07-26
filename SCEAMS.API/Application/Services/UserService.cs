@@ -109,6 +109,87 @@ public sealed class UserService : IUserService
             "User account created successfully.");
     }
 
+    public async Task<Result<UpdatedUserResponseDto>>
+        UpdateUserProfileAsync(
+            int userId,
+            UpdateUserProfileRequestDto request,
+            CancellationToken cancellationToken = default)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(
+            userId,
+            cancellationToken);
+
+        if (user is null)
+        {
+            return Result<UpdatedUserResponseDto>.Fail(
+                "User account does not exist.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var fullName = NormalizeFullName(request.FullName);
+        var email = request.Email.Trim().ToLowerInvariant();
+        var studentCode = NormalizeStudentCode(
+            request.StudentCode);
+
+        if (fullName.Length < 2)
+        {
+            return Result<UpdatedUserResponseDto>.Fail(
+                "FullName must contain at least 2 characters.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (user.Role == UserRole.Student &&
+            studentCode is null)
+        {
+            return Result<UpdatedUserResponseDto>.Fail(
+                "StudentCode is required for Student role.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (await _unitOfWork.Users
+            .EmailBelongsToOtherUserAsync(
+                email,
+                userId,
+                cancellationToken))
+        {
+            return Result<UpdatedUserResponseDto>.Fail(
+                "Email is already registered.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (studentCode is not null &&
+            await _unitOfWork.Users
+                .StudentCodeBelongsToOtherUserAsync(
+                    studentCode,
+                    userId,
+                    cancellationToken))
+        {
+            return Result<UpdatedUserResponseDto>.Fail(
+                "StudentCode is already registered.",
+                StatusCodes.Status409Conflict);
+        }
+
+        user.FullName = fullName;
+        user.Email = email;
+        user.StudentCode = studentCode;
+        user.PhoneNumber = NormalizeOptionalValue(
+            request.PhoneNumber);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<UpdatedUserResponseDto>.Ok(
+            new UpdatedUserResponseDto(
+                Id: user.Id,
+                FullName: user.FullName,
+                Email: user.Email,
+                StudentCode: user.StudentCode,
+                PhoneNumber: user.PhoneNumber,
+                Role: user.Role.ToString(),
+                IsActive: user.IsActive,
+                CreatedAt: user.CreatedAt),
+            "User profile updated successfully.");
+    }
+
     public async Task<Result<PagedUsersResponseDto>> GetUsersAsync(
         UserListQueryDto query,
         CancellationToken cancellationToken = default)

@@ -288,6 +288,38 @@ successful creation, MVC redirects to `/Admin/Users` with the new email as the
 search filter, reloads the list from the API and displays a success
 notification so the Admin can confirm the persisted account is present.
 
+## Admin update-user API
+
+Only an authenticated Admin can update another account's profile:
+
+```text
+PUT http://localhost:5195/api/users/{id}
+Authorization: Bearer <admin-access-token>
+Content-Type: application/json
+```
+
+Example request:
+
+```json
+{
+  "fullName": "Updated Staff Account",
+  "email": "updated.staff@sceams.edu.vn",
+  "studentCode": null,
+  "phoneNumber": "0912345678"
+}
+```
+
+This endpoint updates profile fields only. Its request DTO does not expose
+`role`, `isActive`, password or token fields, so role and account status remain
+unchanged. Email and student code are normalized and must remain unique; a
+Student account must retain a student code.
+
+Success returns `200 OK` with safe persisted account fields. Invalid profile
+data returns `400`, an unknown user ID returns `404`, and an email or student
+code already assigned to another account returns `409`. Ready-to-run Phase 23
+requests are available in `SCEAMS.API/SCEAMS.API.http` and the Postman
+**Users** folder.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

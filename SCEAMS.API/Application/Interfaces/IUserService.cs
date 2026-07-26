@@ -9,6 +9,12 @@ public interface IUserService
         CreateUserRequestDto request,
         CancellationToken cancellationToken = default);
 
+    Task<Result<UpdatedUserResponseDto>>
+        UpdateUserProfileAsync(
+            int userId,
+            UpdateUserProfileRequestDto request,
+            CancellationToken cancellationToken = default);
+
     Task<Result<PagedUsersResponseDto>> GetUsersAsync(
         UserListQueryDto query,
         CancellationToken cancellationToken = default);
