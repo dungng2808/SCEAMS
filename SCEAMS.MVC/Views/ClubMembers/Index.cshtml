@@ -53,6 +53,23 @@
             </div>
         </header>
 
+        <nav aria-label="Trạng thái thành viên" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <a asp-action="Index"
+               asp-route-clubId="@Model.ClubId"
+               asp-route-tab="pending"
+               asp-route-search="@Model.Search"
+               class="btn-app @(Model.ActiveTab == "pending" ? "btn-app--primary" : "btn-app--ghost")">
+                Đơn chờ duyệt
+            </a>
+            <a asp-action="Index"
+               asp-route-clubId="@Model.ClubId"
+               asp-route-tab="active"
+               asp-route-search="@Model.Search"
+               class="btn-app @(Model.ActiveTab == "active" ? "btn-app--primary" : "btn-app--ghost")">
+                Thành viên đang hoạt động
+            </a>
+        </nav>
+
         <!-- Search & Filter bar -->
         <div class="surface-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
             <form asp-action="Index" asp-route-clubId="@Model.ClubId" method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
@@ -92,9 +109,9 @@
         <div class="surface-card" style="padding: 0; overflow: hidden;">
             <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--sceams-border); display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="margin: 0; font-size: 1.15rem; font-weight: 600;">
-                    Đơn gia nhập chờ duyệt
+                    @(Model.ActiveTab == "active" ? "Thành viên đang hoạt động" : "Đơn gia nhập chờ duyệt")
                 </h3>
-                <span class="badge bg-primary rounded-pill">@Model.TotalItems đơn</span>
+                <span class="badge bg-primary rounded-pill">@Model.TotalItems @(Model.ActiveTab == "active" ? "thành viên" : "đơn")</span>
             </div>
 
             @if (Model.Members.Count == 0)
@@ -150,34 +167,66 @@
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <div style="display: inline-flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
-                                            <form asp-action="Approve"
-                                                  asp-route-clubId="@Model.ClubId"
-                                                  asp-route-userId="@item.StudentId"
-                                                  method="post"
-                                                  style="margin: 0;"
-                                                  data-confirm-message="Xác nhận duyệt đơn gia nhập của @item.StudentName?"
-                                                  onsubmit="return confirm(this.dataset.confirmMessage);">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="search" value="@Model.Search" />
-                                                <input type="hidden" name="page" value="@Model.Page" />
-                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                <button type="submit" class="btn-app btn-app--primary btn-sm">Duyệt</button>
-                                            </form>
-                                            <form asp-action="Reject"
-                                                  asp-route-clubId="@Model.ClubId"
-                                                  asp-route-userId="@item.StudentId"
-                                                  method="post"
-                                                  style="margin: 0;"
-                                                  data-confirm-message="Xác nhận từ chối đơn gia nhập của @item.StudentName?"
-                                                  onsubmit="return confirm(this.dataset.confirmMessage);">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="search" value="@Model.Search" />
-                                                <input type="hidden" name="page" value="@Model.Page" />
-                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                                <button type="submit" class="btn-app btn-app--ghost btn-sm" style="color: var(--sceams-danger);">Từ chối</button>
-                                            </form>
-                                        </div>
+                                        @if (Model.ActiveTab == "active")
+                                        {
+                                            <button type="button"
+                                                    class="btn-app btn-app--ghost btn-sm"
+                                                    style="color: var(--sceams-danger);"
+                                                    onclick="document.getElementById('removeModal-@item.StudentId').showModal();">
+                                                Loại thành viên
+                                            </button>
+
+                                            <dialog id="removeModal-@item.StudentId" class="surface-card" style="padding: 1.5rem; border-radius: var(--sceams-radius-md); border: 1px solid var(--sceams-border); max-width: 34rem; width: 90vw; margin: auto;">
+                                                <form asp-action="Remove"
+                                                      asp-route-clubId="@Model.ClubId"
+                                                      asp-route-userId="@item.StudentId"
+                                                      method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="search" value="@Model.Search" />
+                                                    <input type="hidden" name="page" value="@Model.Page" />
+                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                    <h4 style="margin-top: 0;">Loại @item.StudentName khỏi CLB?</h4>
+                                                    <p style="color: var(--sceams-text-soft);">Thành viên sẽ chuyển sang trạng thái Đã loại và lịch sử vẫn được giữ lại.</p>
+                                                    <label for="reason-@item.StudentId" class="form-label">Lý do loại thành viên</label>
+                                                    <textarea id="reason-@item.StudentId" name="reason" class="form-control" rows="3" maxlength="1000" required placeholder="Nhập lý do để lưu vào lịch sử..."></textarea>
+                                                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+                                                        <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('removeModal-@item.StudentId').close();">Hủy</button>
+                                                        <button type="submit" class="btn-app btn-app--primary" style="background: var(--sceams-danger);">Xác nhận loại</button>
+                                                    </div>
+                                                </form>
+                                            </dialog>
+                                        }
+                                        else
+                                        {
+                                            <div style="display: inline-flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                                                <form asp-action="Approve"
+                                                      asp-route-clubId="@Model.ClubId"
+                                                      asp-route-userId="@item.StudentId"
+                                                      method="post"
+                                                      style="margin: 0;"
+                                                      data-confirm-message="Xác nhận duyệt đơn gia nhập của @item.StudentName?"
+                                                      onsubmit="return confirm(this.dataset.confirmMessage);">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="search" value="@Model.Search" />
+                                                    <input type="hidden" name="page" value="@Model.Page" />
+                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                    <button type="submit" class="btn-app btn-app--primary btn-sm">Duyệt</button>
+                                                </form>
+                                                <form asp-action="Reject"
+                                                      asp-route-clubId="@Model.ClubId"
+                                                      asp-route-userId="@item.StudentId"
+                                                      method="post"
+                                                      style="margin: 0;"
+                                                      data-confirm-message="Xác nhận từ chối đơn gia nhập của @item.StudentName?"
+                                                      onsubmit="return confirm(this.dataset.confirmMessage);">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="search" value="@Model.Search" />
+                                                    <input type="hidden" name="page" value="@Model.Page" />
+                                                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                    <button type="submit" class="btn-app btn-app--ghost btn-sm" style="color: var(--sceams-danger);">Từ chối</button>
+                                                </form>
+                                            </div>
+                                        }
                                     </td>
                                 </tr>
                             }

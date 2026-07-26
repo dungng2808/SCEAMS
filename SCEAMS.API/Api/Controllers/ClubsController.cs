@@ -171,6 +171,30 @@ public sealed class ClubsController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpGet("{id:int}/members/active")]
+    [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
+    [ProducesResponseType<PagedResult<ClubMembershipResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetActiveMemberships(
+        int id,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _membershipService.GetActiveMembershipsAsync(
+            id,
+            search,
+            page,
+            pageSize,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpPut("{id:int}/members/{userId:int}/decision")]
     [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
     [ProducesResponseType<ClubMembershipResponseDto>(StatusCodes.Status200OK)]

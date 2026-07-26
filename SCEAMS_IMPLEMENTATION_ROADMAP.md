@@ -544,9 +544,9 @@ Domain entity/enum
 
 ### Phase 58 - MVC: Loại thành viên
 
-- [ ] Tạo danh sách thành viên Active.
-- [ ] Thêm action Remove có lý do/xác nhận.
-- [ ] Thành viên bị loại không còn xuất hiện trong danh sách Active.
+- [x] Tạo danh sách thành viên Active.
+- [x] Thêm action Remove có lý do/xác nhận.
+- [x] Thành viên bị loại không còn xuất hiện trong danh sách Active.
 
 ---
 

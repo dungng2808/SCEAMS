@@ -792,5 +792,10 @@ xác nhận; sau khi API trả thành công, MVC redirect về cùng trang để
 danh sách. Nếu người khác đã xử lý đơn trước đó, API trả `409` và MVC hiển thị
 thông báo lỗi mà không tự xóa dòng trên giao diện.
 
+Trang này có thêm tab **Thành viên đang hoạt động**. Organizer sở hữu Club,
+Admin và Staff có thể mở hộp thoại **Loại thành viên**, nhập lý do bắt buộc và
+xác nhận. MVC gọi API remove rồi tải lại tab Active; thành viên đã chuyển sang
+`Removed` sẽ không còn nằm trong danh sách Active nhưng lịch sử vẫn tồn tại.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

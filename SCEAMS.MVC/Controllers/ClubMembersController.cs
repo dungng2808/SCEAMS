@@ -70,21 +70,31 @@ public sealed class ClubMembersController : Controller
             var clubName = clubResult.Club?.Name ?? $"CLB #{clubId}";
             var normalizedPage = Math.Max(page, 1);
             var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+            var normalizedTab = string.Equals(tab, "active", StringComparison.OrdinalIgnoreCase)
+                ? "active"
+                : "pending";
 
-            var pendingResult = await _membershipApiClient.GetPendingMembershipsAsync(
-                clubId,
-                search,
-                normalizedPage,
-                normalizedPageSize,
-                cancellationToken);
+            var membershipResult = normalizedTab == "active"
+                ? await _membershipApiClient.GetActiveMembershipsAsync(
+                    clubId,
+                    search,
+                    normalizedPage,
+                    normalizedPageSize,
+                    cancellationToken)
+                : await _membershipApiClient.GetPendingMembershipsAsync(
+                    clubId,
+                    search,
+                    normalizedPage,
+                    normalizedPageSize,
+                    cancellationToken);
 
-            if (pendingResult.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            if (membershipResult.IsUnauthorized && User.Identity?.IsAuthenticated == true)
             {
                 return await EndInvalidSessionAsync(
-                    pendingResult.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+                    membershipResult.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
             }
 
-            if (pendingResult.IsForbidden)
+            if (membershipResult.IsForbidden)
             {
                 Response.StatusCode = StatusCodes.Status403Forbidden;
                 return View(new ClubMembersViewModel
@@ -92,25 +102,25 @@ public sealed class ClubMembersController : Controller
                     ClubId = clubId,
                     ClubName = clubName,
                     IsForbidden = true,
-                    ErrorMessage = pendingResult.ErrorMessage ?? "Bạn không có quyền quản lý thành viên câu lạc bộ này."
+                    ErrorMessage = membershipResult.ErrorMessage ?? "Bạn không có quyền quản lý thành viên câu lạc bộ này."
                 });
             }
 
-            if (!pendingResult.IsSuccess)
+            if (!membershipResult.IsSuccess)
             {
                 return View(new ClubMembersViewModel
                 {
                     ClubId = clubId,
                     ClubName = clubName,
-                    ActiveTab = tab ?? "pending",
+                    ActiveTab = normalizedTab,
                     Search = search,
                     Page = normalizedPage,
                     PageSize = normalizedPageSize,
-                    ErrorMessage = pendingResult.ErrorMessage ?? "Không thể tải danh sách đơn gia nhập."
+                    ErrorMessage = membershipResult.ErrorMessage ?? "Không thể tải danh sách thành viên."
                 });
             }
 
-            var memberItems = pendingResult.Items.Select(m => new ClubMembershipItemViewModel
+            var memberItems = membershipResult.Items.Select(m => new ClubMembershipItemViewModel
             {
                 Id = m.Id,
                 StudentId = m.StudentId,
@@ -119,8 +129,10 @@ public sealed class ClubMembersController : Controller
                 RoleInClub = m.RoleInClub,
                 JoinDateFormatted = m.JoinDate.ToString("dd/MM/yyyy HH:mm"),
                 Status = m.Status,
-                StatusLabel = "Chờ duyệt",
-                StatusBadgeClass = "status-badge--warning",
+                StatusLabel = normalizedTab == "active" ? "Đang hoạt động" : "Chờ duyệt",
+                StatusBadgeClass = normalizedTab == "active"
+                    ? "status-badge--success"
+                    : "status-badge--warning",
                 Initials = GetInitials(m.StudentName)
             }).ToList();
 
@@ -128,11 +140,11 @@ public sealed class ClubMembersController : Controller
             {
                 ClubId = clubId,
                 ClubName = clubName,
-                ActiveTab = tab ?? "pending",
+                ActiveTab = normalizedTab,
                 Search = search,
-                Page = pendingResult.Page,
-                PageSize = pendingResult.PageSize,
-                TotalItems = pendingResult.TotalItems,
+                Page = membershipResult.Page,
+                PageSize = membershipResult.PageSize,
+                TotalItems = membershipResult.TotalItems,
                 Members = memberItems
             });
         }
@@ -192,6 +204,74 @@ public sealed class ClubMembersController : Controller
             page,
             pageSize,
             cancellationToken);
+    }
+
+    [HttpPost("{userId:int}/Remove")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Remove(
+        int clubId,
+        int userId,
+        string? reason,
+        string? search = null,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var routeValues = new
+        {
+            clubId,
+            tab = "active",
+            search,
+            page = Math.Max(page, 1),
+            pageSize = Math.Clamp(pageSize, 1, 50)
+        };
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["ErrorMessage"] = "Lý do loại thành viên không được để trống.";
+            return RedirectToAction(nameof(Index), routeValues);
+        }
+
+        try
+        {
+            var result = await _membershipApiClient.RemoveMembershipAsync(
+                clubId,
+                userId,
+                new RemoveClubMembershipApiRequest(reason.Trim()),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden || result.IsNotFound || result.IsConflict || result.IsValidationError || !result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage
+                    ?? "Không thể loại thành viên vào lúc này.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Đã loại thành viên và lưu lịch sử hoạt động của câu lạc bộ.";
+            }
+
+            return RedirectToAction(nameof(Index), routeValues);
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to remove member user #{UserId} from club #{ClubId}.",
+                userId,
+                clubId);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(nameof(Index), routeValues);
+        }
     }
 
     private async Task<IActionResult> DecideMembershipAsync(
