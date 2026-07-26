@@ -738,9 +738,9 @@ Domain entity/enum
 
 ### Phase 89 - API: Đồng bộ trạng thái theo thời gian
 
-- [ ] Tạo background job/service chuyển `Approved -> Ongoing -> Completed` theo StartTime/EndTime.
-- [ ] Job idempotent, có log và không thay đổi Event Cancelled.
-- [ ] Có endpoint Admin development-only hoặc test hook để chạy job khi demo.
+- [x] Tạo background job/service chuyển `Approved -> Ongoing -> Completed` theo StartTime/EndTime.
+- [x] Job idempotent, có log và không thay đổi Event Cancelled.
+- [x] Có endpoint Admin development-only hoặc test hook để chạy job khi demo.
 
 ### Phase 90 - MVC: Hiển thị trạng thái theo thời gian
 

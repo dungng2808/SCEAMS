@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SCEAMS.Application.Interfaces;
 using SCEAMS.Application.Services;
+using SCEAMS.Api.BackgroundServices;
 using SCEAMS.Domain.Entities;
 using SCEAMS.Infrastructure.Authentication;
 using SCEAMS.Infrastructure.Data;
@@ -142,6 +143,8 @@ builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
+builder.Services.AddHostedService<EventStatusSyncBackgroundService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
 
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();

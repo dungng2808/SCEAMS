@@ -5679,6 +5679,24 @@
             "description": "Phase 87 Organizer hủy Event của mình trước StartTime; Admin/Staff có thể can thiệp, dữ liệu không bị xóa."
           },
           "response": []
+        },
+        {
+          "name": "Phase 89 - Sync Event Status - Development Admin",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/sync-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "sync-status"]
+            },
+            "description": "Phase 89 chỉ dùng ở Development để chạy ngay background status sync."
+          },
+          "response": []
         }
       ]
     }

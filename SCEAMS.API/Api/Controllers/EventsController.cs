@@ -12,10 +12,17 @@ namespace SCEAMS.Api.Controllers;
 public sealed class EventsController : ApiControllerBase
 {
     private readonly IEventService _eventService;
+    private readonly IEventStatusSyncService _eventStatusSyncService;
+    private readonly IHostEnvironment _environment;
 
-    public EventsController(IEventService eventService)
+    public EventsController(
+        IEventService eventService,
+        IEventStatusSyncService eventStatusSyncService,
+        IHostEnvironment environment)
     {
         _eventService = eventService;
+        _eventStatusSyncService = eventStatusSyncService;
+        _environment = environment;
     }
 
     [HttpGet]
@@ -210,5 +217,20 @@ public sealed class EventsController : ApiControllerBase
             cancellationToken);
 
         return ToActionResult(result);
+    }
+
+    [HttpPost("sync-status")]
+    [Authorize(Roles = "Admin")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public async Task<IActionResult> SynchronizeEventStatuses(
+        CancellationToken cancellationToken)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var result = await _eventStatusSyncService.SynchronizeAsync(cancellationToken);
+        return Ok(result);
     }
 }

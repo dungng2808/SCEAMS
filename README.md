@@ -1139,6 +1139,24 @@ khi gửi form anti-forgery. Sau khi hủy, trang hiển thị trạng thái `Ca
 và lý do hủy; Organizer gọi sau `StartTime` sẽ nhận thông báo lỗi từ API và
 Event không đổi trạng thái.
 
+## API đồng bộ trạng thái Event theo thời gian
+
+API chạy `EventStatusSyncBackgroundService` theo chu kỳ cấu hình
+`EventStatusSync:IntervalSeconds` (mặc định 60 giây). Job chuyển `Approved` sang
+`Ongoing` khi tới `StartTime`, rồi sang `Completed` khi tới `EndTime`; mỗi lần
+chạy chỉ cập nhật bản ghi cần đổi, có log số lượng chuyển trạng thái và không
+đụng tới Event `Cancelled`.
+
+Khi chạy môi trường Development, Admin có thể kích hoạt ngay bằng test hook:
+
+```text
+POST http://localhost:5195/api/events/sync-status
+Authorization: Bearer <admin-access-token>
+```
+
+Endpoint bị ẩn/không khả dụng ngoài Development để tránh dùng test hook ở môi
+trường production.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:
