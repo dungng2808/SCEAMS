@@ -86,6 +86,17 @@
                                     Hồ sơ
                                 </a>
                             </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="app-nav__link @ActiveClass("AdminUsers")"
+                                       asp-controller="AdminUsers"
+                                       asp-action="Index"
+                                       aria-current="@(currentController == "AdminUsers" ? "page" : null)">
+                                        Người dùng
+                                    </a>
+                                </li>
+                            }
                         }
                         @if (HostEnvironment.IsDevelopment())
                         {

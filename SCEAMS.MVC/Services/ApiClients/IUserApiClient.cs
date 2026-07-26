@@ -4,6 +4,10 @@ namespace SCEAMS.MVC.Services.ApiClients;
 
 public interface IUserApiClient
 {
+    Task<UserListApiResult> GetUsersAsync(
+        UserListApiQuery query,
+        CancellationToken cancellationToken = default);
+
     Task<CurrentUserProfileApiResult> GetCurrentUserAsync(
         CancellationToken cancellationToken = default);
 

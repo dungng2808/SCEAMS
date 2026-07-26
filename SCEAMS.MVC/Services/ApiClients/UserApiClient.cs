@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -15,6 +16,61 @@ public sealed class UserApiClient : IUserApiClient
     public UserApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
+    }
+
+    public async Task<UserListApiResult> GetUsersAsync(
+        UserListApiQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            BuildUserListUri(query),
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var users = await response.Content
+                .ReadFromJsonAsync<PagedUsersApiResponse>(
+                    cancellationToken: cancellationToken);
+            var isValid = users?.Items is not null;
+
+            return new UserListApiResult
+            {
+                IsSuccess = isValid,
+                Users = isValid ? users : null,
+                ErrorMessage = !isValid
+                    ? "API trả về danh sách người dùng không hợp lệ."
+                    : null
+            };
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized =>
+                new UserListApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new UserListApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền xem danh sách người dùng."
+                },
+            HttpStatusCode.BadRequest =>
+                new UserListApiResult
+                {
+                    ErrorMessage =
+                        "Bộ lọc hoặc thông tin phân trang không hợp lệ."
+                },
+            _ => new UserListApiResult
+            {
+                ErrorMessage =
+                    "Không thể tải danh sách người dùng vào lúc này."
+            }
+        };
     }
 
     public async Task<CurrentUserProfileApiResult> GetCurrentUserAsync(
@@ -211,6 +267,36 @@ public sealed class UserApiClient : IUserApiClient
             ErrorMessage =
                 "Không thể đổi mật khẩu vào lúc này."
         };
+    }
+
+    private static string BuildUserListUri(
+        UserListApiQuery query)
+    {
+        var parameters = new List<string>
+        {
+            $"page={query.Page.ToString(CultureInfo.InvariantCulture)}",
+            $"pageSize={query.PageSize.ToString(CultureInfo.InvariantCulture)}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            parameters.Add(
+                $"search={Uri.EscapeDataString(query.Search)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Role))
+        {
+            parameters.Add(
+                $"role={Uri.EscapeDataString(query.Role)}");
+        }
+
+        if (query.IsActive.HasValue)
+        {
+            parameters.Add(
+                $"isActive={query.IsActive.Value.ToString().ToLowerInvariant()}");
+        }
+
+        return $"api/users?{string.Join('&', parameters)}";
     }
 
     private sealed record ApiErrorResponse(string? Message);

@@ -284,9 +284,9 @@ Domain entity/enum
 
 ### Phase 20 - MVC: Danh sách người dùng
 
-- [ ] Tạo trang Admin Users có tìm kiếm, lọc và phân trang.
-- [ ] Giữ query string khi chuyển trang.
-- [ ] Xử lý empty state và `403 Forbidden`.
+- [x] Tạo trang Admin Users có tìm kiếm, lọc và phân trang.
+- [x] Giữ query string khi chuyển trang.
+- [x] Xử lý empty state và `403 Forbidden`.
 
 ### Phase 21 - API: Admin tạo tài khoản
 

@@ -233,6 +233,23 @@ The response contains `items`, `page`, `pageSize`, `totalItems`, `totalPages`,
 password and refresh-token hashes are neither queried nor returned. A valid
 Staff, Organizer or Student token receives `403 Forbidden`.
 
+## MVC Admin user list
+
+After signing in as Admin, open:
+
+```text
+https://localhost:7034/Admin/Users
+```
+
+The page provides full-text search, role and active-status filters, selectable
+page size and numbered pagination. Pagination links preserve all active filter
+values in the query string. The responsive table displays only safe account
+fields and converts creation timestamps to the SCEAMS business timezone.
+
+No-result filters render a dedicated empty state. Non-Admin MVC users are sent
+to a styled `403 Forbidden` page, while an API-side `403` is also handled
+inside the Admin Users screen.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

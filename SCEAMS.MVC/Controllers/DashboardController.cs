@@ -67,12 +67,12 @@ public sealed class DashboardController : Controller
             "Admin" => new(
                 Heading: "Trung tâm quản trị",
                 Description:
-                    "Theo dõi sức khỏe nền tảng và chuẩn bị quản lý tài khoản toàn hệ thống.",
+                    "Theo dõi và quản lý tài khoản người dùng trên toàn hệ thống.",
                 NextStep:
-                    "Các công cụ quản trị người dùng sẽ được mở ở Milestone C.",
-                PrimaryActionText: "Kiểm tra hệ thống",
-                PrimaryController: "System",
-                PrimaryAction: "Health"),
+                    "Danh sách tài khoản đã sẵn sàng với bộ lọc và phân trang.",
+                PrimaryActionText: "Quản lý người dùng",
+                PrimaryController: "AdminUsers",
+                PrimaryAction: "Index"),
             "Staff" => new(
                 Heading: "Không gian Student Affairs",
                 Description:

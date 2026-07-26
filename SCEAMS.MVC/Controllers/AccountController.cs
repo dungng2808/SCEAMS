@@ -226,7 +226,9 @@ public sealed class AccountController : Controller
     [HttpGet("AccessDenied")]
     public IActionResult AccessDenied()
     {
-        return StatusCode(StatusCodes.Status403Forbidden);
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+
+        return View();
     }
 
     private async Task EstablishAuthenticatedSessionAsync(

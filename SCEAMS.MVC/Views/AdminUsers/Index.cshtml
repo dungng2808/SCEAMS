@@ -1,0 +1,359 @@
+@model SCEAMS.MVC.ViewModels.AdminUsersViewModel
+
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+
+    var visiblePages = new SortedSet<int>();
+
+    if (Model.TotalPages > 0)
+    {
+        visiblePages.Add(1);
+        visiblePages.Add(Model.TotalPages);
+
+        for (var pageNumber = Math.Max(1, Model.Page - 2);
+             pageNumber <= Math.Min(Model.TotalPages, Model.Page + 2);
+             pageNumber++)
+        {
+            visiblePages.Add(pageNumber);
+        }
+    }
+}
+
+<section class="users-page" aria-labelledby="users-title">
+    <div class="users-heading">
+        <div>
+            <p class="eyebrow">Milestone C · Admin</p>
+            <h1 id="users-title">Quản lý người dùng</h1>
+            <p>
+                Tra cứu tài khoản, theo dõi vai trò và trạng thái hoạt động trên toàn hệ thống.
+            </p>
+        </div>
+        <div class="users-heading__summary" aria-label="Tổng số tài khoản">
+            <span>Tổng tài khoản</span>
+            <strong>@Model.TotalItems</strong>
+            <small>Dữ liệu mới nhất từ API</small>
+        </div>
+    </div>
+
+    @if (Model.IsForbidden)
+    {
+        <div class="users-state users-state--forbidden surface-card" role="alert">
+            <span class="users-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                    <path d="M9 9l6 6M15 9l-6 6" />
+                </svg>
+            </span>
+            <div>
+                <p class="users-state__eyebrow">403 · Forbidden</p>
+                <h2>Không có quyền truy cập</h2>
+                <p>@Model.ErrorMessage</p>
+                <a class="btn-app btn-app--ghost"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+                    Quay về Dashboard
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <form class="users-filters surface-card"
+              asp-controller="AdminUsers"
+              asp-action="Index"
+              method="get"
+              aria-label="Bộ lọc danh sách người dùng">
+            <div class="users-filter users-filter--search">
+                <label asp-for="Search">Tìm kiếm</label>
+                <div class="users-filter__control">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m16 16 4 4" />
+                    </svg>
+                    <input asp-for="Search"
+                           type="search"
+                           maxlength="150"
+                           placeholder="Tên, email, mã SV hoặc số điện thoại" />
+                </div>
+            </div>
+
+            <div class="users-filter">
+                <label asp-for="Role">Vai trò</label>
+                <select asp-for="Role">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="Admin">Quản trị viên</option>
+                    <option value="Staff">Cán bộ</option>
+                    <option value="Organizer">Nhà tổ chức</option>
+                    <option value="Student">Sinh viên</option>
+                </select>
+            </div>
+
+            <div class="users-filter">
+                <label asp-for="IsActive">Trạng thái</label>
+                <select asp-for="IsActive">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true">Đang hoạt động</option>
+                    <option value="false">Đã khóa</option>
+                </select>
+            </div>
+
+            <div class="users-filter">
+                <label asp-for="PageSize">Hiển thị</label>
+                <select asp-for="PageSize">
+                    <option value="5">5 / trang</option>
+                    <option value="10">10 / trang</option>
+                    <option value="25">25 / trang</option>
+                    <option value="50">50 / trang</option>
+                </select>
+            </div>
+
+            <div class="users-filter__actions">
+                <button class="btn-app btn-app--primary" type="submit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M4 6h16M7 12h10M10 18h4" />
+                    </svg>
+                    Áp dụng
+                </button>
+                @if (Model.HasFilters)
+                {
+                    <a class="users-filter__clear"
+                       asp-controller="AdminUsers"
+                       asp-action="Index"
+                       asp-route-pageSize="@Model.PageSize">
+                        Xóa bộ lọc
+                    </a>
+                }
+            </div>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="users-state surface-card" role="alert">
+                <span class="users-state__icon users-state__icon--warning" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 7v6M12 17h.01" />
+                    </svg>
+                </span>
+                <div>
+                    <p class="users-state__eyebrow">Kết nối gián đoạn</p>
+                    <h2>Chưa thể tải danh sách</h2>
+                    <p>@Model.ErrorMessage</p>
+                    <a class="btn-app btn-app--primary"
+                       asp-controller="AdminUsers"
+                       asp-action="Index"
+                       asp-route-search="@Model.Search"
+                       asp-route-role="@Model.Role"
+                       asp-route-isActive="@Model.IsActive"
+                       asp-route-page="@Model.Page"
+                       asp-route-pageSize="@Model.PageSize">
+                        Thử tải lại
+                    </a>
+                </div>
+            </div>
+        }
+        else if (Model.Users.Count == 0)
+        {
+            <div class="users-state users-state--empty surface-card">
+                <span class="users-state__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="9" cy="8" r="3" />
+                        <path d="M3 19a6 6 0 0 1 12 0M17 8h4M19 6v4" />
+                    </svg>
+                </span>
+                <div>
+                    <p class="users-state__eyebrow">Không có kết quả</p>
+                    <h2>
+                        @(Model.HasFilters
+                            ? "Không tìm thấy tài khoản phù hợp"
+                            : "Chưa có tài khoản trong hệ thống")
+                    </h2>
+                    <p>
+                        @(Model.HasFilters
+                            ? "Thử thay đổi từ khóa hoặc bỏ bớt điều kiện lọc."
+                            : "Danh sách sẽ xuất hiện khi tài khoản đầu tiên được tạo.")
+                    </p>
+                    @if (Model.HasFilters)
+                    {
+                        <a class="btn-app btn-app--ghost"
+                           asp-controller="AdminUsers"
+                           asp-action="Index"
+                           asp-route-pageSize="@Model.PageSize">
+                            Xem toàn bộ người dùng
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <section class="users-results surface-card" aria-labelledby="users-results-title">
+                <div class="users-results__header">
+                    <div>
+                        <p class="users-state__eyebrow">Kết quả</p>
+                        <h2 id="users-results-title">Danh sách tài khoản</h2>
+                    </div>
+                    <p>
+                        Hiển thị <strong>@Model.FirstItemNumber–@Model.LastItemNumber</strong>
+                        trong <strong>@Model.TotalItems</strong> tài khoản
+                    </p>
+                </div>
+
+                <div class="users-table-wrap">
+                    <table class="users-table">
+                        <caption class="visually-hidden">
+                            Danh sách tài khoản người dùng SCEAMS
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Người dùng</th>
+                                <th scope="col">Vai trò</th>
+                                <th scope="col">Mã sinh viên</th>
+                                <th scope="col">Liên hệ</th>
+                                <th scope="col">Trạng thái</th>
+                                <th scope="col">Ngày tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="users-identity">
+                                            <span class="users-avatar" aria-hidden="true">
+                                                @user.Initials
+                                            </span>
+                                            <div>
+                                                <strong>@user.FullName</strong>
+                                                <a href="mailto:@user.Email">@user.Email</a>
+                                                <small>#@user.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="users-role users-role--@user.RoleCssClass">
+                                            @user.RoleLabel
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="users-cell-value @(user.StudentCode is null ? "is-empty" : null)">
+                                            @(user.StudentCode ?? "Không áp dụng")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="users-cell-value @(user.PhoneNumber is null ? "is-empty" : null)">
+                                            @(user.PhoneNumber ?? "Chưa cập nhật")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="users-status @(user.IsActive ? "users-status--active" : "users-status--locked")">
+                                            <span aria-hidden="true"></span>
+                                            @(user.IsActive ? "Hoạt động" : "Đã khóa")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <time class="users-date"
+                                              datetime="@user.CreatedAtUtc.ToString("O")">
+                                            @user.CreatedAtLocal.ToString("dd/MM/yyyy")
+                                            <small>@user.CreatedAtLocal.ToString("HH:mm") · UTC+7</small>
+                                        </time>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="users-pagination" aria-label="Phân trang người dùng">
+                        <p>Trang @Model.Page / @Model.TotalPages</p>
+                        <div class="users-pagination__links">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <a class="users-page-link users-page-link--arrow"
+                                   asp-action="Index"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-role="@Model.Role"
+                                   asp-route-isActive="@Model.IsActive"
+                                   asp-route-page="@(Model.Page - 1)"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   aria-label="Trang trước">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="m15 18-6-6 6-6" />
+                                    </svg>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="users-page-link users-page-link--arrow is-disabled" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m15 18-6-6 6-6" />
+                                    </svg>
+                                </span>
+                            }
+
+                            @{
+                                var previousVisiblePage = 0;
+                            }
+                            @foreach (var pageNumber in visiblePages)
+                            {
+                                if (previousVisiblePage > 0 &&
+                                    pageNumber - previousVisiblePage > 1)
+                                {
+                                    <span class="users-page-ellipsis" aria-hidden="true">…</span>
+                                }
+
+                                if (pageNumber == Model.Page)
+                                {
+                                    <span class="users-page-link is-current"
+                                          aria-current="page">
+                                        @pageNumber
+                                    </span>
+                                }
+                                else
+                                {
+                                    <a class="users-page-link"
+                                       asp-action="Index"
+                                       asp-route-search="@Model.Search"
+                                       asp-route-role="@Model.Role"
+                                       asp-route-isActive="@Model.IsActive"
+                                       asp-route-page="@pageNumber"
+                                       asp-route-pageSize="@Model.PageSize">
+                                        @pageNumber
+                                    </a>
+                                }
+
+                                previousVisiblePage = pageNumber;
+                            }
+
+                            @if (Model.HasNextPage)
+                            {
+                                <a class="users-page-link users-page-link--arrow"
+                                   asp-action="Index"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-role="@Model.Role"
+                                   asp-route-isActive="@Model.IsActive"
+                                   asp-route-page="@(Model.Page + 1)"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   aria-label="Trang sau">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="users-page-link users-page-link--arrow is-disabled" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </span>
+                            }
+                        </div>
+                    </nav>
+                }
+            </section>
+        }
+    }
+</section>
