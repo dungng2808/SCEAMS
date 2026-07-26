@@ -459,9 +459,10 @@ Domain entity/enum
 
 ### Phase 46 - MVC: Từ chối CLB
 
-- [ ] Tạo modal nhập lý do từ chối.
-- [ ] Hiển thị lý do cho Organizer ở trang Club của tôi.
-- [ ] Không cho submit lý do rỗng.
+- [x] Tạo modal nhập lý do từ chối.
+- [x] Hiển thị lý do cho Organizer ở trang Club của tôi.
+- [x] Không cho submit lý do rỗng.
+
 
 ### Phase 47 - API: Cập nhật thông tin CLB
 

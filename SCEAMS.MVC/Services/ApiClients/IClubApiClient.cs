@@ -19,4 +19,9 @@ public interface IClubApiClient
     Task<ApproveClubApiResult> ApproveClubAsync(
         int id,
         CancellationToken cancellationToken = default);
+
+    Task<RejectClubApiResult> RejectClubAsync(
+        int id,
+        RejectClubApiRequest request,
+        CancellationToken cancellationToken = default);
 }

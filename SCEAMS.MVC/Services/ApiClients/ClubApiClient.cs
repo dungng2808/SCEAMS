@@ -290,6 +290,78 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<RejectClubApiResult> RejectClubAsync(
+        int id,
+        RejectClubApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync($"api/clubs/{id}/reject", request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var rejectedClub = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new RejectClubApiResult
+            {
+                IsSuccess = true,
+                Club = rejectedClub
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new RejectClubApiResult
+            {
+                ErrorMessage = message ?? "Lý do từ chối không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new RejectClubApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ #{id}."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new RejectClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Chỉ câu lạc bộ ở trạng thái Chờ duyệt mới có thể bị từ chối."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new RejectClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new RejectClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền thực hiện từ chối câu lạc bộ."
+            };
+        }
+
+        return new RejectClubApiResult
+        {
+            ErrorMessage = "Không thể từ chối câu lạc bộ vào lúc này."
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

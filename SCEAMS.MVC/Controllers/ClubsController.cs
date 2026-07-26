@@ -340,6 +340,62 @@ public sealed class ClubsController : Controller
         }
     }
 
+    [HttpPost("{id:int}/Reject")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reject(
+        int id,
+        RejectClubViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(model.Reason))
+        {
+            TempData["ErrorMessage"] = "Lý do từ chối không được để rỗng.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        try
+        {
+            var apiRequest = new RejectClubApiRequest
+            {
+                Reason = model.Reason.Trim()
+            };
+
+            var result = await _clubApiClient.RejectClubAsync(id, apiRequest, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Bạn không có quyền từ chối câu lạc bộ này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Không thể từ chối câu lạc bộ vào lúc này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["SuccessMessage"] = $"Đã từ chối đề xuất câu lạc bộ '{result.Club.Name}'.";
+            return RedirectToAction(nameof(Details), new { id = result.Club.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send reject club #{ClubId} request.", id);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
     [HttpGet("Create")]
     [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> Create(CancellationToken cancellationToken = default)

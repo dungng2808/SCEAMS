@@ -128,6 +128,10 @@
                             Chi tiết
                         </a>
 
+                        <button type="button" class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" onclick="document.getElementById('rejectModal-@club.Id').showModal();">
+                            Từ chối
+                        </button>
+
                         <form asp-controller="Clubs"
                               asp-action="Approve"
                               asp-route-id="@club.Id"
@@ -143,6 +147,41 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Rejection Reason Modal -->
+                    <dialog id="rejectModal-@club.Id" class="surface-card" style="padding: 1.75rem; border-radius: var(--sceams-radius-md); border: 1px solid var(--sceams-border); max-width: 34rem; width: 90vw; margin: auto;">
+                        <form asp-controller="Clubs"
+                              asp-action="Reject"
+                              asp-route-id="@club.Id"
+                              method="post"
+                              onsubmit="var reason = this.Reason.value.trim(); if (!reason) { alert('Vui lòng nhập lý do từ chối.'); return false; } return confirm('Xác nhận từ chối câu lạc bộ \'@club.Name\'?');">
+                            @Html.AntiForgeryToken()
+                            <h3 style="margin-top: 0; color: var(--sceams-danger); font-size: 1.25rem;">Từ chối thành lập câu lạc bộ</h3>
+                            <p style="font-size: 0.9rem; color: var(--sceams-text-soft); margin-bottom: 1rem;">
+                                Cho câu lạc bộ <strong>@club.Name</strong>. Vui lòng nhập lý do để gửi phản hồi cho người đề xuất.
+                            </p>
+                            <div style="margin-bottom: 1.25rem;">
+                                <label style="display: block; font-weight: 700; margin-bottom: 0.35rem; font-size: 0.9rem;">
+                                    Lý do từ chối <span style="color: var(--sceams-danger);">*</span>
+                                </label>
+                                <textarea name="Reason"
+                                          rows="4"
+                                          required
+                                          maxlength="500"
+                                          class="form-control"
+                                          placeholder="Mô tả lý do đề xuất chưa được thông qua..."
+                                          style="width: 100%; padding: 0.75rem; border-radius: var(--sceams-radius-sm); border: 1px solid var(--sceams-border); font-family: inherit; font-size: 0.95rem; line-height: 1.5;"></textarea>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('rejectModal-@club.Id').close();">
+                                    Hủy bỏ
+                                </button>
+                                <button type="submit" class="btn-app btn-app--primary" style="background: var(--sceams-danger); border-color: var(--sceams-danger);">
+                                    Xác nhận từ chối
+                                </button>
+                            </div>
+                        </form>
+                    </dialog>
                 </article>
             }
         </div>
