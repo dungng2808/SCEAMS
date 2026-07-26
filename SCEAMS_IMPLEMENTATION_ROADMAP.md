@@ -560,9 +560,9 @@ Domain entity/enum
 
 ### Phase 60 - MVC: Danh sách địa điểm
 
-- [ ] Tạo trang venue list.
-- [ ] Hiển thị badge Available/Maintenance và capacity.
-- [ ] Chỉ Admin/Staff thấy action quản trị.
+- [x] Tạo trang venue list.
+- [x] Hiển thị badge Available/Maintenance và capacity.
+- [x] Chỉ Admin/Staff thấy action quản trị.
 
 ### Phase 61 - API: Tạo địa điểm
 

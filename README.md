@@ -810,5 +810,17 @@ API hỗ trợ tìm theo tên/vị trí, lọc `maintenance=true|false` và phâ
 `isUnderMaintenance`; không trả navigation `Events`, tránh vòng lặp khi dùng
 JSON/XML. Request Phase 59 nằm trong Postman **Venues** folder.
 
+## MVC danh sách địa điểm
+
+Mở trang:
+
+```text
+https://localhost:7034/Venues
+```
+
+MVC có bộ lọc tên/vị trí, tình trạng bảo trì và page size; danh sách hiển thị
+badge `Sẵn sàng`/`Đang bảo trì` cùng sức chứa. Admin và Staff nhìn thấy khu vực
+quản trị địa điểm; các nút tạo/sửa/bảo trì sẽ được mở ở các phase tiếp theo.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

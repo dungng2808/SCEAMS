@@ -1,0 +1,179 @@
+@model SCEAMS.MVC.ViewModels.VenuesViewModel
+
+@{
+    ViewData["Title"] = "Danh sách địa điểm";
+}
+
+<section class="clubs-page" aria-labelledby="venues-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone G · Không gian hoạt động</p>
+            <h1 id="venues-title">Địa điểm tổ chức hoạt động</h1>
+            <p>Tra cứu sức chứa và tình trạng sẵn sàng của các địa điểm dành cho câu lạc bộ và sự kiện.</p>
+        </div>
+        <div class="category-hero__summary" aria-label="Tổng quan địa điểm">
+            <span>Địa điểm phù hợp</span>
+            <strong>@Model.TotalItems</strong>
+            <small>Dữ liệu tải trực tiếp từ API</small>
+        </div>
+    </header>
+
+    <form class="users-filters surface-card"
+          asp-controller="Venues"
+          asp-action="Index"
+          method="get"
+          aria-label="Bộ lọc danh sách địa điểm">
+        <div class="users-filter users-filter--search">
+            <label for="Search">Tìm kiếm</label>
+            <div class="users-filter__control">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m16 16 4 4" />
+                </svg>
+                <input id="Search"
+                       name="search"
+                       type="search"
+                       value="@Model.Search"
+                       maxlength="300"
+                       placeholder="Nhập tên hoặc vị trí địa điểm..." />
+            </div>
+        </div>
+
+        <div class="users-filter">
+            <label for="Maintenance">Tình trạng</label>
+            <select id="Maintenance" name="maintenance">
+                <option value="" selected="@(!Model.Maintenance.HasValue)">Tất cả địa điểm</option>
+                <option value="false" selected="@(Model.Maintenance == false)">Sẵn sàng</option>
+                <option value="true" selected="@(Model.Maintenance == true)">Đang bảo trì</option>
+            </select>
+        </div>
+
+        <div class="users-filter">
+            <label for="PageSize">Số dòng</label>
+            <select id="PageSize" name="pageSize">
+                <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                <option value="25" selected="@(Model.PageSize == 25)">25</option>
+                <option value="50" selected="@(Model.PageSize == 50)">50</option>
+            </select>
+        </div>
+
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">Lọc kết quả</button>
+            <a class="btn-app btn-app--ghost" asp-controller="Venues" asp-action="Index">Xóa lọc</a>
+        </div>
+    </form>
+
+    @if (Model.CanManage)
+    {
+        <aside class="category-admin surface-card" aria-label="Quyền quản trị địa điểm">
+            <span class="category-admin__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M8 9h.01M12 9h.01M16 9h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="category-admin__eyebrow">Dành cho Admin / Staff</p>
+                <strong>Quyền quản trị địa điểm</strong>
+                <small>Các thao tác tạo, sửa và bảo trì sẽ được mở theo từng phase tiếp theo.</small>
+            </div>
+        </aside>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Kết nối gián đoạn</p>
+                <h2>Chưa thể tải danh sách địa điểm</h2>
+                <p>@Model.ErrorMessage</p>
+                <a class="btn-app btn-app--primary" asp-controller="Venues" asp-action="Index">Thử tải lại</a>
+            </div>
+        </div>
+    }
+    else if (Model.Venues.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Không tìm thấy kết quả</p>
+                <h2>Chưa có địa điểm phù hợp</h2>
+                <p>Thử thay đổi từ khóa hoặc bộ lọc tình trạng.</p>
+                <a class="btn-app btn-app--ghost" asp-controller="Venues" asp-action="Index">Xem tất cả địa điểm</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="surface-card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table align-middle style-table mb-0" style="width: 100%;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 1px solid var(--sceams-border);">
+                            <th style="padding: 1rem 1.5rem;">Địa điểm</th>
+                            <th>Vị trí</th>
+                            <th>Sức chứa</th>
+                            <th>Tình trạng</th>
+                            <th class="text-end">Mã</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var venue in Model.Venues)
+                        {
+                            <tr style="border-bottom: 1px solid var(--sceams-border);">
+                                <td style="padding: 1rem 1.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <span class="category-card__mark category-card--blue" aria-hidden="true">@venue.Name[..1].ToUpperInvariant()</span>
+                                        <strong style="color: var(--sceams-text);">@venue.Name</strong>
+                                    </div>
+                                </td>
+                                <td>@venue.Location</td>
+                                <td><strong>@venue.Capacity</strong> người</td>
+                                <td><span class="status-badge @venue.MaintenanceBadgeClass">@venue.MaintenanceLabel</span></td>
+                                <td class="text-end" style="color: var(--sceams-text-soft);">#@venue.Id</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div style="padding: 1.25rem 1.5rem; border-top: 1px solid var(--sceams-border); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <small style="color: var(--sceams-text-soft);">Trang @Model.Page / @Model.TotalPages · @Model.TotalItems địa điểm</small>
+                    <div style="display: flex; gap: 0.5rem;">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm"
+                               asp-controller="Venues"
+                               asp-action="Index"
+                               asp-route-search="@Model.Search"
+                               asp-route-maintenance="@Model.Maintenance"
+                               asp-route-page="@(Model.Page - 1)"
+                               asp-route-pageSize="@Model.PageSize">&larr; Trang trước</a>
+                        }
+                        @if (Model.HasNextPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm"
+                               asp-controller="Venues"
+                               asp-action="Index"
+                               asp-route-search="@Model.Search"
+                               asp-route-maintenance="@Model.Maintenance"
+                               asp-route-page="@(Model.Page + 1)"
+                               asp-route-pageSize="@Model.PageSize">Trang sau &rarr;</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
