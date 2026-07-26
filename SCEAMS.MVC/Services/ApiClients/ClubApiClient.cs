@@ -434,6 +434,68 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<DissolveClubApiResult> DissolveClubAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync($"api/clubs/{id}/dissolve", null, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var dissolvedClub = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new DissolveClubApiResult
+            {
+                IsSuccess = true,
+                Club = dissolvedClub
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DissolveClubApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ #{id}."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new DissolveClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Chỉ câu lạc bộ ở trạng thái Hoạt động mới có thể giải thể."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new DissolveClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new DissolveClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền giải thể câu lạc bộ."
+            };
+        }
+
+        return new DissolveClubApiResult
+        {
+            ErrorMessage = "Không thể giải thể câu lạc bộ vào lúc này."
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

@@ -197,6 +197,7 @@ public sealed class ClubsController : Controller
             var (label, badgeClass) = GetStatusInfo(club.Status);
             var isApproved = string.Equals(club.Status, "Approved", StringComparison.OrdinalIgnoreCase);
             var isPending = string.Equals(club.Status, "PendingApproval", StringComparison.OrdinalIgnoreCase);
+            var isDissolved = string.Equals(club.Status, "Dissolved", StringComparison.OrdinalIgnoreCase);
 
             var viewModel = new ClubDetailsViewModel
             {
@@ -216,10 +217,10 @@ public sealed class ClubsController : Controller
                 RejectionReason = club.RejectionReason,
                 DissolvedAtFormatted = club.DissolvedAt?.ToString("dd/MM/yyyy HH:mm"),
                 Initials = GetInitials(club.Name),
-                CanEdit = isOwner || isAdmin,
-                CanApproveOrReject = (isAdmin || isStaff) && isPending,
-                CanDissolve = (isAdmin || isStaff) && isApproved,
-                CanJoin = isApproved
+                CanEdit = !isDissolved && (isOwner || isAdmin),
+                CanApproveOrReject = !isDissolved && (isAdmin || isStaff) && isPending,
+                CanDissolve = !isDissolved && (isAdmin || isStaff) && isApproved,
+                CanJoin = !isDissolved && isApproved
             };
 
             return View(viewModel);
@@ -390,6 +391,50 @@ public sealed class ClubsController : Controller
             JsonException)
         {
             _logger.LogWarning(exception, "Unable to send reject club #{ClubId} request.", id);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    [HttpPost("{id:int}/Dissolve")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Dissolve(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.DissolveClubAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Bạn không có quyền giải thể câu lạc bộ này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Không thể giải thể câu lạc bộ vào lúc này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["SuccessMessage"] = $"Câu lạc bộ '{result.Club.Name}' đã chính thức giải thể.";
+            return RedirectToAction(nameof(Details), new { id = result.Club.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send dissolve club #{ClubId} request.", id);
 
             TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
             return RedirectToAction(nameof(Details), new { id });

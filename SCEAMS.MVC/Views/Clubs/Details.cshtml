@@ -187,6 +187,16 @@
             </div>
         }
 
+        @if (string.Equals(Model.Status, "Dissolved", StringComparison.OrdinalIgnoreCase))
+        {
+            <div class="surface-card" style="padding: 1.5rem; border-left: 4px solid var(--sceams-navy-900); background: rgba(15, 23, 42, 0.05);" role="status">
+                <strong style="color: var(--sceams-navy-900); display: block; margin-bottom: 0.5rem; font-size: 1.05rem;">Trạng thái: Câu lạc bộ đã giải thể</strong>
+                <p style="margin: 0; color: var(--sceams-text); line-height: 1.6;">
+                    Câu lạc bộ này đã chính thức ngưng hoạt động từ ngày <strong>@(Model.DissolvedAtFormatted ?? "N/A")</strong>. Tất cả hoạt động đăng ký thành viên mới và đề xuất sự kiện đối với câu lạc bộ này đã bị dừng.
+                </p>
+            </div>
+        }
+
         <aside class="surface-card" style="padding: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
             <div>
                 <strong style="font-size: 1.1rem; display: block;">Thao tác quản lý câu lạc bộ</strong>
@@ -260,15 +270,45 @@
                     </dialog>
                 }
 
-
-
                 @if (Model.CanDissolve)
                 {
-                    <a class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" asp-controller="Clubs" asp-action="Dissolve" asp-route-id="@Model.Id">
+                    <button type="button" class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" onclick="document.getElementById('dissolveModal-details').showModal();">
                         Giải thể CLB
-                    </a>
+                    </button>
+
+                    <!-- Dissolve Confirmation Modal -->
+                    <dialog id="dissolveModal-details" class="surface-card" style="padding: 1.75rem; border-radius: var(--sceams-radius-md); border: 1px solid var(--sceams-border); max-width: 34rem; width: 90vw; margin: auto;">
+                        <form asp-controller="Clubs"
+                              asp-action="Dissolve"
+                              asp-route-id="@Model.Id"
+                              method="post"
+                              onsubmit="return confirm('CẢNH BÁO: Việc giải thể câu lạc bộ \'@Model.Name\' sẽ chấm dứt mọi hoạt động và đóng quyền tham gia! Bạn chắc chắn muốn tiếp tục?');">
+                            @Html.AntiForgeryToken()
+                            <h3 style="margin-top: 0; color: var(--sceams-danger); font-size: 1.25rem;">Giải thể câu lạc bộ</h3>
+                            <p style="font-size: 0.95rem; color: var(--sceams-text); margin-bottom: 1rem; line-height: 1.5;">
+                                Bạn đang chuẩn bị giải thể câu lạc bộ <strong>@Model.Name</strong> (#@Model.Id).
+                            </p>
+                            <div style="background: var(--sceams-danger-soft); border-left: 4px solid var(--sceams-danger); padding: 1rem; margin-bottom: 1.25rem; border-radius: var(--sceams-radius-sm);">
+                                <strong style="color: var(--sceams-danger); display: block; margin-bottom: 0.35rem;">Tác động của hành động:</strong>
+                                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--sceams-text);">
+                                    <li>Trạng thái câu lạc bộ sẽ chuyển sang <strong>Đã giải thể (Dissolved)</strong>.</li>
+                                    <li>Chặn toàn bộ lượt xin gia nhập mới và việc tổ chức sự kiện mới.</li>
+                                    <li>Dữ liệu lịch sử câu lạc bộ và thành viên cũ vẫn được bảo lưu.</li>
+                                </ul>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('dissolveModal-details').close();">
+                                    Hủy bỏ
+                                </button>
+                                <button type="submit" class="btn-app btn-app--primary" style="background: var(--sceams-danger); border-color: var(--sceams-danger);">
+                                    Xác nhận giải thể
+                                </button>
+                            </div>
+                        </form>
+                    </dialog>
                 }
             </div>
         </aside>
     }
 </section>
+

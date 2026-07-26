@@ -487,9 +487,10 @@ Domain entity/enum
 
 ### Phase 50 - MVC: Giải thể CLB
 
-- [ ] Thêm action có cảnh báo ảnh hưởng.
-- [ ] Hiển thị Club đã giải thể ở lịch sử nhưng không cho thao tác mới.
-- [ ] Kiểm thử thử tạo Event sau khi giải thể phải thất bại.
+- [x] Thêm action có cảnh báo ảnh hưởng.
+- [x] Hiển thị Club đã giải thể ở lịch sử nhưng không cho thao tác mới.
+- [x] Kiểm thử thử tạo Event sau khi giải thể phải thất bại.
+
 
 ---
 
