@@ -417,9 +417,10 @@ Domain entity/enum
 
 ### Phase 40 - MVC: Trang chi tiết CLB
 
-- [ ] Hiển thị thông tin CLB, category, organizer và số thành viên.
-- [ ] Hiển thị action theo role và ownership.
-- [ ] Kiểm thử truy cập Club pending bằng Student.
+- [x] Hiển thị thông tin CLB, category, organizer và số thành viên.
+- [x] Hiển thị action theo role và ownership.
+- [x] Kiểm thử truy cập Club pending bằng Student.
+
 
 ### Phase 41 - API: Organizer đề xuất thành lập CLB
 

@@ -114,6 +114,58 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<ClubDetailApiResult> GetClubByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync($"api/clubs/{id}", cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var club = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new ClubDetailApiResult
+            {
+                IsSuccess = true,
+                Club = club
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new ClubDetailApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ với mã #{id} hoặc bạn không có quyền xem."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new ClubDetailApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new ClubDetailApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền xem thông tin câu lạc bộ này."
+            };
+        }
+
+        return new ClubDetailApiResult
+        {
+            ErrorMessage = "Không thể tải chi tiết câu lạc bộ vào lúc này."
+        };
+    }
+
     private static string NormalizeOrderBy(string? orderBy)
     {
         return orderBy?.ToLowerInvariant() switch

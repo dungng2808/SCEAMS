@@ -1,0 +1,217 @@
+@model SCEAMS.MVC.ViewModels.ClubDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.IsNotFound || Model.IsForbidden || !string.IsNullOrWhiteSpace(Model.ErrorMessage)
+        ? "Chi tiết câu lạc bộ"
+        : Model.Name;
+}
+
+<section class="clubs-page" aria-labelledby="club-details-title">
+    <nav class="breadcrumb-nav" aria-label="Điều hướng">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a asp-controller="Clubs" asp-action="Index">Câu lạc bộ</a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span aria-current="page">@(Model.Name ?? "Chi tiết")</span>
+    </nav>
+
+    @if (Model.IsNotFound)
+    {
+        <div class="category-state category-state--empty surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v4M12 16h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Không tìm thấy</p>
+                <h2>Câu lạc bộ không tồn tại hoặc chưa được duyệt</h2>
+                <p>@Model.ErrorMessage</p>
+                <div class="category-state__actions">
+                    <a class="btn-app btn-app--primary" asp-controller="Clubs" asp-action="Index">
+                        Quay lại danh sách câu lạc bộ
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.IsForbidden)
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Quyền truy cập</p>
+                <h2>Bạn không có quyền xem thông tin câu lạc bộ này</h2>
+                <p>@Model.ErrorMessage</p>
+                <div class="category-state__actions">
+                    <a class="btn-app btn-app--primary" asp-controller="Clubs" asp-action="Index">
+                        Quay lại danh sách câu lạc bộ
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v4M12 16h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Lỗi hệ thống</p>
+                <h2>Không thể tải thông tin câu lạc bộ</h2>
+                <p>@Model.ErrorMessage</p>
+                <div class="category-state__actions">
+                    <a class="btn-app btn-app--primary" asp-controller="Clubs" asp-action="Details" asp-route-id="@Model.Id">
+                        Thử lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <header class="category-hero" style="padding-block: 2.25rem;">
+            <div class="category-hero__copy">
+                <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="category-card__mark" style="background: rgba(255,255,255,0.18); color: #fff; width: 2.75rem; height: 2.75rem; font-size: 1rem;" aria-hidden="true">
+                        @Model.Initials
+                    </span>
+                    <span class="eyebrow" style="margin: 0;">@Model.CategoryName</span>
+                    <span class="@Model.StatusBadgeClass">@Model.StatusLabel</span>
+                </div>
+                <h1 id="club-details-title" style="margin-top: 0.25rem;">@Model.Name</h1>
+                <p style="color: rgba(255, 255, 255, 0.82);">
+                    Mã số CLB: <strong>#@Model.Id</strong> &bull; Tạo ngày @Model.CreatedAtFormatted bởi <strong>@Model.CreatedByUserName</strong>
+                </p>
+            </div>
+            <div class="category-hero__summary" style="min-height: 7.5rem; min-width: 10.5rem;">
+                <span>Thành viên</span>
+                <strong>@Model.ActiveMemberCount</strong>
+                <small>Đang hoạt động</small>
+            </div>
+        </header>
+
+        <div style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));">
+            <div class="surface-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="background: var(--sceams-blue-50); color: var(--sceams-blue-600); border-radius: 0.75rem; padding: 0.75rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                    </svg>
+                </div>
+                <div>
+                    <span style="font-size: 0.75rem; color: var(--sceams-text-faint); text-transform: uppercase; font-weight: 700;">Thành viên Active</span>
+                    <h3 style="margin: 0; font-size: 1.35rem;">@Model.ActiveMemberCount người</h3>
+                </div>
+            </div>
+
+            <div class="surface-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="background: var(--sceams-blue-50); color: var(--sceams-blue-600); border-radius: 0.75rem; padding: 0.75rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </div>
+                <div>
+                    <span style="font-size: 0.75rem; color: var(--sceams-text-faint); text-transform: uppercase; font-weight: 700;">Nhà tổ chức</span>
+                    <h3 style="margin: 0; font-size: 1.15rem;">@Model.CreatedByUserName</h3>
+                </div>
+            </div>
+
+            <div class="surface-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="background: var(--sceams-blue-50); color: var(--sceams-blue-600); border-radius: 0.75rem; padding: 0.75rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                </div>
+                <div>
+                    <span style="font-size: 0.75rem; color: var(--sceams-text-faint); text-transform: uppercase; font-weight: 700;">Ngày thành lập</span>
+                    <h3 style="margin: 0; font-size: 1.1rem;">@Model.CreatedAtFormatted</h3>
+                </div>
+            </div>
+        </div>
+
+        <article class="surface-card" style="padding: 2rem;">
+            <h2 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.35rem; border-bottom: 1px solid var(--sceams-border); padding-bottom: 0.75rem;">
+                Mô tả câu lạc bộ
+            </h2>
+            <div style="color: var(--sceams-text); line-height: 1.7; font-size: 1.05rem;">
+                @if (string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p style="color: var(--sceams-text-faint); font-style: italic;">
+                        Câu lạc bộ chưa có thông tin mô tả chi tiết.
+                    </p>
+                }
+                else
+                {
+                    <p style="white-space: pre-wrap;">@Model.Description</p>
+                }
+            </div>
+        </article>
+
+        @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+        {
+            <div class="surface-card" style="padding: 1.5rem; border-left: 4px solid var(--sceams-danger); background: var(--sceams-danger-soft);">
+                <strong style="color: var(--sceams-danger); display: block; margin-bottom: 0.5rem;">Lý do từ chối:</strong>
+                <p style="margin: 0; color: var(--sceams-text);">@Model.RejectionReason</p>
+            </div>
+        }
+
+        <aside class="surface-card" style="padding: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+            <div>
+                <strong style="font-size: 1.1rem; display: block;">Thao tác quản lý câu lạc bộ</strong>
+                <small style="color: var(--sceams-text-soft);">Các hành động khả dụng dựa trên vai trò và quyền sở hữu của bạn.</small>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a class="btn-app btn-app--ghost" asp-controller="Clubs" asp-action="Index">
+                    &larr; Danh sách CLB
+                </a>
+
+                @if (Model.CanJoin)
+                {
+                    <button type="button" class="btn-app btn-app--primary" title="Tính năng đăng ký thành viên sắp ra mắt ở Phase 51">
+                        Xin gia nhập CLB
+                    </button>
+                }
+
+                @if (Model.CanEdit)
+                {
+                    <a class="btn-app btn-app--ghost" asp-controller="Clubs" asp-action="Edit" asp-route-id="@Model.Id" title="Chỉnh sửa thông tin CLB">
+                        Chỉnh sửa CLB
+                    </a>
+                }
+
+                @if (Model.CanApproveOrReject)
+                {
+                    <a class="btn-app btn-app--primary" asp-controller="Clubs" asp-action="Approve" asp-route-id="@Model.Id">
+                        Duyệt CLB
+                    </a>
+                    <a class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" asp-controller="Clubs" asp-action="Reject" asp-route-id="@Model.Id">
+                        Từ chối
+                    </a>
+                }
+
+                @if (Model.CanDissolve)
+                {
+                    <a class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" asp-controller="Clubs" asp-action="Dissolve" asp-route-id="@Model.Id">
+                        Giải thể CLB
+                    </a>
+                }
+            </div>
+        </aside>
+    }
+</section>

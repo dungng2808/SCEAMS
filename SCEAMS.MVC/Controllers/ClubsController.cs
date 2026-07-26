@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -41,7 +42,6 @@ public sealed class ClubsController : Controller
         var canManage = User.IsInRole("Admin") || User.IsInRole("Staff");
         var canCreateClub = User.IsInRole("Organizer") || User.IsInRole("Admin");
 
-        // Non-Admin/Staff users can only view Approved status
         var effectiveStatus = canManage ? status : "Approved";
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
@@ -139,6 +139,111 @@ public sealed class ClubsController : Controller
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Details(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.GetClubByIdAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return View("Details", new ClubDetailsViewModel
+                {
+                    Id = id,
+                    IsNotFound = true,
+                    ErrorMessage = result.ErrorMessage ?? "Không tìm thấy câu lạc bộ."
+                });
+            }
+
+            if (result.IsForbidden)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return View("Details", new ClubDetailsViewModel
+                {
+                    Id = id,
+                    IsForbidden = true,
+                    ErrorMessage = result.ErrorMessage ?? "Bạn không có quyền xem thông tin câu lạc bộ này."
+                });
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                return View("Details", new ClubDetailsViewModel
+                {
+                    Id = id,
+                    ErrorMessage = result.ErrorMessage ?? "Không thể tải chi tiết câu lạc bộ."
+                });
+            }
+
+            var club = result.Club;
+            var currentUserId = GetCurrentUserId();
+            var isAdmin = User.IsInRole("Admin");
+            var isStaff = User.IsInRole("Staff");
+            var isOwner = currentUserId.HasValue && currentUserId.Value == club.CreatedByUserId;
+
+            var (label, badgeClass) = GetStatusInfo(club.Status);
+            var isApproved = string.Equals(club.Status, "Approved", StringComparison.OrdinalIgnoreCase);
+            var isPending = string.Equals(club.Status, "PendingApproval", StringComparison.OrdinalIgnoreCase);
+
+            var viewModel = new ClubDetailsViewModel
+            {
+                Id = club.Id,
+                Name = club.Name,
+                Description = club.Description,
+                CategoryId = club.CategoryId,
+                CategoryName = club.CategoryName,
+                Status = club.Status,
+                StatusLabel = label,
+                StatusBadgeClass = badgeClass,
+                CreatedByUserId = club.CreatedByUserId,
+                CreatedByUserName = club.CreatedByUserName,
+                ActiveMemberCount = club.ActiveMemberCount,
+                CreatedAtFormatted = club.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
+                ReviewedAtFormatted = club.ReviewedAt?.ToString("dd/MM/yyyy HH:mm"),
+                RejectionReason = club.RejectionReason,
+                DissolvedAtFormatted = club.DissolvedAt?.ToString("dd/MM/yyyy HH:mm"),
+                Initials = GetInitials(club.Name),
+                CanEdit = isOwner || isAdmin,
+                CanApproveOrReject = (isAdmin || isStaff) && isPending,
+                CanDissolve = (isAdmin || isStaff) && isApproved,
+                CanJoin = isApproved
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load club details #{ClubId} from API.", id);
+
+            return View("Details", new ClubDetailsViewModel
+            {
+                Id = id,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
+
+        return int.TryParse(subClaim, out var userId) ? userId : null;
     }
 
     private static ClubListItemViewModel MapClub(ClubApiResponse club, int index)

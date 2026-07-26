@@ -7,4 +7,8 @@ public interface IClubApiClient
     Task<ClubListApiResult> GetClubsAsync(
         ClubListApiQuery query,
         CancellationToken cancellationToken = default);
+
+    Task<ClubDetailApiResult> GetClubByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default);
 }
