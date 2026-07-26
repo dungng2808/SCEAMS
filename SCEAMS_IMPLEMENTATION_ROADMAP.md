@@ -326,9 +326,9 @@ Domain entity/enum
 
 ### Phase 27 - API: Gán vai trò
 
-- [ ] Thêm `PUT /api/users/{id}/role`.
-- [ ] Chỉ chấp nhận 4 role đã định nghĩa; chặn tự hạ quyền Admin cuối cùng.
-- [ ] Revoke refresh token sau khi đổi role.
+- [x] Thêm `PUT /api/users/{id}/role`.
+- [x] Chỉ chấp nhận 4 role đã định nghĩa; chặn tự hạ quyền Admin cuối cùng.
+- [x] Revoke refresh token sau khi đổi role.
 
 ### Phase 28 - MVC: Form gán vai trò
 

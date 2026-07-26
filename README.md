@@ -363,6 +363,42 @@ short expiry.
 Ready-to-run Phase 25 requests are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
 
+## Admin user-role API
+
+Only an authenticated Admin can assign a role to an account:
+
+```text
+PUT http://localhost:5195/api/users/{id}/role
+Authorization: Bearer <admin-access-token>
+Content-Type: application/json
+```
+
+The request accepts exactly one of the four domain roles:
+
+```json
+{
+  "role": "Organizer"
+}
+```
+
+Supported values are `Admin`, `Staff`, `Organizer` and `Student`. A successful
+request returns `200 OK` with safe account identity, the persisted role and
+active status. Invalid or missing role values return `400`, an unknown account
+returns `404`, and authenticated non-Admin users receive `403`.
+
+When the role actually changes, the API clears the target account's stored
+refresh-token hash and expiry in the same save. A refresh token issued before
+the change therefore returns `401`; the account must sign in again to receive
+claims for its new role. Repeating the current role is idempotent and does not
+revoke an otherwise valid refresh token.
+
+The final active Admin cannot demote their own account. This protection counts
+only active Admin accounts so an inactive Admin cannot leave the system without
+an account capable of restoring administrative access.
+
+Ready-to-run Phase 27 requests and failure cases are available in
+`SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

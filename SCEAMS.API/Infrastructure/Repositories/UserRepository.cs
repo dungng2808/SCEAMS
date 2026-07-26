@@ -182,4 +182,15 @@ public sealed class UserRepository
                 user.StudentCode == studentCode,
             cancellationToken);
     }
+
+    public Task<int> CountActiveByRoleAsync(
+        UserRole role,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.CountAsync(
+            user =>
+                user.Role == role &&
+                user.IsActive,
+            cancellationToken);
+    }
 }

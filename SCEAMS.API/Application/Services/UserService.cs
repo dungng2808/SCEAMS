@@ -260,6 +260,70 @@ public sealed class UserService : IUserService
                 : "User account locked successfully.");
     }
 
+    public async Task<Result<UserRoleResponseDto>>
+        UpdateUserRoleAsync(
+            int actingAdminId,
+            int userId,
+            UpdateUserRoleRequestDto request,
+            CancellationToken cancellationToken = default)
+    {
+        if (!request.Role.HasValue ||
+            !Enum.IsDefined(request.Role.Value))
+        {
+            return Result<UserRoleResponseDto>.Fail(
+                "Role is invalid.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var user = await _unitOfWork.Users.GetByIdAsync(
+            userId,
+            cancellationToken);
+
+        if (user is null)
+        {
+            return Result<UserRoleResponseDto>.Fail(
+                "User account does not exist.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var role = request.Role.Value;
+
+        if (user.Role == role)
+        {
+            return Result<UserRoleResponseDto>.Ok(
+                MapRole(user),
+                "User role is already up to date.");
+        }
+
+        if (actingAdminId == user.Id &&
+            user.Role == UserRole.Admin &&
+            role != UserRole.Admin)
+        {
+            var activeAdminCount = await _unitOfWork.Users
+                .CountActiveByRoleAsync(
+                    UserRole.Admin,
+                    cancellationToken);
+
+            if (activeAdminCount <= 1)
+            {
+                return Result<UserRoleResponseDto>.Fail(
+                    "The last active administrator cannot demote " +
+                    "their own account.",
+                    StatusCodes.Status400BadRequest);
+            }
+        }
+
+        user.Role = role;
+        user.RefreshTokenHash = null;
+        user.RefreshTokenExpiresAt = null;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<UserRoleResponseDto>.Ok(
+            MapRole(user),
+            "User role updated successfully.");
+    }
+
     public async Task<Result<PagedUsersResponseDto>> GetUsersAsync(
         UserListQueryDto query,
         CancellationToken cancellationToken = default)
@@ -402,6 +466,16 @@ public sealed class UserService : IUserService
             Role: user.Role.ToString(),
             IsActive: user.IsActive,
             CreatedAt: user.CreatedAt);
+    }
+
+    private static UserRoleResponseDto MapRole(User user)
+    {
+        return new UserRoleResponseDto(
+            Id: user.Id,
+            FullName: user.FullName,
+            Email: user.Email,
+            Role: user.Role.ToString(),
+            IsActive: user.IsActive);
     }
 
     private static string NormalizeFullName(string fullName)

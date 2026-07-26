@@ -52,4 +52,8 @@ public interface IUserRepository : IGenericRepository<User>
         string studentCode,
         int userId,
         CancellationToken cancellationToken = default);
+
+    Task<int> CountActiveByRoleAsync(
+        UserRole role,
+        CancellationToken cancellationToken = default);
 }

@@ -207,6 +207,61 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Assign one of the four supported roles:
+# Admin, Staff, Organizer or Student.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}/role
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "role": "Organizer"
+}
+
+###
+
+# An unknown role must return 400.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}/role
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "role": "SuperAdmin"
+}
+
+###
+
+# An unknown user ID must return 404.
+PUT {{SCEAMS.API_HostAddress}}/api/users/2147483647/role
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "role": "Staff"
+}
+
+###
+
+# The last active Admin cannot demote their own account.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{AdminUserId}}/role
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "role": "Staff"
+}
+
+###
+
+# A refresh token issued before a role change must return 401.
+POST {{SCEAMS.API_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{RoleChangeRefreshToken}}"
+}
+
+###
+
 # Define AccessToken from a successful login in your local HTTP client environment.
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json
