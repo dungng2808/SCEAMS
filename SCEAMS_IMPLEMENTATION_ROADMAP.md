@@ -505,9 +505,10 @@ Domain entity/enum
 
 ### Phase 52 - MVC: Nút xin gia nhập CLB
 
-- [ ] Thêm nút Join ở trang Club Approved.
-- [ ] Sau khi gửi, nút chuyển sang `Đang chờ duyệt`.
-- [ ] Hiển thị lỗi khi đã là thành viên.
+- [x] Thêm nút Join ở trang Club Approved.
+- [x] Sau khi gửi, nút chuyển sang `Đang chờ duyệt`.
+- [x] Chặn gửi lại khi đang Pending/Active.
+
 
 ### Phase 53 - API: Danh sách đơn gia nhập chờ duyệt
 

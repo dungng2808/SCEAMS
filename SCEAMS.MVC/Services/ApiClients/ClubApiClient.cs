@@ -496,6 +496,68 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<RequestJoinClubApiResult> RequestJoinClubAsync(
+        int clubId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsync($"api/clubs/{clubId}/members", null, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var membership = await response.Content
+                .ReadFromJsonAsync<ClubMembershipApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new RequestJoinClubApiResult
+            {
+                IsSuccess = true,
+                Membership = membership
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new RequestJoinClubApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ #{clubId}."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new RequestJoinClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Bạn không thể xin gia nhập câu lạc bộ này vào lúc này."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new RequestJoinClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new RequestJoinClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Chỉ tài khoản Sinh viên (Student) mới có thể gửi yêu cầu xin gia nhập câu lạc bộ."
+            };
+        }
+
+        return new RequestJoinClubApiResult
+        {
+            ErrorMessage = "Không thể gửi yêu cầu gia nhập câu lạc bộ vào lúc này."
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

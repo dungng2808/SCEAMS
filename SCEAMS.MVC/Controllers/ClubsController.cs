@@ -192,6 +192,7 @@ public sealed class ClubsController : Controller
             var currentUserId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");
             var isStaff = User.IsInRole("Staff");
+            var isStudent = User.IsInRole("Student");
             var isOwner = currentUserId.HasValue && currentUserId.Value == club.CreatedByUserId;
 
             var (label, badgeClass) = GetStatusInfo(club.Status);
@@ -220,7 +221,7 @@ public sealed class ClubsController : Controller
                 CanEdit = !isDissolved && (isOwner || isAdmin),
                 CanApproveOrReject = !isDissolved && (isAdmin || isStaff) && isPending,
                 CanDissolve = !isDissolved && (isAdmin || isStaff) && isApproved,
-                CanJoin = !isDissolved && isApproved
+                CanJoin = !isDissolved && isApproved && isStudent
             };
 
             return View(viewModel);
@@ -435,6 +436,56 @@ public sealed class ClubsController : Controller
             JsonException)
         {
             _logger.LogWarning(exception, "Unable to send dissolve club #{ClubId} request.", id);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    [HttpPost("{id:int}/Join")]
+    [Authorize(Roles = "Student")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Join(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.RequestJoinClubAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Chỉ tài khoản Sinh viên (Student) mới có thể gia nhập câu lạc bộ.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (result.IsConflict)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Bạn không thể gửi đơn xin gia nhập vào lúc này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!result.IsSuccess || result.Membership == null)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Không thể gửi đơn xin gia nhập vào lúc này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["SuccessMessage"] = $"Đơn xin gia nhập câu lạc bộ '{result.Membership.ClubName}' đã được gửi thành công! Trạng thái hiện tại: Đang chờ duyệt.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send request join club #{ClubId}.", id);
 
             TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
             return RedirectToAction(nameof(Details), new { id });

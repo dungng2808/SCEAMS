@@ -33,4 +33,8 @@ public interface IClubApiClient
     Task<DissolveClubApiResult> DissolveClubAsync(
         int id,
         CancellationToken cancellationToken = default);
+
+    Task<RequestJoinClubApiResult> RequestJoinClubAsync(
+        int clubId,
+        CancellationToken cancellationToken = default);
 }
