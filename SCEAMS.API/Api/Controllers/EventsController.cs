@@ -14,17 +14,20 @@ public sealed class EventsController : ApiControllerBase
     private readonly IEventService _eventService;
     private readonly IEventStatusSyncService _eventStatusSyncService;
     private readonly IRegistrationService _registrationService;
+    private readonly IFeedbackService _feedbackService;
     private readonly IHostEnvironment _environment;
 
     public EventsController(
         IEventService eventService,
         IEventStatusSyncService eventStatusSyncService,
         IRegistrationService registrationService,
+        IFeedbackService feedbackService,
         IHostEnvironment environment)
     {
         _eventService = eventService;
         _eventStatusSyncService = eventStatusSyncService;
         _registrationService = registrationService;
+        _feedbackService = feedbackService;
         _environment = environment;
     }
 
@@ -262,5 +265,31 @@ public sealed class EventsController : ApiControllerBase
             cancellationToken);
 
         return ToActionResult(result);
+    }
+
+    [HttpPost("{id:int}/feedback")]
+    [Authorize(Roles = "Student")]
+    [ProducesResponseType<FeedbackResponseDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateFeedback(
+        int id,
+        [FromBody] CreateFeedbackRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _feedbackService.CreateAsync(
+            id,
+            request,
+            User,
+            cancellationToken);
+        if (!result.Success)
+        {
+            return ToActionResult(result);
+        }
+
+        return StatusCode(StatusCodes.Status201Created, result.Data);
     }
 }

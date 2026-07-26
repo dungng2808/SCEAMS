@@ -1282,6 +1282,27 @@ registration `Confirmed`. Nút bị khóa ngay khi submit để chống double-c
 sau khi thành công danh sách tải lại với status `Attended`, thời gian và người
 check-in. API từ chối check-in trùng nên không tạo Attendance thứ hai.
 
+## API Student gửi Feedback
+
+Student đã điểm danh dùng:
+
+```text
+POST http://localhost:5195/api/events/{id}/feedback
+Authorization: Bearer <student-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "rating": 5,
+  "comment": "Nội dung hữu ích và tổ chức tốt."
+}
+```
+
+API chỉ cho Student có registration `Attended` gửi feedback, mỗi Student tối đa
+một feedback/Event. Rating bắt buộc 1–5, comment tối đa 2.000 ký tự; gửi trùng
+hoặc chưa điểm danh trả `409`.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

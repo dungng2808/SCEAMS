@@ -814,9 +814,9 @@ Domain entity/enum
 
 ### Phase 101 - API: Student gửi Feedback
 
-- [ ] Thêm `POST /api/events/{id}/feedback`.
-- [ ] Áp dụng BR5: chỉ Student đã Attended, mỗi Student tối đa một feedback/Event.
-- [ ] Validate rating 1-5 và giới hạn độ dài comment.
+- [x] Thêm `POST /api/events/{id}/feedback`.
+- [x] Áp dụng BR5: chỉ Student đã Attended, mỗi Student tối đa một feedback/Event.
+- [x] Validate rating 1-5 và giới hạn độ dài comment.
 
 ### Phase 102 - MVC: Form gửi Feedback
 

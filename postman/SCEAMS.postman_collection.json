@@ -5808,6 +5808,29 @@
             "description": "Phase 99 Organizer điểm danh registration Confirmed trong Event Ongoing; không tạo Attendance trùng."
           },
           "response": []
+        },
+        {
+          "name": "Phase 101 - Feedback Event - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Nội dung hữu ích và tổ chức tốt.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/feedback",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "feedback"]
+            },
+            "description": "Phase 101 Student đã Attended gửi feedback một lần cho Event; rating 1-5, comment tối đa 2000 ký tự."
+          },
+          "response": []
         }
       ]
     }
