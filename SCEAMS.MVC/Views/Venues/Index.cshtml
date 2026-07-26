@@ -149,10 +149,7 @@
                             <th>Vị trí</th>
                             <th>Sức chứa</th>
                             <th>Tình trạng</th>
-                            @if (Model.CanManage)
-                            {
-                                <th class="text-end">Thao tác</th>
-                            }
+                            <th class="text-end">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -168,10 +165,16 @@
                                 <td>@venue.Location</td>
                                 <td><strong>@venue.Capacity</strong> người</td>
                                 <td><span class="status-badge @venue.MaintenanceBadgeClass">@venue.MaintenanceLabel</span></td>
-                                @if (Model.CanManage)
-                                {
-                                    <td class="text-end">
-                                        <div style="display: inline-flex; gap: .4rem; align-items: center;">
+                                <td class="text-end">
+                                    <div style="display: inline-flex; gap: .4rem; align-items: center;">
+                                        <a class="btn-app btn-app--ghost btn-sm"
+                                           asp-controller="Venues"
+                                           asp-action="Schedule"
+                                           asp-route-id="@venue.Id">
+                                            Lịch
+                                        </a>
+                                        @if (Model.CanManage)
+                                        {
                                             <a class="btn-app btn-app--ghost btn-sm"
                                                asp-controller="Venues"
                                                asp-action="Edit"
@@ -202,9 +205,9 @@
                                                     <button type="submit" class="btn-app btn-app--ghost btn-sm">Xóa</button>
                                                 </form>
                                             }
-                                        </div>
-                                    </td>
-                                }
+                                        }
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>

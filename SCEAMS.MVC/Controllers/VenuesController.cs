@@ -99,6 +99,84 @@ public sealed class VenuesController : Controller
         }
     }
 
+    [HttpGet("{id:int}/Schedule")]
+    public async Task<IActionResult> Schedule(
+        int id,
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        var fromDate = (from ?? DateTime.Today).Date;
+        var toDate = (to ?? fromDate.AddDays(30)).Date;
+
+        if (toDate < fromDate)
+        {
+            return View(new VenueScheduleViewModel
+            {
+                VenueId = id,
+                From = fromDate,
+                To = toDate,
+                ErrorMessage = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu."
+            });
+        }
+
+        try
+        {
+            var result = await _venueApiClient.GetScheduleAsync(
+                id,
+                fromDate,
+                toDate.AddDays(1),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (!result.IsSuccess || result.Schedule is null)
+            {
+                if (result.IsNotFound)
+                {
+                    Response.StatusCode = StatusCodes.Status404NotFound;
+                }
+
+                return View(new VenueScheduleViewModel
+                {
+                    VenueId = id,
+                    From = fromDate,
+                    To = toDate,
+                    IsNotFound = result.IsNotFound,
+                    ErrorMessage = result.ErrorMessage ?? "Không thể tải lịch địa điểm."
+                });
+            }
+
+            return View(new VenueScheduleViewModel
+            {
+                VenueId = result.Schedule.VenueId,
+                VenueName = result.Schedule.VenueName,
+                Location = result.Schedule.Location,
+                From = fromDate,
+                To = toDate,
+                Events = result.Schedule.Events.Select(MapScheduleEvent).ToList()
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load schedule for venue {VenueId}.", id);
+            return View(new VenueScheduleViewModel
+            {
+                VenueId = id,
+                From = fromDate,
+                To = toDate,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Staff")]
     [HttpGet("Create")]
     public IActionResult Create()
@@ -434,6 +512,19 @@ public sealed class VenuesController : Controller
             Location = venue.Location,
             Capacity = venue.Capacity,
             IsUnderMaintenance = venue.IsUnderMaintenance
+        };
+    }
+
+    private static VenueScheduleEventViewModel MapScheduleEvent(
+        VenueScheduleEventApiResponse eventItem)
+    {
+        return new VenueScheduleEventViewModel
+        {
+            EventId = eventItem.EventId,
+            Title = eventItem.Title,
+            Status = eventItem.Status,
+            StartTime = eventItem.StartTime,
+            EndTime = eventItem.EndTime
         };
     }
 

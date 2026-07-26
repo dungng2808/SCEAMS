@@ -950,6 +950,18 @@ dùng venue. Nếu có xung đột, API trả `409 Conflict` với mảng `confl
 bị thay đổi. Tắt bảo trì không có điều kiện xung đột. Request kiểm thử nằm trong
 Postman **Venues** folder.
 
+## MVC lịch sử sử dụng địa điểm
+
+Từ danh sách venue, chọn **Lịch** để mở:
+
+```text
+https://localhost:7034/Venues/{id}/Schedule
+```
+
+Trang cho phép chọn ngày bắt đầu/kết thúc, hiển thị bảng Event giao với khoảng
+đã chọn và có trạng thái rỗng khi venue không có lịch. Các mốc thời gian UTC từ
+API được hiển thị theo giờ địa phương của máy chạy MVC.
+
 ## MVC cập nhật bảo trì địa điểm
 
 Trong danh sách địa điểm, Admin và Staff có thể dùng nút **Bảo trì** hoặc

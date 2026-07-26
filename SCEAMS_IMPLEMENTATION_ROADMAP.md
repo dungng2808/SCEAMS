@@ -620,9 +620,9 @@ Domain entity/enum
 
 ### Phase 70 - MVC: Lịch sử dụng địa điểm
 
-- [ ] Tạo trang schedule theo date range.
-- [ ] Hiển thị bảng hoặc calendar đơn giản.
-- [ ] Kiểm thử venue không có lịch và venue có lịch trùng ngày.
+- [x] Tạo trang schedule theo date range.
+- [x] Hiển thị bảng hoặc calendar đơn giản.
+- [x] Kiểm thử venue không có lịch và venue có lịch trùng ngày.
 
 ---
 

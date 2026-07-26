@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Globalization;
 using SCEAMS.MVC.Models.Api;
 
 namespace SCEAMS.MVC.Services.ApiClients;
@@ -56,6 +57,64 @@ public sealed class VenueApiClient : IVenueApiClient
             _ => new DeleteVenueApiResult
             {
                 ErrorMessage = message ?? "Không thể xóa địa điểm vào lúc này."
+            }
+        };
+    }
+
+    public async Task<VenueScheduleApiResult> GetScheduleAsync(
+        int venueId,
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken = default)
+    {
+        var fromValue = Uri.EscapeDataString(
+            from.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
+        var toValue = Uri.EscapeDataString(
+            to.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
+
+        using var response = await _httpClient.GetAsync(
+            $"api/venues/{venueId}/schedule?from={fromValue}&to={toValue}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var schedule = await response.Content
+                .ReadFromJsonAsync<VenueScheduleApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new VenueScheduleApiResult
+            {
+                IsSuccess = schedule is not null,
+                Schedule = schedule,
+                ErrorMessage = schedule is null
+                    ? "API trả về lịch địa điểm không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractApiMessage(content);
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest => new VenueScheduleApiResult
+            {
+                IsValidationError = true,
+                ErrorMessage = message ?? "Khoảng thời gian không hợp lệ."
+            },
+            HttpStatusCode.Unauthorized => new VenueScheduleApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.NotFound => new VenueScheduleApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Địa điểm không tồn tại."
+            },
+            _ => new VenueScheduleApiResult
+            {
+                ErrorMessage = message ?? "Không thể tải lịch địa điểm vào lúc này."
             }
         };
     }

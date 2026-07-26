@@ -8,6 +8,12 @@ public interface IVenueApiClient
         int venueId,
         CancellationToken cancellationToken = default);
 
+    Task<VenueScheduleApiResult> GetScheduleAsync(
+        int venueId,
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken = default);
+
     Task<VenueApiResult> GetVenueAsync(
         int venueId,
         CancellationToken cancellationToken = default);
