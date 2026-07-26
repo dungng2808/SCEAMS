@@ -678,9 +678,9 @@ Domain entity/enum
 
 ### Phase 79 - API: Gửi Event để duyệt
 
-- [ ] Thêm `PUT /api/events/{id}/submit`.
-- [ ] Chỉ chuyển `Draft -> PendingApproval`.
-- [ ] Kiểm tra lại dữ liệu bắt buộc trước khi chuyển trạng thái.
+- [x] Thêm `PUT /api/events/{id}/submit`.
+- [x] Chỉ chuyển `Draft -> PendingApproval`.
+- [x] Kiểm tra lại dữ liệu bắt buộc trước khi chuyển trạng thái.
 
 ### Phase 80 - MVC: Gửi Event để duyệt
 

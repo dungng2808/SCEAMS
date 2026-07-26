@@ -5555,6 +5555,24 @@
             "description": "Phase 77 Organizer cập nhật Event Draft của mình."
           },
           "response": []
+        },
+        {
+          "name": "Phase 79 - Submit Event Draft - Organizer",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "submit"]
+            },
+            "description": "Phase 79 chỉ chuyển Event Draft thuộc Organizer hiện tại sang PendingApproval."
+          },
+          "response": []
         }
       ]
     }

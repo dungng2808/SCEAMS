@@ -1043,6 +1043,17 @@ Form tại `/Events/{id}/Edit` giữ nguyên Club, cho phép cập nhật nội 
 thời gian và capacity; lỗi ownership/status/business rule được giữ lại trên
 form. Lưu thành công sẽ redirect về trang chi tiết Event.
 
+## API gửi Event để duyệt
+
+```text
+PUT http://localhost:5195/api/events/{id}/submit
+Authorization: Bearer <organizer-access-token>
+```
+
+Chỉ Organizer sở hữu Event được chuyển `Draft -> PendingApproval`. API kiểm tra
+lại title, Club/Venue, thời gian, deadline và capacity trước khi đổi status;
+Event ở trạng thái khác Draft trả `409 Conflict`.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

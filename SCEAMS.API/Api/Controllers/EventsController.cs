@@ -100,4 +100,24 @@ public sealed class EventsController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/submit")]
+    [Authorize(Roles = "Organizer")]
+    [ProducesResponseType<EventDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> SubmitEvent(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _eventService.SubmitEventAsync(
+            id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }
