@@ -70,6 +70,62 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<UpdateEventApiResult> UpdateEventAsync(
+        int eventId,
+        UpdateEventApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/events/{eventId}",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new UpdateEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về Event vừa cập nhật không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var error = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new UpdateEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new UpdateEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = error ?? "Bạn không có quyền sửa Event này."
+            },
+            HttpStatusCode.NotFound => new UpdateEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = error ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new UpdateEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = error ?? "Event đang ở trạng thái không thể sửa."
+            },
+            _ => new UpdateEventApiResult
+            {
+                ErrorMessage = error ?? "Thông tin Event chưa hợp lệ."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

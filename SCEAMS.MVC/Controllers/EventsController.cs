@@ -198,6 +198,132 @@ public sealed class EventsController : Controller
         }
     }
 
+    [Authorize(Roles = "Organizer,Admin,Staff")]
+    [HttpGet("{id:int}/Edit")]
+    public async Task<IActionResult> Edit(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var detail = await _eventApiClient.GetEventByIdAsync(id, cancellationToken);
+        if (detail.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+        {
+            return await EndInvalidSessionAsync(
+                detail.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+        }
+
+        if (!detail.IsSuccess || detail.Event is null)
+        {
+            if (detail.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+            }
+
+            return View(new EditEventViewModel
+            {
+                Id = id,
+                IsNotFound = detail.IsNotFound,
+                LoadErrorMessage = detail.ErrorMessage ?? "Không thể tải Event để sửa."
+            });
+        }
+
+        if (!detail.Event.Permissions.CanEdit)
+        {
+            Response.StatusCode = StatusCodes.Status403Forbidden;
+            return View(new EditEventViewModel
+            {
+                Id = id,
+                IsNotFound = true,
+                LoadErrorMessage = "Bạn không có quyền sửa Event ở trạng thái hiện tại."
+            });
+        }
+
+        var model = MapEdit(detail.Event);
+        var options = await LoadEditOptionsAsync(model, cancellationToken);
+        if (options.IsUnauthorized)
+        {
+            return await EndInvalidSessionAsync(
+                options.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+        }
+
+        if (!options.IsSuccess)
+        {
+            model.ErrorMessage = options.ErrorMessage;
+        }
+
+        return View(model);
+    }
+
+    [Authorize(Roles = "Organizer,Admin,Staff")]
+    [HttpPost("{id:int}/Edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id,
+        EditEventViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            await LoadEditOptionsAsync(model, cancellationToken);
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _eventApiClient.UpdateEventAsync(
+                id,
+                new UpdateEventApiRequest(
+                    model.Title.Trim(),
+                    string.IsNullOrWhiteSpace(model.Description)
+                        ? null
+                        : model.Description.Trim(),
+                    model.VenueId,
+                    model.StartTime,
+                    model.EndTime,
+                    model.RegistrationDeadline,
+                    model.Capacity),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                model.ErrorMessage = result.ErrorMessage ?? "Event không tồn tại.";
+                return View(model);
+            }
+
+            if (result.IsConflict || !result.IsSuccess || result.Event is null)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Không thể cập nhật Event.");
+                model.ErrorMessage = result.ErrorMessage;
+                await LoadEditOptionsAsync(model, cancellationToken);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Đã cập nhật Event '{result.Event.Title}'.";
+            return RedirectToAction(nameof(Detail), new { id = result.Event.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to update event {EventId} from MVC.", id);
+            model.ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            await LoadEditOptionsAsync(model, cancellationToken);
+            return View(model);
+        }
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,
@@ -319,6 +445,27 @@ public sealed class EventsController : Controller
         return new CreateOptionsResult(true, false, null);
     }
 
+    private async Task<CreateOptionsResult> LoadEditOptionsAsync(
+        EditEventViewModel model,
+        CancellationToken cancellationToken)
+    {
+        var venuesResult = await _venueApiClient.GetVenuesAsync(
+            search: null,
+            maintenance: false,
+            page: 1,
+            pageSize: 50,
+            cancellationToken);
+        if (venuesResult.IsUnauthorized)
+        {
+            return new CreateOptionsResult(false, true, venuesResult.ErrorMessage);
+        }
+
+        model.Venues = venuesResult.IsSuccess ? venuesResult.Venues : [];
+        return venuesResult.IsSuccess
+            ? new CreateOptionsResult(true, false, null)
+            : new CreateOptionsResult(false, false, venuesResult.ErrorMessage);
+    }
+
     private sealed record CreateOptionsResult(
         bool IsSuccess,
         bool IsUnauthorized,
@@ -353,6 +500,23 @@ public sealed class EventsController : Controller
                 CanCancel = eventItem.Permissions.CanCancel,
                 CanRegister = eventItem.Permissions.CanRegister
             }
+        };
+    }
+
+    private static EditEventViewModel MapEdit(EventDetailApiResponse eventItem)
+    {
+        return new EditEventViewModel
+        {
+            Id = eventItem.Id,
+            Title = eventItem.Title,
+            Description = eventItem.Description,
+            ClubId = eventItem.ClubId,
+            ClubName = eventItem.ClubName,
+            VenueId = eventItem.VenueId,
+            StartTime = eventItem.StartTime.ToLocalTime(),
+            EndTime = eventItem.EndTime.ToLocalTime(),
+            RegistrationDeadline = eventItem.RegistrationDeadline.ToLocalTime(),
+            Capacity = eventItem.Capacity
         };
     }
 

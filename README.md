@@ -1036,6 +1036,13 @@ Organizer chỉ sửa Event thuộc scope của mình khi còn Draft; Admin/Staf
 lý theo quyền nội bộ. API kiểm tra lại Venue, khoảng thời gian, capacity và số
 đăng ký hợp lệ; Event Completed/Cancelled không thể sửa.
 
+## MVC sửa Event
+
+Nút **Chỉnh sửa Event** chỉ xuất hiện khi API trả `permissions.canEdit = true`.
+Form tại `/Events/{id}/Edit` giữ nguyên Club, cho phép cập nhật nội dung, Venue,
+thời gian và capacity; lỗi ownership/status/business rule được giữ lại trên
+form. Lưu thành công sẽ redirect về trang chi tiết Event.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

@@ -672,9 +672,9 @@ Domain entity/enum
 
 ### Phase 78 - MVC: Form sửa Event
 
-- [ ] Chỉ hiện nút Edit khi API cho phép.
-- [ ] Hiển thị validation thời gian, capacity và ownership.
-- [ ] Tải lại chi tiết sau khi lưu.
+- [x] Chỉ hiện nút Edit khi API cho phép.
+- [x] Hiển thị validation thời gian, capacity và ownership.
+- [x] Tải lại chi tiết sau khi lưu.
 
 ### Phase 79 - API: Gửi Event để duyệt
 

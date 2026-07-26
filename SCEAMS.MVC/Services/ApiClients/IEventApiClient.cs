@@ -8,6 +8,11 @@ public interface IEventApiClient
         CreateEventApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<UpdateEventApiResult> UpdateEventAsync(
+        int eventId,
+        UpdateEventApiRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

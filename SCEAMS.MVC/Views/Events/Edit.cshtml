@@ -1,0 +1,106 @@
+@model SCEAMS.MVC.ViewModels.EditEventViewModel
+
+@{
+    ViewData["Title"] = "Sửa Event";
+}
+
+<section class="profile-page" aria-labelledby="edit-event-title">
+    <div class="profile-page__header">
+        <div>
+            <p class="eyebrow">Milestone H · Chỉnh sửa Event</p>
+            <h1 id="edit-event-title">Sửa Event Draft</h1>
+            <p>Club <strong>@Model.ClubName</strong> được giữ nguyên; chỉ cập nhật nội dung, Venue và lịch.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-action="Detail" asp-route-id="@Model.Id">&larr; Chi tiết Event</a>
+    </div>
+
+    @if (Model.IsNotFound || !string.IsNullOrWhiteSpace(Model.LoadErrorMessage))
+    {
+        <section class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Không thể chỉnh sửa</p>
+                <h2>Event không khả dụng</h2>
+                <p>@(Model.LoadErrorMessage ?? Model.ErrorMessage)</p>
+                <a class="btn-app btn-app--primary" asp-action="Detail" asp-route-id="@Model.Id">Quay lại chi tiết</a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="profile-layout">
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="surface-card profile-form">
+                @Html.AntiForgeryToken()
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+                }
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <div class="profile-form__field">
+                    <label asp-for="Title">Tiêu đề Event</label>
+                    <input asp-for="Title" maxlength="250" autofocus />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="Description">Mô tả</label>
+                    <textarea asp-for="Description" rows="4" maxlength="4000"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="VenueId">Venue</label>
+                    <select asp-for="VenueId">
+                        @foreach (var venue in Model.Venues)
+                        {
+                            <option value="@venue.Id">@venue.Name · @venue.Location (tối đa @venue.Capacity)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VenueId" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="StartTime">Bắt đầu</label>
+                    <input asp-for="StartTime" type="datetime-local" />
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="EndTime">Kết thúc</label>
+                    <input asp-for="EndTime" type="datetime-local" />
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="RegistrationDeadline">Hạn đăng ký</label>
+                    <input asp-for="RegistrationDeadline" type="datetime-local" />
+                    <span asp-validation-for="RegistrationDeadline" class="text-danger"></span>
+                </div>
+                <div class="profile-form__field">
+                    <label asp-for="Capacity">Capacity</label>
+                    <input asp-for="Capacity" type="number" min="1" />
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                </div>
+                <div class="profile-form__actions">
+                    <a class="btn-app btn-app--ghost" asp-action="Detail" asp-route-id="@Model.Id">Hủy</a>
+                    <button type="submit" class="btn-app btn-app--primary">Lưu thay đổi</button>
+                </div>
+            </form>
+
+            <aside class="surface-card profile-aside">
+                <p class="eyebrow">Lưu ý</p>
+                <h2>Kiểm tra trước khi lưu</h2>
+                <ul>
+                    <li>Không thể chuyển sang Venue bảo trì.</li>
+                    <li>Capacity không nhỏ hơn số đăng ký hợp lệ.</li>
+                    <li>StartTime phải trước EndTime và deadline không sau StartTime.</li>
+                </ul>
+            </aside>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

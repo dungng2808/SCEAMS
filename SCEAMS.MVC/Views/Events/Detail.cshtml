@@ -87,6 +87,10 @@
                         <li>Không có action khả dụng ở trạng thái hiện tại.</li>
                     }
                 </ul>
+                @if (Model.Permissions.CanEdit)
+                {
+                    <a class="btn-app btn-app--primary" asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id">Chỉnh sửa Event</a>
+                }
             </aside>
         </div>
     }
