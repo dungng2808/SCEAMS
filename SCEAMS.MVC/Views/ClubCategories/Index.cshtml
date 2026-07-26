@@ -1,0 +1,163 @@
+@model SCEAMS.MVC.ViewModels.ClubCategoriesViewModel
+
+@{
+    ViewData["Title"] = "Danh mục câu lạc bộ";
+}
+
+<section class="category-page" aria-labelledby="category-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone D · Khám phá câu lạc bộ</p>
+            <h1 id="category-title">Tìm cộng đồng phù hợp với bạn</h1>
+            <p>
+                Khám phá các nhóm lĩnh vực đang có trên SCEAMS trước khi chọn câu lạc bộ và hoạt động muốn tham gia.
+            </p>
+        </div>
+        <div class="category-hero__summary" aria-label="Tổng quan danh mục">
+            <span>Danh mục hiện có</span>
+            <strong>@Model.Categories.Count</strong>
+            <small>Cập nhật trực tiếp từ API</small>
+        </div>
+    </header>
+
+    @if (Model.CanManage)
+    {
+        <aside class="category-admin surface-card"
+               data-category-admin-tools
+               aria-label="Công cụ quản trị danh mục">
+            <span class="category-admin__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                    <path d="M12 8v8M8 12h8" />
+                </svg>
+            </span>
+            <div>
+                <p class="category-admin__eyebrow">Quyền Admin</p>
+                <strong>Công cụ quản trị danh mục</strong>
+                <small>Tạo và chỉnh sửa sẽ được mở trong các phase tiếp theo.</small>
+            </div>
+            <button type="button"
+                    class="btn-app btn-app--primary category-admin__action"
+                    disabled
+                    aria-disabled="true"
+                    title="Tính năng sẽ được mở ở Phase 32">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Thêm danh mục
+                <span>Sắp mở</span>
+            </button>
+        </aside>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card"
+             role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Kết nối gián đoạn</p>
+                <h2>Chưa thể tải danh mục</h2>
+                <p>@Model.ErrorMessage</p>
+                <div class="category-state__actions">
+                    <a class="btn-app btn-app--primary"
+                       asp-controller="ClubCategories"
+                       asp-action="Index">
+                        Thử tải lại
+                    </a>
+                    <a class="btn-app btn-app--ghost"
+                       asp-controller="System"
+                       asp-action="Health">
+                        Kiểm tra hệ thống
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.Categories.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card"
+             data-category-empty>
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                    <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                    <path d="M12 13v8M8 17h8" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Chưa có dữ liệu</p>
+                <h2>Chưa có danh mục câu lạc bộ</h2>
+                <p>
+                    Danh mục đầu tiên sẽ xuất hiện tại đây ngay sau khi Admin tạo trên hệ thống.
+                </p>
+                <a class="btn-app btn-app--ghost"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    Quay về trang chủ
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="category-section-heading">
+            <div>
+                <p class="eyebrow">Lĩnh vực hoạt động</p>
+                <h2>@Model.Categories.Count lựa chọn để bắt đầu</h2>
+            </div>
+            <p>
+                Các danh mục được sắp xếp theo tên để bạn có thể tìm kiếm nhanh chóng.
+            </p>
+        </div>
+
+        <div class="category-grid" aria-label="Danh sách danh mục câu lạc bộ">
+            @foreach (var category in Model.Categories)
+            {
+                <article class="category-card category-card--@category.Theme"
+                         data-category-id="@category.Id">
+                    <div class="category-card__top">
+                        <span class="category-card__mark" aria-hidden="true">
+                            @category.Initials
+                        </span>
+                        <small>@category.SequenceNumber.ToString("00")</small>
+                    </div>
+                    <div>
+                        <h3>@category.Name</h3>
+                        <p>
+                            @(string.IsNullOrWhiteSpace(category.Description)
+                                ? "Danh mục này chưa có mô tả. Thông tin sẽ được cập nhật sớm."
+                                : category.Description)
+                        </p>
+                    </div>
+                    <footer>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M8 12h8M12 8l4 4-4 4" />
+                            </svg>
+                            Khám phá lĩnh vực
+                        </span>
+                        <small>#@category.Id</small>
+                    </footer>
+                </article>
+            }
+        </div>
+    }
+
+    <footer class="category-footnote">
+        <span aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5M12 8h.01" />
+            </svg>
+        </span>
+        <p>
+            Danh mục được dùng chung cho khách, sinh viên và cán bộ. Quyền quản trị chỉ hiển thị với tài khoản Admin.
+        </p>
+    </footer>
+</section>

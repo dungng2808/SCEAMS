@@ -457,6 +457,26 @@ JSON array.
 Ready-to-run public and authenticated Phase 29 requests are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Club Categories** folder.
 
+## MVC club-category list
+
+Open the shared club-category page at:
+
+```text
+https://localhost:7034/ClubCategories
+```
+
+The page is available to public visitors and every authenticated role. It loads
+the Phase 29 API through a typed server-side client, displays the category
+count, and renders responsive category cards without exposing access tokens to
+the browser. A **Danh mục CLB** link is available in the main navigation and
+footer.
+
+Only an authenticated Admin sees the management toolbar. Its create action is
+intentionally disabled until the category-creation flow is implemented in
+Phase 32; other roles and public visitors do not receive the toolbar markup.
+An empty API result renders a dedicated `Chưa có danh mục câu lạc bộ` state,
+while connection failures show retry and system-health actions.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

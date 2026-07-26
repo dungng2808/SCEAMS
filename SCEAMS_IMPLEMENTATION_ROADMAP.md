@@ -348,9 +348,9 @@ Domain entity/enum
 
 ### Phase 30 - MVC: Danh sách danh mục CLB
 
-- [ ] Tạo trang danh mục dùng chung.
-- [ ] Chỉ hiển thị nút quản trị cho Admin.
-- [ ] Kiểm thử khi danh sách rỗng.
+- [x] Tạo trang danh mục dùng chung.
+- [x] Chỉ hiển thị nút quản trị cho Admin.
+- [x] Kiểm thử khi danh sách rỗng.
 
 ### Phase 31 - API: Tạo danh mục CLB
 

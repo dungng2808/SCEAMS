@@ -69,6 +69,14 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="app-nav__link @ActiveClass("ClubCategories")"
+                               asp-controller="ClubCategories"
+                               asp-action="Index"
+                               aria-current="@(currentController == "ClubCategories" ? "page" : null)">
+                                Danh mục CLB
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="app-nav__link @ActiveClass("System", "Health")"
                                asp-controller="System"
                                asp-action="Health"
@@ -167,6 +175,7 @@
                 </div>
             </div>
             <div class="app-footer__links">
+                <a asp-controller="ClubCategories" asp-action="Index">Danh mục CLB</a>
                 <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
                 <a asp-controller="System" asp-action="Health">Trạng thái hệ thống</a>
                 <span>© 2026 SCEAMS</span>

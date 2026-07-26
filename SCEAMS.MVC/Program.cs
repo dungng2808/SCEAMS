@@ -59,6 +59,19 @@ builder.Services.AddHttpClient<IHealthApiClient, HealthApiClient>(
         client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
     })
     .AddHttpMessageHandler<BearerTokenHandler>();
+builder.Services.AddHttpClient<
+    IClubCategoryApiClient,
+    ClubCategoryApiClient>(
+    (serviceProvider, client) =>
+    {
+        var settings = serviceProvider
+            .GetRequiredService<IOptions<ApiSettings>>()
+            .Value;
+
+        client.BaseAddress = new Uri(settings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+    })
+    .AddHttpMessageHandler<BearerTokenHandler>();
 builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(
     (serviceProvider, client) =>
     {
