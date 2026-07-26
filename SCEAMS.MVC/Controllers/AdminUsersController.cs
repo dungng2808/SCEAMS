@@ -580,6 +580,199 @@ public sealed class AdminUsersController : Controller
             });
     }
 
+    [HttpPost("{id:int}/Role")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateRole(
+        int id,
+        string? newRole,
+        string? search,
+        string? filterRole,
+        bool? filterIsActive,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedRole = NormalizeRole(newRole);
+
+        if (normalizedRole is null)
+        {
+            TempData["UserRoleError"] =
+                "Vui lòng chọn một vai trò hợp lệ.";
+
+            return RedirectToUserList(
+                search,
+                filterRole,
+                filterIsActive,
+                page,
+                pageSize);
+        }
+
+        try
+        {
+            var currentResult = await _userApiClient.GetUserAsync(
+                id,
+                cancellationToken);
+
+            if (currentResult.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    currentResult.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (currentResult.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (!currentResult.IsSuccess ||
+                currentResult.User is null)
+            {
+                TempData["UserRoleError"] =
+                    currentResult.ErrorMessage ??
+                    "Không thể tải tài khoản trước khi đổi vai trò.";
+            }
+            else if (string.Equals(
+                currentResult.User.Role,
+                normalizedRole,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["UserRoleError"] =
+                    $"Tài khoản đã có vai trò " +
+                    $"{GetRoleLabel(normalizedRole)}.";
+            }
+            else
+            {
+                var updateResult = await _userApiClient
+                    .UpdateUserRoleAsync(
+                        id,
+                        new UpdateUserRoleApiRequest(
+                            normalizedRole),
+                        cancellationToken);
+
+                if (updateResult.IsUnauthorized)
+                {
+                    return await EndInvalidSessionAsync(
+                        updateResult.ErrorMessage ??
+                        "Phiên đăng nhập không còn hợp lệ.");
+                }
+
+                if (updateResult.IsForbidden)
+                {
+                    return RedirectToAction(
+                        nameof(AccountController.AccessDenied),
+                        "Account");
+                }
+
+                if (updateResult.IsSuccess &&
+                    updateResult.User is not null)
+                {
+                    var confirmedResult =
+                        await _userApiClient.GetUserAsync(
+                            id,
+                            cancellationToken);
+
+                    if (confirmedResult.IsUnauthorized)
+                    {
+                        return await EndInvalidSessionAsync(
+                            confirmedResult.ErrorMessage ??
+                            "Phiên đăng nhập không còn hợp lệ.");
+                    }
+
+                    if (confirmedResult.IsForbidden)
+                    {
+                        return RedirectToAction(
+                            nameof(AccountController.AccessDenied),
+                            "Account");
+                    }
+
+                    if (confirmedResult.IsSuccess &&
+                        confirmedResult.User is not null &&
+                        string.Equals(
+                            confirmedResult.User.Role,
+                            normalizedRole,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        TempData["UserRoleSuccess"] =
+                            $"Đã đổi vai trò {confirmedResult.User.Email} " +
+                            $"thành {GetRoleLabel(normalizedRole)} " +
+                            "và xác nhận lại từ API.";
+                        TempData["UserRoleSecurity"] =
+                            "Refresh token đã thu hồi · " +
+                            "tài khoản cần đăng nhập lại";
+                        TempData["UserRoleChangedId"] =
+                            id.ToString();
+
+                        return RedirectToAction(
+                            nameof(Index),
+                            new
+                            {
+                                search =
+                                    confirmedResult.User.Email,
+                                pageSize = AllowedPageSizes.Contains(
+                                    pageSize)
+                                    ? pageSize
+                                    : 10
+                            });
+                    }
+
+                    TempData["UserRoleError"] =
+                        "Vai trò đã được lưu nhưng chưa thể tải lại " +
+                        "tài khoản từ API để xác nhận.";
+                }
+                else
+                {
+                    TempData["UserRoleError"] =
+                        updateResult.ErrorMessage ??
+                        "Không thể thay đổi vai trò tài khoản.";
+                }
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to update role for user {UserId}.",
+                id);
+
+            TempData["UserRoleError"] =
+                "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToUserList(
+            search,
+            filterRole,
+            filterIsActive,
+            page,
+            pageSize);
+    }
+
+    private IActionResult RedirectToUserList(
+        string? search,
+        string? role,
+        bool? isActive,
+        int page,
+        int pageSize)
+    {
+        return RedirectToAction(
+            nameof(Index),
+            new
+            {
+                search,
+                role,
+                isActive,
+                page = Math.Max(page, 1),
+                pageSize = AllowedPageSizes.Contains(pageSize)
+                    ? pageSize
+                    : 10
+            });
+    }
+
     private void AddApiValidationErrors(
         IReadOnlyDictionary<string, string[]> fieldErrors,
         HashSet<string> allowedFields)

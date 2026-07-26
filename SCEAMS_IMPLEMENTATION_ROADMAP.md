@@ -332,9 +332,9 @@ Domain entity/enum
 
 ### Phase 28 - MVC: Form gán vai trò
 
-- [ ] Tạo thao tác đổi role riêng và có xác nhận.
-- [ ] Sau khi đổi role, tải lại user và security badge.
-- [ ] Kiểm thử user bị đổi role phải đăng nhập lại.
+- [x] Tạo thao tác đổi role riêng và có xác nhận.
+- [x] Sau khi đổi role, tải lại user và security badge.
+- [x] Kiểm thử user bị đổi role phải đăng nhập lại.
 
 ---
 

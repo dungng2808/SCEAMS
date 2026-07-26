@@ -399,6 +399,32 @@ an account capable of restoring administrative access.
 Ready-to-run Phase 27 requests and failure cases are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
 
+## MVC user-role assignment
+
+The Admin user list exposes role assignment as a separate **Vai trò** action;
+it is not mixed into the profile-edit form. The action opens a confirmation
+dialog with the target account, current role, new-role selector and a security
+notice explaining that the current refresh token will be revoked. The submit
+button remains disabled until a different valid role is selected.
+
+MVC posts the anti-forgery-protected form to:
+
+```text
+POST /Admin/Users/{id}/Role
+```
+
+The controller validates the selected role, loads the current account, calls
+`PUT /api/users/{id}/role`, and then loads the account from the API again. Only
+after that confirmation does the list display the persisted role badge and the
+**Phiên cũ đã thu hồi** security badge. The result redirects to a search for the
+updated account so a previous role filter cannot hide it.
+
+The previous refresh token returns `401` after a real role change. The account
+must sign in again and receives a new access token whose role claim matches the
+persisted role. Submitting the current role is rejected by MVC without revoking
+the existing session. API authorization and last-active-Admin errors are
+displayed on the user list without losing the active filters.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

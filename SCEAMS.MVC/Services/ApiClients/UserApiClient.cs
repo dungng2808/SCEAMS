@@ -377,6 +377,86 @@ public sealed class UserApiClient : IUserApiClient
         };
     }
 
+    public async Task<UpdateUserRoleApiResult> UpdateUserRoleAsync(
+        int userId,
+        UpdateUserRoleApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/users/{userId.ToString(CultureInfo.InvariantCulture)}" +
+            "/role",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var user = await response.Content
+                .ReadFromJsonAsync<UserRoleApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateUserRoleApiResult
+            {
+                IsSuccess = user is not null,
+                User = user,
+                ErrorMessage = user is null
+                    ? "API trả về vai trò tài khoản không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+        var apiError = DeserializeOrDefault<ApiErrorResponse>(
+            content);
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest
+                when apiError?.Message ==
+                    "The last active administrator cannot demote " +
+                    "their own account." =>
+                new UpdateUserRoleApiResult
+                {
+                    IsLastActiveAdmin = true,
+                    ErrorMessage =
+                        "Không thể hạ quyền Admin cuối cùng " +
+                        "đang hoạt động."
+                },
+            HttpStatusCode.BadRequest =>
+                new UpdateUserRoleApiResult
+                {
+                    ErrorMessage =
+                        "Vai trò được chọn không hợp lệ."
+                },
+            HttpStatusCode.Unauthorized =>
+                new UpdateUserRoleApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new UpdateUserRoleApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền thay đổi vai trò tài khoản."
+                },
+            HttpStatusCode.NotFound =>
+                new UpdateUserRoleApiResult
+                {
+                    IsNotFound = true,
+                    ErrorMessage =
+                        "Tài khoản không còn tồn tại trong hệ thống."
+                },
+            _ => new UpdateUserRoleApiResult
+            {
+                ErrorMessage =
+                    "Không thể thay đổi vai trò tài khoản vào lúc này."
+            }
+        };
+    }
+
     public async Task<CurrentUserProfileApiResult> GetCurrentUserAsync(
         CancellationToken cancellationToken = default)
     {
