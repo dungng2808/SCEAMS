@@ -636,9 +636,9 @@ Domain entity/enum
 
 ### Phase 72 - MVC: Danh sách sự kiện
 
-- [ ] Tạo event list với keyword, category/club, date, status và còn chỗ.
-- [ ] Gửi OData query đã encode.
-- [ ] Kiểm thử ví dụ Event Approved theo `StartTime` tăng dần.
+- [x] Tạo event list với keyword, category/club, date, status và còn chỗ.
+- [x] Gửi OData query đã encode.
+- [x] Kiểm thử ví dụ Event Approved theo `StartTime` tăng dần.
 
 ### Phase 73 - API: Chi tiết sự kiện
 

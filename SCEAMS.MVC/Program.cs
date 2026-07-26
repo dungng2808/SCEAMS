@@ -115,6 +115,17 @@ builder.Services.AddHttpClient<IVenueApiClient, VenueApiClient>(
         client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
     })
     .AddHttpMessageHandler<BearerTokenHandler>();
+builder.Services.AddHttpClient<IEventApiClient, EventApiClient>(
+    (serviceProvider, client) =>
+    {
+        var settings = serviceProvider
+            .GetRequiredService<IOptions<ApiSettings>>()
+            .Value;
+
+        client.BaseAddress = new Uri(settings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+    })
+    .AddHttpMessageHandler<BearerTokenHandler>();
 builder.Services.AddHttpClient<IClubMembershipApiClient, ClubMembershipApiClient>(
     (serviceProvider, client) =>
     {

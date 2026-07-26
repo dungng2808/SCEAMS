@@ -190,6 +190,14 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("Events")"
+                                   asp-controller="Events"
+                                   asp-action="Index"
+                                   aria-current="@(currentController == "Events" ? "page" : null)">
+                                    Sự kiện
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="app-nav__link @ActiveClass("Venues")"
                                    asp-controller="Venues"
                                    asp-action="Index"

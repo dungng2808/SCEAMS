@@ -988,3 +988,15 @@ GET http://localhost:5195/api/events?$filter=Status eq 'Approved'&$orderby=Start
 ```
 
 Request OData mẫu nằm trong Postman **Events** folder.
+
+## MVC danh sách sự kiện
+
+Mở trang:
+
+```text
+https://localhost:7034/Events
+```
+
+Trang MVC gửi OData query đã encode tới API và hỗ trợ lọc theo từ khóa (Event,
+Club, venue), mã Club, khoảng ngày, status và số chỗ còn lại. Kết quả được sắp
+xếp `StartTime asc`, có phân trang và hiển thị capacity/slots remaining.
