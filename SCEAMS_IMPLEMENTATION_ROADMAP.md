@@ -403,9 +403,10 @@ Domain entity/enum
 
 ### Phase 38 - MVC: Danh sách và tìm kiếm CLB
 
-- [ ] Tạo trang danh sách với category filter, status filter theo quyền và phân trang.
-- [ ] MVC tạo OData query an toàn, không ghép trực tiếp input chưa encode.
-- [ ] Kiểm thử ví dụ `$filter=CategoryId eq ...&$orderby=Name`.
+- [x] Tạo trang danh sách với category filter, status filter theo quyền và phân trang.
+- [x] MVC tạo OData query an toàn, không ghép trực tiếp input chưa encode.
+- [x] Kiểm thử ví dụ `$filter=CategoryId eq ...&$orderby=Name`.
+
 
 ### Phase 39 - API: Chi tiết CLB
 

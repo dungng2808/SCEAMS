@@ -1,0 +1,217 @@
+@model SCEAMS.MVC.ViewModels.ClubsViewModel
+
+@{
+    ViewData["Title"] = "Danh sách câu lạc bộ";
+}
+
+<section class="clubs-page" aria-labelledby="clubs-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone E · Cộng đồng sinh viên</p>
+            <h1 id="clubs-title">Khám phá các câu lạc bộ SCEAMS</h1>
+            <p>
+                Tham gia câu lạc bộ yêu thích để mở rộng mạng lưới kết nối, rèn luyện kỹ năng và tham gia các hoạt động ngoại khóa hấp dẫn.
+            </p>
+        </div>
+        <div class="category-hero__summary" aria-label="Tổng quan câu lạc bộ">
+            <span>CLB đang hiển thị</span>
+            <strong>@Model.Clubs.Count</strong>
+            <small>Truy vấn trực tiếp qua OData API</small>
+        </div>
+    </header>
+
+    <form class="users-filters surface-card"
+          asp-controller="Clubs"
+          asp-action="Index"
+          method="get"
+          aria-label="Bộ lọc danh sách câu lạc bộ">
+        <div class="users-filter users-filter--search">
+            <label for="Search">Tìm kiếm</label>
+            <div class="users-filter__control">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m16 16 4 4" />
+                </svg>
+                <input id="Search"
+                       name="search"
+                       type="search"
+                       value="@Model.Search"
+                       maxlength="150"
+                       placeholder="Nhập tên câu lạc bộ..." />
+            </div>
+        </div>
+
+        <div class="users-filter">
+            <label for="CategoryId">Lĩnh vực</label>
+            <select id="CategoryId" name="categoryId">
+                <option value="">Tất cả lĩnh vực</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">
+                        @category.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        @if (Model.CanManage)
+        {
+            <div class="users-filter">
+                <label for="Status">Trạng thái</label>
+                <select id="Status" name="status">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Approved" selected="@(Model.Status == "Approved")">Đã duyệt</option>
+                    <option value="PendingApproval" selected="@(Model.Status == "PendingApproval")">Chờ duyệt</option>
+                    <option value="Rejected" selected="@(Model.Status == "Rejected")">Từ chối</option>
+                    <option value="Dissolved" selected="@(Model.Status == "Dissolved")">Đã giải thể</option>
+                </select>
+            </div>
+        }
+
+        <div class="users-filter">
+            <label for="SortBy">Sắp xếp</label>
+            <select id="SortBy" name="sortBy">
+                <option value="name_asc" selected="@(Model.SortBy == "name_asc")">Tên (A - Z)</option>
+                <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Tên (Z - A)</option>
+                <option value="created_desc" selected="@(Model.SortBy == "created_desc")">Mới nhất</option>
+                <option value="created_asc" selected="@(Model.SortBy == "created_asc")">Cũ nhất</option>
+                <option value="members_desc" selected="@(Model.SortBy == "members_desc")">Nhiều thành viên nhất</option>
+            </select>
+        </div>
+
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">
+                Lọc kết quả
+            </button>
+            <a class="btn-app btn-app--ghost"
+               asp-controller="Clubs"
+               asp-action="Index">
+                Xóa lọc
+            </a>
+        </div>
+    </form>
+
+    @if (Model.CanCreateClub)
+    {
+        <aside class="category-admin surface-card"
+               aria-label="Công cụ đề xuất câu lạc bộ">
+            <span class="category-admin__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+            </span>
+            <div>
+                <p class="category-admin__eyebrow">Dành cho Nhà tổ chức</p>
+                <strong>Đề xuất thành lập câu lạc bộ mới</strong>
+                <small>Gửi thông tin đề xuất CLB để Admin và Staff kiểm duyệt.</small>
+            </div>
+            <a class="btn-app btn-app--primary category-admin__action"
+               asp-controller="Clubs"
+               asp-action="Create">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Đề xuất CLB
+            </a>
+        </aside>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Kết nối gián đoạn</p>
+                <h2>Chưa thể tải danh sách câu lạc bộ</h2>
+                <p>@Model.ErrorMessage</p>
+                <div class="category-state__actions">
+                    <a class="btn-app btn-app--primary"
+                       asp-controller="Clubs"
+                       asp-action="Index">
+                        Thử tải lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.Clubs.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">Không tìm thấy kết quả</p>
+                <h2>Không có câu lạc bộ phù hợp</h2>
+                <p>
+                    Thử thay đổi từ khóa tìm kiếm hoặc lọc theo lĩnh vực khác.
+                </p>
+                <a class="btn-app btn-app--ghost"
+                   asp-controller="Clubs"
+                   asp-action="Index">
+                    Xem tất cả câu lạc bộ
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="category-grid" aria-label="Danh sách các câu lạc bộ">
+            @foreach (var club in Model.Clubs)
+            {
+                <article class="category-card category-card--@club.Theme">
+                    <div class="category-card__top">
+                        <span class="category-card__mark" aria-hidden="true">
+                            @club.Initials
+                        </span>
+                        <small class="@club.StatusBadgeClass">
+                            @club.StatusLabel
+                        </small>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 750; color: var(--sceams-blue-600);">
+                            @club.CategoryName
+                        </span>
+                        <h3 style="margin-top: 0.25rem;">@club.Name</h3>
+                        <p>
+                            @(string.IsNullOrWhiteSpace(club.Description)
+                                ? "Câu lạc bộ chưa cập nhật mô tả chi tiết."
+                                : club.Description)
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--sceams-border); font-size: 0.8rem; color: var(--sceams-text-soft);">
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 0.95rem; height: 0.95rem; vertical-align: text-bottom;" aria-hidden="true">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
+                            <strong>@club.ActiveMemberCount</strong> thành viên
+                        </span>
+                        <span>
+                            Tạo bởi: <strong>@club.CreatedByUserName</strong>
+                        </span>
+                    </div>
+                    <footer>
+                        <a class="category-card__edit"
+                           asp-controller="Clubs"
+                           asp-action="Details"
+                           asp-route-id="@club.Id">
+                            Chi tiết CLB &rarr;
+                        </a>
+                        <small>#@club.Id</small>
+                    </footer>
+                </article>
+            }
+        </div>
+    }
+</section>

@@ -93,6 +93,17 @@ builder.Services.AddHttpClient<IUserApiClient, UserApiClient>(
         client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
     })
     .AddHttpMessageHandler<BearerTokenHandler>();
+builder.Services.AddHttpClient<IClubApiClient, ClubApiClient>(
+    (serviceProvider, client) =>
+    {
+        var settings = serviceProvider
+            .GetRequiredService<IOptions<ApiSettings>>()
+            .Value;
+
+        client.BaseAddress = new Uri(settings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+    })
+    .AddHttpMessageHandler<BearerTokenHandler>();
 
 var app = builder.Build();
 

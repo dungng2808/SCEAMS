@@ -1,4 +1,4 @@
-﻿@inject IWebHostEnvironment HostEnvironment
+@inject IWebHostEnvironment HostEnvironment
 
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -69,6 +69,14 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="app-nav__link @ActiveClass("Clubs")"
+                               asp-controller="Clubs"
+                               asp-action="Index"
+                               aria-current="@(currentController == "Clubs" ? "page" : null)">
+                                Câu lạc bộ
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="app-nav__link @ActiveClass("ClubCategories")"
                                asp-controller="ClubCategories"
                                asp-action="Index"
@@ -76,6 +84,7 @@
                                 Danh mục CLB
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="app-nav__link @ActiveClass("System", "Health")"
                                asp-controller="System"
