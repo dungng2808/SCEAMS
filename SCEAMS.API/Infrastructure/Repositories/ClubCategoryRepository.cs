@@ -29,4 +29,16 @@ public sealed class ClubCategoryRepository
                 category.Description))
             .ToListAsync(cancellationToken);
     }
+
+    public Task<bool> NameExistsAsync(
+        string normalizedName,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet
+            .AsNoTracking()
+            .AnyAsync(
+                category =>
+                    category.Name.ToUpper() == normalizedName,
+                cancellationToken);
+    }
 }

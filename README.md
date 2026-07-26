@@ -477,6 +477,35 @@ Phase 32; other roles and public visitors do not receive the toolbar markup.
 An empty API result renders a dedicated `Chưa có danh mục câu lạc bộ` state,
 while connection failures show retry and system-health actions.
 
+## Admin create club-category API
+
+Only an authenticated Admin can create a category:
+
+```text
+POST http://localhost:5195/api/club-categories
+Authorization: Bearer <admin-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Community Service",
+  "description": "Clubs focused on volunteering and community projects."
+}
+```
+
+The category name is required and limited to 150 characters. Leading,
+trailing and repeated spaces are normalized before persistence. Description is
+optional and limited to 1,000 characters. Names are checked
+case-insensitively, so submitting `community service` after
+`Community Service` returns `409 Conflict`.
+
+A successful request returns `201 Created` with the compact `id`, `name` and
+`description` DTO. Missing authentication returns `401`, authenticated
+non-Admin roles receive `403`, and invalid input returns `400`. Ready-to-run
+Phase 31 requests are available in `SCEAMS.API/SCEAMS.API.http` and the
+Postman **Club Categories** folder.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

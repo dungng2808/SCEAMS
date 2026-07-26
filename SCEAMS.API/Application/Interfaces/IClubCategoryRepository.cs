@@ -9,4 +9,8 @@ public interface IClubCategoryRepository
     Task<IReadOnlyList<ClubCategoryResponseDto>>
         GetOrderedByNameAsync(
             CancellationToken cancellationToken = default);
+
+    Task<bool> NameExistsAsync(
+        string normalizedName,
+        CancellationToken cancellationToken = default);
 }

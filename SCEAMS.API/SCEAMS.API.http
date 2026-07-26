@@ -18,6 +18,56 @@ Authorization: Bearer {{AccessToken}}
 
 ###
 
+# Define AdminAccessToken and CreateClubCategoryName in your local
+# HTTP client environment.
+POST {{SCEAMS.API_HostAddress}}/api/club-categories
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "name": "{{CreateClubCategoryName}}",
+  "description": "Category created during Phase 31 verification."
+}
+
+###
+
+# Define CreateClubCategoryDuplicateName as the previous name with different
+# casing. The request must return 409.
+POST {{SCEAMS.API_HostAddress}}/api/club-categories
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "name": "{{CreateClubCategoryDuplicateName}}",
+  "description": "Duplicate category"
+}
+
+###
+
+# A valid non-Admin token must return 403.
+POST {{SCEAMS.API_HostAddress}}/api/club-categories
+Content-Type: application/json
+Authorization: Bearer {{NonAdminAccessToken}}
+
+{
+  "name": "Unauthorized Category",
+  "description": null
+}
+
+###
+
+# A blank category name must return 400.
+POST {{SCEAMS.API_HostAddress}}/api/club-categories
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "name": "   ",
+  "description": null
+}
+
+###
+
 # Define LoginEmail and LoginPassword in your local HTTP client environment.
 POST {{SCEAMS.API_HostAddress}}/api/auth/login
 Content-Type: application/json

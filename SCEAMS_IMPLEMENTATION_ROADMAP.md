@@ -354,9 +354,9 @@ Domain entity/enum
 
 ### Phase 31 - API: Tạo danh mục CLB
 
-- [ ] Thêm `POST /api/club-categories` cho Admin.
-- [ ] Tên category bắt buộc và không trùng không phân biệt hoa thường.
-- [ ] Trả `201 Created`.
+- [x] Thêm `POST /api/club-categories` cho Admin.
+- [x] Tên category bắt buộc và không trùng không phân biệt hoa thường.
+- [x] Trả `201 Created`.
 
 ### Phase 32 - MVC: Tạo danh mục CLB
 
