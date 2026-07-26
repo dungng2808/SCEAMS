@@ -9,6 +9,11 @@ public interface IVenueService
         CreateVenueRequestDto request,
         CancellationToken cancellationToken = default);
 
+    Task<Result<VenueResponseDto>> UpdateVenueAsync(
+        int id,
+        UpdateVenueRequestDto request,
+        CancellationToken cancellationToken = default);
+
     Task<Result<PagedResult<VenueResponseDto>>> GetVenuesAsync(
         string? search,
         bool? maintenance,

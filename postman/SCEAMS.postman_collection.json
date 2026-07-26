@@ -130,6 +130,16 @@
       "key": "removalReason",
       "value": "Vi phạm quy định hoạt động của câu lạc bộ.",
       "type": "string"
+    },
+    {
+      "key": "venueId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "updatedVenueName",
+      "value": "Innovation Hall Updated",
+      "type": "string"
     }
   ],
   "item": [
@@ -4607,13 +4617,193 @@
                 "venues"
               ]
             },
-            "description": "Phase 61 rejects duplicate Name + Location regardless of casing with 409 Conflict."
-          },
-          "response": []
+      "description": "Phase 61 rejects duplicate Name + Location regardless of casing with 409 Conflict."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 63 - Update Venue - Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Only editable fields changed\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"venueId\")));",
+              "    pm.expect(body.name).to.eql(pm.collectionVariables.get(\"updatedVenueName\"));",
+              "    pm.expect(body.capacity).to.eql(150);",
+              "    pm.expect(body).to.have.property(\"isUnderMaintenance\");",
+              "});"
+            ]
+          }
         }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{updatedVenueName}}\",\n  \"location\": \"Building A - Floor 2\",\n  \"capacity\": 150\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{venueId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{venueId}}"
+          ]
+        },
+        "description": "Phase 63 cập nhật name/location/capacity, không thay đổi maintenance."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 63 - Update Venue - Duplicate Conflict",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Academic Hall\",\n  \"location\": \"Building A\",\n  \"capacity\": 100\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{venueId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{venueId}}"
+          ]
+        },
+        "description": "Phase 63 kiểm thử conflict khi cập nhật vào cặp name/location đã có."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 63 - Update Venue - Missing Venue",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Missing Venue\",\n  \"location\": \"Unknown\",\n  \"capacity\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "999999"
+          ]
+        },
+        "description": "Phase 63 kiểm thử venue không tồn tại trả 404 Not Found."
+      },
+      "response": []
+    }
       ]
     }
   ]
 }
-
-

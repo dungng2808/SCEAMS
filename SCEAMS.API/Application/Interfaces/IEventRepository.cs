@@ -18,4 +18,9 @@ public interface IEventRepository : IGenericRepository<Event>
     Task<int> GetConfirmedRegistrationCountAsync(
         int eventId,
         CancellationToken cancellationToken = default);
+
+    Task<int> GetUpcomingConfirmedRegistrationCountForVenueAsync(
+        int venueId,
+        DateTime fromUtc,
+        CancellationToken cancellationToken = default);
 }

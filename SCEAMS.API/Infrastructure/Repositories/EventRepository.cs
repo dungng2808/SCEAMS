@@ -58,4 +58,19 @@ public sealed class EventRepository
                     registration.Status == RegistrationStatus.Attended),
             cancellationToken);
     }
+
+    public Task<int> GetUpcomingConfirmedRegistrationCountForVenueAsync(
+        int venueId,
+        DateTime fromUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return Context.Registrations.CountAsync(
+            registration =>
+                registration.Event.VenueId == venueId &&
+                registration.Event.StartTime > fromUtc &&
+                registration.Event.Status == EventStatus.Approved &&
+                (registration.Status == RegistrationStatus.Confirmed ||
+                    registration.Status == RegistrationStatus.Attended),
+            cancellationToken);
+    }
 }

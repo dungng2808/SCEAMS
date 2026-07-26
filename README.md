@@ -857,5 +857,28 @@ Form có validation phía client/server cho tên, vị trí và capacity; confli
 `409` được gắn vào trường tên. Khi tạo thành công, MVC redirect về danh sách
 với filter tên venue mới để xác nhận dữ liệu đã được lưu qua API.
 
+## API cập nhật địa điểm
+
+Admin và Staff cập nhật thông tin venue bằng:
+
+```text
+PUT http://localhost:5195/api/venues/{id}
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Innovation Hall Updated",
+  "location": "Building A - Floor 2",
+  "capacity": 150
+}
+```
+
+Endpoint này chỉ thay đổi tên, vị trí và sức chứa; trạng thái bảo trì được giữ
+nguyên để xử lý riêng ở Phase 65. API trả `409 Conflict` nếu cặp tên/vị trí đã
+tồn tại hoặc sức chứa mới nhỏ hơn số đăng ký `Confirmed`/`Attended` của các
+Event `Approved` sắp tới. Request kiểm thử nằm trong Postman **Venues** folder.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

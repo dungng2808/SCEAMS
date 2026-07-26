@@ -578,9 +578,9 @@ Domain entity/enum
 
 ### Phase 63 - API: Cập nhật địa điểm
 
-- [ ] Thêm `PUT /api/venues/{id}` cho Admin/Staff.
-- [ ] Chỉ sửa tên, location, capacity; chưa thay maintenance ở endpoint này.
-- [ ] Không cho giảm capacity thấp hơn số đăng ký hợp lệ của Event sắp tới nếu gây vi phạm.
+- [x] Thêm `PUT /api/venues/{id}` cho Admin/Staff.
+- [x] Chỉ sửa tên, location, capacity; chưa thay maintenance ở endpoint này.
+- [x] Không cho giảm capacity thấp hơn số đăng ký hợp lệ của Event sắp tới nếu gây vi phạm.
 
 ### Phase 64 - MVC: Sửa địa điểm
 

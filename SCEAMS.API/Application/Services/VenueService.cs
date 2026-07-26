@@ -100,4 +100,63 @@ public sealed class VenueService : IVenueService
         return Result<PagedResult<VenueResponseDto>>.Ok(
             new PagedResult<VenueResponseDto>(items, totalItems));
     }
+
+    public async Task<Result<VenueResponseDto>> UpdateVenueAsync(
+        int id,
+        UpdateVenueRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var venue = await _unitOfWork.Venues.GetByIdAsync(id, cancellationToken);
+        if (venue == null)
+        {
+            return Result<VenueResponseDto>.Fail(
+                $"Địa điểm với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var name = request.Name.Trim();
+        var location = request.Location.Trim();
+        var duplicateExists = await _unitOfWork.Venues.AnyAsync(
+            candidate => candidate.Id != id &&
+                         candidate.Name.ToLower() == name.ToLower() &&
+                         candidate.Location.ToLower() == location.ToLower(),
+            cancellationToken);
+
+        if (duplicateExists)
+        {
+            return Result<VenueResponseDto>.Fail(
+                $"Địa điểm '{name}' tại '{location}' đã tồn tại.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (request.Capacity < venue.Capacity)
+        {
+            var upcomingRegistrations = await _unitOfWork.Events
+                .GetUpcomingConfirmedRegistrationCountForVenueAsync(
+                    id,
+                    DateTime.UtcNow,
+                    cancellationToken);
+
+            if (request.Capacity < upcomingRegistrations)
+            {
+                return Result<VenueResponseDto>.Fail(
+                    $"Không thể giảm sức chứa xuống {request.Capacity}. Có {upcomingRegistrations} đăng ký hợp lệ ở các Event sắp tới.",
+                    StatusCodes.Status409Conflict);
+            }
+        }
+
+        venue.Name = name;
+        venue.Location = location;
+        venue.Capacity = request.Capacity;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<VenueResponseDto>.Ok(new VenueResponseDto
+        {
+            Id = venue.Id,
+            Name = venue.Name,
+            Location = venue.Location,
+            Capacity = venue.Capacity,
+            IsUnderMaintenance = venue.IsUnderMaintenance
+        });
+    }
 }
