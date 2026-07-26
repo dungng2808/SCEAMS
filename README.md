@@ -1082,6 +1082,27 @@ API chỉ chuyển `PendingApproval -> Approved`, kiểm tra Venue không bảo 
 không overlap Event `Approved/Ongoing` khác. Conflict trả `409` với danh sách
 Event, Venue và khung giờ bị trùng.
 
+## API từ chối Event
+
+Admin/Staff từ chối Event chờ duyệt bằng:
+
+```text
+PUT http://localhost:5195/api/events/{id}/reject
+Authorization: Bearer <admin-or-staff-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "reason": "Thời gian tổ chức chưa phù hợp với kế hoạch học kỳ."
+}
+```
+
+`reason` bắt buộc từ 2 đến 500 ký tự. API chỉ cho phép chuyển
+`PendingApproval -> Rejected`, lưu lý do và thời điểm xử lý; Organizer sở hữu
+Event có thể xem lý do trên trang chi tiết. Request mẫu nằm trong Postman
+**Events** folder.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

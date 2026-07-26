@@ -714,9 +714,9 @@ Domain entity/enum
 
 ### Phase 85 - API: Từ chối Event
 
-- [ ] Thêm `PUT /api/events/{id}/reject` với lý do bắt buộc.
-- [ ] Chỉ chuyển `PendingApproval -> Rejected`.
-- [ ] Organizer sở hữu có thể xem lý do.
+- [x] Thêm `PUT /api/events/{id}/reject` với lý do bắt buộc.
+- [x] Chỉ chuyển `PendingApproval -> Rejected`.
+- [x] Organizer sở hữu có thể xem lý do.
 
 ### Phase 86 - MVC: Từ chối Event
 

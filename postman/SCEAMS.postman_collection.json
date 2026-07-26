@@ -5633,6 +5633,29 @@
             "description": "Phase 83 Admin/Staff duyệt PendingApproval sau khi kiểm tra Venue maintenance và overlap."
           },
           "response": []
+        },
+        {
+          "name": "Phase 85 - Reject Event - Admin",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Thời gian tổ chức chưa phù hợp với kế hoạch học kỳ.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "reject"]
+            },
+            "description": "Phase 85 Admin/Staff từ chối PendingApproval; reason bắt buộc và được Organizer nhìn thấy trên detail."
+          },
+          "response": []
         }
       ]
     }

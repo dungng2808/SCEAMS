@@ -560,6 +560,45 @@ public sealed class EventService : IEventService
         return await GetEventByIdAsync(id, user, cancellationToken);
     }
 
+    public async Task<Result<EventDetailResponseDto>> RejectEventAsync(
+        int id,
+        RejectEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var reviewerId = GetUserId(user);
+        if (!reviewerId.HasValue)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không xác định được người duyệt từ token.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(id, cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (eventEntity.Status != EventStatus.PendingApproval)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Chỉ Event PendingApproval mới có thể từ chối. Trạng thái hiện tại: {eventEntity.Status}.",
+                StatusCodes.Status409Conflict);
+        }
+
+        eventEntity.Status = EventStatus.Rejected;
+        eventEntity.RejectionReason = request.Reason.Trim();
+        eventEntity.ApprovedByUserId = reviewerId.Value;
+        eventEntity.ApprovedAt = DateTime.UtcNow;
+        eventEntity.UpdatedAt = DateTime.UtcNow;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return await GetEventByIdAsync(id, user, cancellationToken);
+    }
+
     private static string? ValidateEventForSubmission(
         Domain.Entities.Event eventEntity,
         Domain.Entities.Venue? venue)
