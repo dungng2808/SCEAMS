@@ -8,4 +8,10 @@ public interface IUserService
     Task<Result<CurrentUserProfileResponseDto>> GetCurrentUserAsync(
         int userId,
         CancellationToken cancellationToken = default);
+
+    Task<Result<CurrentUserProfileResponseDto>>
+        UpdateCurrentUserAsync(
+            int userId,
+            UpdateCurrentUserProfileRequestDto request,
+            CancellationToken cancellationToken = default);
 }

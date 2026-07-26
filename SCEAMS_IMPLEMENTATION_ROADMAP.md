@@ -21,6 +21,7 @@
 - [ ] Không đưa `PasswordHash`, refresh token thô hoặc dữ liệu nhạy cảm vào response DTO.
 - [ ] Sau khi hoàn thành toàn bộ checkbox và kiểm thử của một phase, tự động tạo một Git commit riêng cho phase đó trước khi bắt đầu phase tiếp theo.
 - [ ] Commit chỉ chứa các file thuộc phạm vi phase đang hoàn thành, không đưa thay đổi không liên quan của người dùng vào commit; message phải viết bằng tiếng Việt theo mẫu `phase NN: <mô tả ngắn bằng tiếng Việt>`.
+- [ ] Sau khi commit thành công, tự động push lên `origin` của nhánh hiện tại; chỉ bắt đầu phase tiếp theo khi push thành công.
 
 ## 2. Kiến trúc đích
 
@@ -135,7 +136,7 @@ Domain entity/enum
 - [ ] Quyền đúng trả `2xx`; thiếu đăng nhập trả `401`; sai role/sai ownership trả `403`.
 - [ ] Validation sai trả `400`; không tìm thấy trả `404`; xung đột nghiệp vụ trả `409` khi phù hợp.
 - [ ] Không còn exception chưa xử lý trong log.
-- [ ] Phase đã được lưu thành một Git commit riêng sau khi tất cả kiểm thử đạt.
+- [ ] Phase đã được lưu thành một Git commit riêng và push lên remote sau khi tất cả kiểm thử đạt.
 
 ---
 
@@ -237,9 +238,9 @@ Domain entity/enum
 
 ### Phase 13 - API: Cập nhật hồ sơ cá nhân
 
-- [ ] Thêm `PUT /api/users/me` chỉ cho sửa `FullName` và `PhoneNumber`.
-- [ ] Không nhận `Role`, `IsActive`, `PasswordHash` trong request DTO.
-- [ ] Test cập nhật thành công và số điện thoại không hợp lệ.
+- [x] Thêm `PUT /api/users/me` chỉ cho sửa `FullName` và `PhoneNumber`.
+- [x] Không nhận `Role`, `IsActive`, `PasswordHash` trong request DTO.
+- [x] Test cập nhật thành công và số điện thoại không hợp lệ.
 
 ### Phase 14 - MVC: Sửa hồ sơ cá nhân
 

@@ -33,6 +33,28 @@ Authorization: Bearer {{AccessToken}}
 
 ###
 
+PUT {{SCEAMS.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{AccessToken}}
+
+{
+  "fullName": "Updated Student Name",
+  "phoneNumber": "0901234567"
+}
+
+###
+
+PUT {{SCEAMS.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{AccessToken}}
+
+{
+  "fullName": "Updated Student Name",
+  "phoneNumber": "invalid-phone"
+}
+
+###
+
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json
 

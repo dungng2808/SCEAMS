@@ -27,16 +27,9 @@ public sealed class UsersController : ApiControllerBase
     public async Task<IActionResult> GetCurrentUser(
         CancellationToken cancellationToken)
     {
-        var subject = User.FindFirstValue(
-            JwtRegisteredClaimNames.Sub);
-
-        if (!int.TryParse(subject, out var userId) ||
-            userId <= 0)
+        if (!TryGetCurrentUserId(out var userId))
         {
-            return Unauthorized(new
-            {
-                message = "Access token subject is invalid."
-            });
+            return InvalidTokenSubject();
         }
 
         var result = await _userService.GetCurrentUserAsync(
@@ -44,5 +37,45 @@ public sealed class UsersController : ApiControllerBase
             cancellationToken);
 
         return ToActionResult(result);
+    }
+
+    [HttpPut("me")]
+    [ProducesResponseType<CurrentUserProfileResponseDto>(
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateCurrentUser(
+        [FromBody] UpdateCurrentUserProfileRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return InvalidTokenSubject();
+        }
+
+        var result = await _userService.UpdateCurrentUserAsync(
+            userId,
+            request,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
+    private bool TryGetCurrentUserId(out int userId)
+    {
+        var subject = User.FindFirstValue(
+            JwtRegisteredClaimNames.Sub);
+
+        return int.TryParse(subject, out userId) &&
+            userId > 0;
+    }
+
+    private IActionResult InvalidTokenSubject()
+    {
+        return Unauthorized(new
+        {
+            message = "Access token subject is invalid."
+        });
     }
 }

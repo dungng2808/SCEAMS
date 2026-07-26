@@ -228,5 +228,31 @@ the Session and authentication cookie before returning to Login. Temporary API
 or network failures keep the user on a safe error state with retry and system
 health actions.
 
+## Current-user profile update API
+
+An authenticated user can update only their display name and optional phone
+number:
+
+```text
+PUT http://localhost:5195/api/users/me
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+Example request:
+
+```json
+{
+  "fullName": "Updated Student Name",
+  "phoneNumber": "0901234567"
+}
+```
+
+The request DTO does not expose email, student code, role, active status,
+password hash or refresh-token fields. The API normalizes whitespace in the
+name, converts a blank phone number to `null`, validates the phone format and
+returns the updated safe profile. Invalid input returns `400`; an invalid token
+returns `401`; a valid token whose user no longer exists returns `404`.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

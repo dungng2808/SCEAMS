@@ -412,6 +412,137 @@
           "response": []
         },
         {
+          "name": "Update My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Only editable profile fields are returned safely\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.fullName).to.eql(\"Updated Student Name\");",
+                  "    pm.expect(body.phoneNumber).to.eql(\"0901234567\");",
+                  "    pm.expect(body.role).to.be.oneOf([\"Admin\", \"Staff\", \"Organizer\", \"Student\"]);",
+                  "    pm.expect(body.isActive).to.be.a(\"boolean\");",
+                  "    pm.expect(body).not.to.have.property(\"passwordHash\");",
+                  "    pm.expect(body).not.to.have.property(\"refreshTokenHash\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Student Name\",\n  \"phoneNumber\": \"0901234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Phase 13 current-user profile update. Only fullName and phoneNumber are accepted by the request DTO."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile - Invalid Phone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Phone validation error is returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.errors).to.have.property(\"PhoneNumber\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Student Name\",\n  \"phoneNumber\": \"invalid-phone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Phase 13 validation-error path. The invalid phone number must return 400."
+          },
+          "response": []
+        },
+        {
           "name": "Get My Profile - Missing Token",
           "event": [
             {
