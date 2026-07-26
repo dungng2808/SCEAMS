@@ -116,6 +116,10 @@
                         <li>Không có action khả dụng ở trạng thái hiện tại.</li>
                     }
                 </ul>
+                @if (User.IsInRole("Admin") || User.IsInRole("Organizer"))
+                {
+                    <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Registrations" asp-route-eventId="@Model.Id" style="margin-top:.75rem;">Danh sách người đăng ký</a>
+                }
                 @if (Model.Permissions.CanEdit)
                 {
                     <a class="btn-app btn-app--primary" asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id">Chỉnh sửa Event</a>

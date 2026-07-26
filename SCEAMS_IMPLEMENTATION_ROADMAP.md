@@ -796,9 +796,9 @@ Domain entity/enum
 
 ### Phase 98 - MVC: Danh sách người đăng ký
 
-- [ ] Tạo trang Event Registrations cho Organizer.
-- [ ] Hiển thị Student code, tên và status; hạn chế dữ liệu cá nhân.
-- [ ] Kiểm thử Organizer khác nhận `403`.
+- [x] Tạo trang Event Registrations cho Organizer.
+- [x] Hiển thị Student code, tên và status; hạn chế dữ liệu cá nhân.
+- [x] Kiểm thử Organizer khác nhận `403`.
 
 ### Phase 99 - API: Điểm danh
 

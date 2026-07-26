@@ -1254,6 +1254,13 @@ status, phân trang, Event/thời gian, trạng thái registration và trạng t
 danh. Mỗi dòng có link tới Event detail; registration `Confirmed` còn trong
 thời hạn sẽ có nút hủy và dùng chung workflow anti-forgery của Event detail.
 
+## MVC danh sách người đăng ký Event
+
+Admin hoặc Organizer mở **Danh sách người đăng ký** từ Event detail. MVC có
+filter status/search, phân trang và chỉ hiển thị Student code, tên, status cùng
+thông tin điểm danh cần thiết. Organizer không sở hữu Event sẽ nhận lỗi `403`
+và không xem được danh sách.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

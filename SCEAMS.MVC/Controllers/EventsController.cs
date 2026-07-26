@@ -16,17 +16,20 @@ public sealed class EventsController : Controller
     private readonly IEventApiClient _eventApiClient;
     private readonly IClubApiClient _clubApiClient;
     private readonly IVenueApiClient _venueApiClient;
+    private readonly IEventRegistrationApiClient _eventRegistrationApiClient;
     private readonly ILogger<EventsController> _logger;
 
     public EventsController(
         IEventApiClient eventApiClient,
         IClubApiClient clubApiClient,
         IVenueApiClient venueApiClient,
+        IEventRegistrationApiClient eventRegistrationApiClient,
         ILogger<EventsController> logger)
     {
         _eventApiClient = eventApiClient;
         _clubApiClient = clubApiClient;
         _venueApiClient = venueApiClient;
+        _eventRegistrationApiClient = eventRegistrationApiClient;
         _logger = logger;
     }
 
@@ -674,6 +677,77 @@ public sealed class EventsController : Controller
         }
 
         return RedirectToAction(nameof(Detail), new { id = eventId });
+    }
+
+    [Authorize(Roles = "Admin,Organizer")]
+    [HttpGet("{eventId:int}/Registrations")]
+    public async Task<IActionResult> Registrations(
+        int eventId,
+        string? status,
+        string? search,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventRegistrationApiClient.GetForEventAsync(
+                eventId,
+                status,
+                search,
+                page,
+                pageSize,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+            }
+
+            return View("Registrations", new EventRegistrationsViewModel
+            {
+                EventId = eventId,
+                Status = status,
+                Search = search,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalItems = result.TotalItems,
+                TotalPages = result.TotalPages,
+                HasPreviousPage = result.HasPreviousPage,
+                HasNextPage = result.HasNextPage,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Items = result.Items.Select(item => new EventRegistrationItemViewModel
+                {
+                    Id = item.Id,
+                    StudentCode = item.StudentCode,
+                    StudentName = item.StudentName,
+                    Status = item.Status,
+                    RegisteredAt = item.RegisteredAt,
+                    CancelledAt = item.CancelledAt,
+                    IsAttended = item.IsAttended,
+                    CheckInTime = item.CheckInTime
+                }).ToList()
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load registrations for event {EventId}.", eventId);
+            return View("Registrations", new EventRegistrationsViewModel
+            {
+                EventId = eventId,
+                Status = status,
+                Search = search,
+                Page = page,
+                PageSize = pageSize,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
     }
 
     [HttpGet("{id:int}")]

@@ -1,0 +1,111 @@
+@model SCEAMS.MVC.ViewModels.EventRegistrationsViewModel
+
+@{
+    ViewData["Title"] = "Danh sách người đăng ký";
+}
+
+<section class="clubs-page" aria-labelledby="event-registrations-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone I · Organizer / Admin</p>
+            <h1 id="event-registrations-title">Người đăng ký Event #@Model.EventId</h1>
+            <p>Chỉ hiển thị Student code, tên và trạng thái nghiệp vụ cần thiết.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Detail" asp-route-id="@Model.EventId">&larr; Chi tiết Event</a>
+    </header>
+
+    <form class="users-filters surface-card" asp-controller="Events" asp-action="Registrations" asp-route-eventId="@Model.EventId" method="get" aria-label="Lọc người đăng ký">
+        <div class="users-filter">
+            <label for="search">Tìm Student</label>
+            <input id="search" name="search" value="@Model.Search" placeholder="Student code hoặc tên" />
+        </div>
+        <div class="users-filter">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">Tất cả</option>
+                @foreach (var option in new[] { "Pending", "Confirmed", "Attended", "CancelledByStudent" })
+                {
+                    <option value="@option" selected="@(string.Equals(Model.Status, option, StringComparison.OrdinalIgnoreCase))">@option</option>
+                }
+            </select>
+        </div>
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">Lọc danh sách</button>
+            <a class="btn-app btn-app--ghost" asp-action="Registrations" asp-route-eventId="@Model.EventId">Xóa lọc</a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <p class="eyebrow">Không thể tải dữ liệu</p>
+            <h2>Danh sách registration chưa sẵn sàng</h2>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+    else if (Model.Items.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card">
+            <p class="eyebrow">Danh sách trống</p>
+            <h2>Chưa có registration phù hợp</h2>
+            <p>Thử xóa filter hoặc quay lại sau khi Student đăng ký.</p>
+        </div>
+    }
+    else
+    {
+        <div class="surface-card" style="padding:0;overflow:hidden;">
+            <div class="table-responsive">
+                <table class="table align-middle style-table mb-0" style="width:100%;">
+                    <thead>
+                        <tr style="background:#f8fafc;border-bottom:1px solid var(--sceams-border);">
+                            <th style="padding:1rem 1.5rem;">Student</th>
+                            <th>Status</th>
+                            <th>Đăng ký lúc</th>
+                            <th>Điểm danh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr style="border-bottom:1px solid var(--sceams-border);">
+                                <td style="padding:1rem 1.5rem;"><strong>@item.StudentCode</strong><small style="display:block;color:var(--sceams-text-soft);">@item.StudentName</small></td>
+                                <td><span class="status-badge @(item.Status == "Attended" ? "status-badge--success" : item.Status == "CancelledByStudent" ? "status-badge--danger" : "status-badge--warning")">@item.Status</span></td>
+                                <td>@item.RegisteredAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.IsAttended)
+                                    {
+                                        <span class="status-badge status-badge--success">Attended</span>
+                                        @if (item.CheckInTime.HasValue)
+                                        {
+                                            <small style="display:block;color:var(--sceams-text-soft);">@item.CheckInTime.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-badge--neutral">Chưa điểm danh</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--sceams-border);">
+                    <small>Trang @Model.Page / @Model.TotalPages · @Model.TotalItems registration</small>
+                    <div style="display:flex;gap:.5rem;">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Registrations" asp-route-eventId="@Model.EventId" asp-route-status="@Model.Status" asp-route-search="@Model.Search" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">&larr; Trước</a>
+                        }
+                        @if (Model.HasNextPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Registrations" asp-route-eventId="@Model.EventId" asp-route-status="@Model.Status" asp-route-search="@Model.Search" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Sau &rarr;</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
