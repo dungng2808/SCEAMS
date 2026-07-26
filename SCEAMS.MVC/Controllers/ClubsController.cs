@@ -239,6 +239,107 @@ public sealed class ClubsController : Controller
         }
     }
 
+    [HttpGet("Pending")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> Pending(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.GetClubsAsync(
+                new ClubListApiQuery(Status: "PendingApproval", PageSize: 50),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return View(new PendingClubsViewModel
+                {
+                    IsForbidden = true,
+                    ErrorMessage = result.ErrorMessage ?? "Bạn không có quyền xem danh sách chờ duyệt."
+                });
+            }
+
+            if (!result.IsSuccess)
+            {
+                return View(new PendingClubsViewModel
+                {
+                    ErrorMessage = result.ErrorMessage ?? "Không thể tải danh sách chờ duyệt."
+                });
+            }
+
+            var pendingClubs = result.Clubs
+                .Select(MapClub)
+                .ToList();
+
+            return View(new PendingClubsViewModel
+            {
+                PendingClubs = pendingClubs
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load pending clubs queue.");
+
+            return View(new PendingClubsViewModel
+            {
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    [HttpPost("{id:int}/Approve")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.ApproveClubAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Bạn không có quyền duyệt câu lạc bộ này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Không thể duyệt câu lạc bộ vào lúc này.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["SuccessMessage"] = $"Đã duyệt thành công câu lạc bộ '{result.Club.Name}'! Câu lạc bộ hiện đã chính thức hoạt động và công khai.";
+            return RedirectToAction(nameof(Details), new { id = result.Club.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send approve club #{ClubId} request.", id);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
     [HttpGet("Create")]
     [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> Create(CancellationToken cancellationToken = default)

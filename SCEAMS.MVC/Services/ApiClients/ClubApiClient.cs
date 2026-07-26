@@ -228,6 +228,68 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<ApproveClubApiResult> ApproveClubAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync($"api/clubs/{id}/approve", null, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var approvedClub = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new ApproveClubApiResult
+            {
+                IsSuccess = true,
+                Club = approvedClub
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new ApproveClubApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ #{id}."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new ApproveClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Chỉ câu lạc bộ ở trạng thái Chờ duyệt mới có thể phê duyệt."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new ApproveClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new ApproveClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền thực hiện duyệt câu lạc bộ."
+            };
+        }
+
+        return new ApproveClubApiResult
+        {
+            ErrorMessage = "Không thể duyệt câu lạc bộ vào lúc này."
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

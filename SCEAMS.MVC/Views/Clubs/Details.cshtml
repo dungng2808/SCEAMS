@@ -15,7 +15,24 @@
         <span aria-current="page">@(Model.Name ?? "Chi tiết")</span>
     </nav>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="surface-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--sceams-success); background: var(--sceams-success-soft);" role="status">
+            <strong style="color: var(--sceams-success); display: block; margin-bottom: 0.25rem;">Thành công!</strong>
+            <p style="margin: 0; color: var(--sceams-text);">@TempData["SuccessMessage"]</p>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="surface-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--sceams-danger); background: var(--sceams-danger-soft);" role="alert">
+            <strong style="color: var(--sceams-danger); display: block; margin-bottom: 0.25rem;">Lỗi thao tác!</strong>
+            <p style="margin: 0; color: var(--sceams-text);">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
     @if (Model.IsNotFound)
+
     {
         <div class="category-state category-state--empty surface-card" role="alert">
             <span class="category-state__icon" aria-hidden="true">
@@ -197,13 +214,17 @@
 
                 @if (Model.CanApproveOrReject)
                 {
-                    <a class="btn-app btn-app--primary" asp-controller="Clubs" asp-action="Approve" asp-route-id="@Model.Id">
-                        Duyệt CLB
-                    </a>
+                    <form asp-controller="Clubs" asp-action="Approve" asp-route-id="@Model.Id" method="post" style="margin:0; display:inline-block;" onsubmit="return confirm('Xác nhận phê duyệt câu lạc bộ \'@Model.Name\'?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-app btn-app--primary">
+                            Duyệt CLB
+                        </button>
+                    </form>
                     <a class="btn-app btn-app--ghost" style="color: var(--sceams-danger);" asp-controller="Clubs" asp-action="Reject" asp-route-id="@Model.Id">
                         Từ chối
                     </a>
                 }
+
 
                 @if (Model.CanDissolve)
                 {

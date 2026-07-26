@@ -445,9 +445,10 @@ Domain entity/enum
 
 ### Phase 44 - MVC: Duyệt CLB
 
-- [ ] Tạo danh sách Club chờ duyệt cho Admin/Staff.
-- [ ] Thêm nút Approve có xác nhận.
-- [ ] Sau khi duyệt, Club biến mất khỏi queue và public có thể xem.
+- [x] Tạo danh sách Club chờ duyệt cho Admin/Staff.
+- [x] Thêm nút Approve có xác nhận.
+- [x] Sau khi duyệt, Club biến mất khỏi queue và public có thể xem.
+
 
 ### Phase 45 - API: Từ chối CLB
 

@@ -93,7 +93,20 @@
                                 Trạng thái
                             </a>
                         </li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                        {
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("Clubs", "Pending")"
+                                   asp-controller="Clubs"
+                                   asp-action="Pending"
+                                   aria-current="@(currentController == "Clubs" && currentAction == "Pending" ? "page" : null)">
+                                    Duyệt CLB
+                                </a>
+                            </li>
+                        }
+
                         @if (User.Identity?.IsAuthenticated == true)
+
                         {
                             <li class="nav-item">
                                 <a class="app-nav__link @ActiveClass("Profile", "Index")"
