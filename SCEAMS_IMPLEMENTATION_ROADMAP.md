@@ -424,9 +424,10 @@ Domain entity/enum
 
 ### Phase 41 - API: Organizer đề xuất thành lập CLB
 
-- [ ] Thêm `POST /api/clubs` cho Organizer.
-- [ ] Club mới luôn là `PendingApproval`, lấy `CreatedByUserId` từ JWT.
-- [ ] Không cho client tự gửi status hoặc owner ID.
+- [x] Thêm `POST /api/clubs` cho Organizer.
+- [x] Club mới luôn là `PendingApproval`, lấy `CreatedByUserId` từ JWT.
+- [x] Không cho client tự gửi status hoặc owner ID.
+
 
 ### Phase 42 - MVC: Form đề xuất CLB
 

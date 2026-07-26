@@ -12,4 +12,9 @@ public interface IClubService
         int id,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ClubDetailResponseDto>> CreateClubAsync(
+        CreateClubRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

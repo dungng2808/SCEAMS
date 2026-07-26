@@ -523,6 +523,34 @@ Accept: application/json
 
 ###
 
+# Phase 41 - POST /api/clubs (Organizer proposes a new club, status automatically set to PendingApproval)
+POST {{SCEAMS.API_HostAddress}}/api/clubs
+Content-Type: application/json
+Authorization: Bearer {{OrganizerAccessToken}}
+
+{
+  "name": "FPT Robotics & Automation Club",
+  "description": "A student club dedicated to mobile robotics, automation, and IoT projects.",
+  "categoryId": 1
+}
+
+###
+
+# Phase 41 - POST /api/clubs (Student attempt returns 403 Forbidden)
+POST {{SCEAMS.API_HostAddress}}/api/clubs
+Content-Type: application/json
+Authorization: Bearer {{StudentAccessToken}}
+
+{
+  "name": "Unauthorized Club Proposal",
+  "description": "This request should be rejected with 403 Forbidden.",
+  "categoryId": 1
+}
+
+###
+
+
+
 
 
 

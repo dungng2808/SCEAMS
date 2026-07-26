@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
+using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Api.Controllers;
 
@@ -37,5 +38,28 @@ public sealed class ClubsController : ApiControllerBase
     {
         var result = await _clubService.GetClubByIdAsync(id, User, cancellationToken);
         return ToActionResult(result);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)}")]
+    [ProducesResponseType<ClubDetailResponseDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateClub(
+        [FromBody] CreateClubRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _clubService.CreateClubAsync(request, User, cancellationToken);
+        if (!result.Success)
+        {
+            return ToActionResult(result);
+        }
+
+        return CreatedAtAction(
+            nameof(GetClubById),
+            new { id = result.Data!.Id },
+            result.Data);
     }
 }
