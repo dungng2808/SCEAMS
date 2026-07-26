@@ -134,6 +134,14 @@
                         <button type="submit" class="btn-app btn-app--primary">Đăng ký Event</button>
                     </form>
                 }
+                @if (Model.CurrentRegistrationStatus == "Confirmed" && Model.CurrentRegistrationId.HasValue)
+                {
+                    <form asp-controller="Events" asp-action="CancelRegistration" asp-route-registrationId="@Model.CurrentRegistrationId" asp-route-eventId="@Model.Id" method="post" onsubmit="return confirm('Xác nhận hủy registration?');" style="margin-top: .75rem;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-app btn-app--ghost" style="color: var(--sceams-danger);">Hủy đăng ký</button>
+                    </form>
+                    <small style="display:block;margin-top:.5rem;color:var(--sceams-text-soft);">Hạn hủy: @Model.StartTime.AddHours(-24).ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                }
                 @if (Model.Permissions.CanApprove)
                 {
                     <form asp-controller="Events" asp-action="Approve" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Duyệt Event này? API sẽ kiểm tra overlap Venue.');" style="margin-top: .75rem;">

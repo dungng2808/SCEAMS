@@ -19,6 +19,7 @@ public sealed class EventDetailViewModel
     public string? RejectionReason { get; init; }
     public string? CancellationReason { get; init; }
     public string? CurrentRegistrationStatus { get; init; }
+    public int? CurrentRegistrationId { get; init; }
     public EventPermissionsViewModel Permissions { get; init; } = new();
     public bool IsNotFound { get; init; }
     public string? ErrorMessage { get; init; }

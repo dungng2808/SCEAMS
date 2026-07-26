@@ -772,9 +772,9 @@ Domain entity/enum
 
 ### Phase 94 - MVC: Hủy đăng ký
 
-- [ ] Thêm nút Cancel ở lịch sử/chi tiết khi còn được phép.
-- [ ] Hiển thị deadline hủy và hộp xác nhận.
-- [ ] Sau khi hủy, slots remaining tăng đúng.
+- [x] Thêm nút Cancel ở lịch sử/chi tiết khi còn được phép.
+- [x] Hiển thị deadline hủy và hộp xác nhận.
+- [x] Sau khi hủy, slots remaining tăng đúng.
 
 ### Phase 95 - API: Lịch sử đăng ký của Student
 

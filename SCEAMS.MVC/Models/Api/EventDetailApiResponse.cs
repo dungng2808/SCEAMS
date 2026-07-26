@@ -27,6 +27,7 @@ public sealed class EventDetailApiResponse
     public string? RejectionReason { get; init; }
     public string? CancellationReason { get; init; }
     public string? CurrentRegistrationStatus { get; init; }
+    public int? CurrentRegistrationId { get; init; }
     public EventActionPermissionsApiResponse Permissions { get; init; } = new();
 }
 

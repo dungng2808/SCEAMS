@@ -1211,6 +1211,14 @@ nhất 24 giờ trước `StartTime`. API đổi status sang `CancelledByStudent
 Nếu quá mốc 24 giờ, đã điểm danh hoặc không phải chủ sở hữu, API trả lỗi nghiệp
 vụ tương ứng.
 
+## MVC hủy đăng ký
+
+Event detail hiển thị mã registration và nút **Hủy đăng ký** khi status là
+`Confirmed`. MVC hiển thị hạn hủy (`StartTime - 24 giờ`), dùng anti-forgery và
+hộp xác nhận; sau khi thành công tải lại detail để thấy status
+`CancelledByStudent` và slots remaining tăng. Lỗi quá hạn, đã điểm danh hoặc
+không đúng chủ sở hữu được giữ lại trên trang.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

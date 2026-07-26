@@ -466,6 +466,60 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<CancelRegistrationApiResult> CancelRegistrationAsync(
+        int registrationId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync(
+            $"api/registrations/{registrationId}/cancel",
+            content: null,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var registration = await response.Content
+                .ReadFromJsonAsync<RegisterEventApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new CancelRegistrationApiResult
+            {
+                IsSuccess = registration is not null,
+                Registration = registration,
+                ErrorMessage = registration is null
+                    ? "API trả về registration đã hủy không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new CancelRegistrationApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new CancelRegistrationApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền hủy registration."
+            },
+            HttpStatusCode.NotFound => new CancelRegistrationApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Registration không tồn tại."
+            },
+            HttpStatusCode.Conflict => new CancelRegistrationApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Registration không thể hủy ở thời điểm hiện tại."
+            },
+            _ => new CancelRegistrationApiResult
+            {
+                ErrorMessage = message ?? "Không thể hủy registration."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)
