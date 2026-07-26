@@ -49,4 +49,10 @@ public interface IEventService
         RejectEventRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<EventDetailResponseDto>> CancelEventAsync(
+        int id,
+        CancelEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

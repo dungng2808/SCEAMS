@@ -189,4 +189,26 @@ public sealed class EventsController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/cancel")]
+    [Authorize(Roles = "Organizer,Admin,Staff")]
+    [ProducesResponseType<EventDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CancelEvent(
+        int id,
+        [FromBody] CancelEventRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _eventService.CancelEventAsync(
+            id,
+            request,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

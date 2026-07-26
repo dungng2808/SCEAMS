@@ -5656,6 +5656,29 @@
             "description": "Phase 85 Admin/Staff từ chối PendingApproval; reason bắt buộc và được Organizer nhìn thấy trên detail."
           },
           "response": []
+        },
+        {
+          "name": "Phase 87 - Cancel Event - Organizer",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Lịch thi đấu của câu lạc bộ đã thay đổi.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "cancel"]
+            },
+            "description": "Phase 87 Organizer hủy Event của mình trước StartTime; Admin/Staff có thể can thiệp, dữ liệu không bị xóa."
+          },
+          "response": []
         }
       ]
     }

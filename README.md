@@ -1110,6 +1110,27 @@ lý do. Form MVC dùng anti-forgery token, bắt buộc nội dung không rỗng
 tự) và xác nhận trước khi gửi. Organizer sở hữu Event sẽ thấy badge `Rejected`
 và phần **Lý do từ chối** khi mở lại chi tiết.
 
+## API hủy Event
+
+Organizer sở hữu Event hoặc Admin/Staff dùng:
+
+```text
+PUT http://localhost:5195/api/events/{id}/cancel
+Authorization: Bearer <organizer-or-admin-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "reason": "Lịch thi đấu của câu lạc bộ đã thay đổi."
+}
+```
+
+Organizer chỉ hủy được Event của mình trước `StartTime`; Admin/Staff có thể can
+thiệp theo quyền nội bộ. Event `Completed`/`Cancelled` không thể hủy lại. API
+lưu `CancellationReason`, giữ nguyên Event và Registration, không hard-delete.
+Request mẫu nằm trong Postman **Events** folder.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

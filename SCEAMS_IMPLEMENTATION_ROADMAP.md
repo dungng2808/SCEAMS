@@ -726,9 +726,9 @@ Domain entity/enum
 
 ### Phase 87 - API: Hủy Event
 
-- [ ] Thêm `PUT /api/events/{id}/cancel`.
-- [ ] Organizer chỉ hủy Event của mình trước StartTime; Admin được can thiệp theo BR8.
-- [ ] Lưu lý do hủy và không hard-delete Event/Registration.
+- [x] Thêm `PUT /api/events/{id}/cancel`.
+- [x] Organizer chỉ hủy Event của mình trước StartTime; Admin được can thiệp theo BR8.
+- [x] Lưu lý do hủy và không hard-delete Event/Registration.
 
 ### Phase 88 - MVC: Hủy Event
 

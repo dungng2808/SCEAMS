@@ -599,6 +599,59 @@ public sealed class EventService : IEventService
         return await GetEventByIdAsync(id, user, cancellationToken);
     }
 
+    public async Task<Result<EventDetailResponseDto>> CancelEventAsync(
+        int id,
+        CancelEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(id, cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isAdminOrStaff = user.IsInRole(nameof(UserRole.Admin)) ||
+                             user.IsInRole(nameof(UserRole.Staff));
+        var currentUserId = GetUserId(user);
+        var club = await _unitOfWork.Clubs.GetByIdWithDetailsAsync(
+            eventEntity.ClubId,
+            cancellationToken);
+        var isOwner = currentUserId.HasValue &&
+                      (eventEntity.CreatedByUserId == currentUserId.Value ||
+                       club?.CreatedByUserId == currentUserId.Value);
+        if (!isAdminOrStaff &&
+            !(user.IsInRole(nameof(UserRole.Organizer)) && isOwner))
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Chỉ Organizer sở hữu Event hoặc Admin/Staff mới có thể hủy Event.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        if (eventEntity.Status is EventStatus.Completed or EventStatus.Cancelled)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Event ở trạng thái {eventEntity.Status} không thể hủy thêm.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (!isAdminOrStaff && eventEntity.StartTime <= DateTime.UtcNow)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Organizer chỉ có thể hủy Event trước thời điểm bắt đầu.",
+                StatusCodes.Status409Conflict);
+        }
+
+        eventEntity.Status = EventStatus.Cancelled;
+        eventEntity.CancellationReason = request.Reason.Trim();
+        eventEntity.UpdatedAt = DateTime.UtcNow;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return await GetEventByIdAsync(id, user, cancellationToken);
+    }
+
     private static string? ValidateEventForSubmission(
         Domain.Entities.Event eventEntity,
         Domain.Entities.Venue? venue)
