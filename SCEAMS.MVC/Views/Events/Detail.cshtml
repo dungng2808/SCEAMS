@@ -75,6 +75,21 @@
                 {
                     <div class="alert alert-danger" role="status"><strong>Lý do hủy:</strong> @Model.CancellationReason</div>
                 }
+
+                @if (string.Equals(Model.Status, "Ongoing", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-info" role="status" style="margin-top: 1.25rem;">
+                        <strong>Event đang diễn ra.</strong>
+                        <p style="margin: .35rem 0 0;">Khu vực điểm danh chỉ khả dụng trong thời gian Ongoing cho người đã đăng ký.</p>
+                    </div>
+                }
+                else if (string.Equals(Model.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-success" role="status" style="margin-top: 1.25rem;">
+                        <strong>Event đã hoàn tất.</strong>
+                        <p style="margin: .35rem 0 0;">Feedback sẽ được mở sau khi hệ thống xác nhận trạng thái điểm danh.</p>
+                    </div>
+                }
             </section>
 
             <aside class="surface-card profile-aside" aria-label="Sức chứa và quyền thao tác">
@@ -147,6 +162,14 @@
                             </div>
                         </form>
                     </dialog>
+                }
+                @if (string.Equals(Model.Status, "Ongoing", StringComparison.OrdinalIgnoreCase))
+                {
+                    <button type="button" class="btn-app btn-app--ghost" style="margin-top: .75rem;" disabled aria-disabled="true">Check-in (dành cho người đăng ký)</button>
+                }
+                else if (string.Equals(Model.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    <button type="button" class="btn-app btn-app--ghost" style="margin-top: .75rem;" disabled aria-disabled="true">Feedback sau điểm danh</button>
                 }
             </aside>
         </div>

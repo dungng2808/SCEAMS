@@ -1157,6 +1157,14 @@ Authorization: Bearer <admin-access-token>
 Endpoint bị ẩn/không khả dụng ngoài Development để tránh dùng test hook ở môi
 trường production.
 
+## MVC trạng thái Event theo thời gian
+
+Mỗi lần mở `/Events/{id}`, MVC tải lại detail từ API nên phản ánh ngay status sau
+khi background job chạy. Với Event `Ongoing`, giao diện chỉ hiển thị khu vực
+Check-in cho người đã đăng ký; với Event `Completed`, giao diện hiển thị khu vực
+Feedback sau khi hệ thống xác nhận điểm danh. Các endpoint thao tác thật sẽ được
+kết nối ở các phase đăng ký/điểm danh/feedback tiếp theo.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

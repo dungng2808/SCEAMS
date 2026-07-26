@@ -744,9 +744,9 @@ Domain entity/enum
 
 ### Phase 90 - MVC: Hiển thị trạng thái theo thời gian
 
-- [ ] Trang Event phản ánh status mới sau khi job chạy.
-- [ ] Action check-in chỉ hiện ở Ongoing; feedback chỉ hiện sau khi Attended/Completed.
-- [ ] Demo bằng dữ liệu thời gian gần hoặc test clock.
+- [x] Trang Event phản ánh status mới sau khi job chạy.
+- [x] Action check-in chỉ hiện ở Ongoing; feedback chỉ hiện sau khi Attended/Completed.
+- [x] Demo bằng dữ liệu thời gian gần hoặc test clock.
 
 ---
 
