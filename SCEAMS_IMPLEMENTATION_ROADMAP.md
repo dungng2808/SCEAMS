@@ -654,9 +654,9 @@ Domain entity/enum
 
 ### Phase 75 - API: Organizer tạo Event Draft
 
-- [ ] Thêm `POST /api/events`.
-- [ ] Club phải thuộc Organizer, Club đã Approved, Venue không maintenance.
-- [ ] Validate `StartTime < EndTime`, deadline trước start, capacity hợp lệ; status luôn `Draft`.
+- [x] Thêm `POST /api/events`.
+- [x] Club phải thuộc Organizer, Club đã Approved, Venue không maintenance.
+- [x] Validate `StartTime < EndTime`, deadline trước start, capacity hợp lệ; status luôn `Draft`.
 
 ### Phase 76 - MVC: Form tạo Event Draft
 

@@ -1013,6 +1013,22 @@ ownership, status và deadline. Event Draft/Pending của Organizer khác không
 public; API trả `404` cho URL không có quyền xem. Request mẫu nằm trong Postman
 **Events** folder.
 
+## API Organizer tạo Event Draft
+
+Organizer tạo Event bằng:
+
+```text
+POST http://localhost:5195/api/events
+Authorization: Bearer <organizer-access-token>
+Content-Type: application/json
+```
+
+API chỉ nhận Club Approved thuộc Organizer, Venue không bảo trì, thời gian hợp
+lệ (`StartTime < EndTime`, deadline không sau StartTime) và capacity không vượt
+sức chứa Venue. Event mới luôn có status `Draft`; lỗi ownership, maintenance
+hoặc dữ liệu thời gian trả status phù hợp. Request mẫu nằm trong Postman
+**Events** folder.
+
 ## MVC chi tiết sự kiện
 
 Từ danh sách Event chọn tiêu đề hoặc mở trực tiếp:

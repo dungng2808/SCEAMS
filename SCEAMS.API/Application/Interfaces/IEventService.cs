@@ -12,4 +12,9 @@ public interface IEventService
         int id,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<EventDetailResponseDto>> CreateEventAsync(
+        CreateEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

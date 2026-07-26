@@ -156,6 +156,118 @@ public sealed class EventService : IEventService
         });
     }
 
+    public async Task<Result<EventDetailResponseDto>> CreateEventAsync(
+        CreateEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var organizerId = GetUserId(user);
+        if (!organizerId.HasValue)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không xác định được Organizer từ token.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var title = request.Title.Trim();
+        var club = await _unitOfWork.Clubs.GetByIdWithDetailsAsync(
+            request.ClubId,
+            cancellationToken);
+        if (club == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Club không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (club.CreatedByUserId != organizerId.Value)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Organizer chỉ được tạo Event cho Club mình phụ trách.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        if (club.Status != ClubStatus.Approved)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Club phải ở trạng thái Approved trước khi tạo Event.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var venue = await _unitOfWork.Venues.GetByIdAsync(
+            request.VenueId,
+            cancellationToken);
+        if (venue == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Venue không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (venue.IsUnderMaintenance)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không thể tạo Event tại Venue đang bảo trì.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (request.StartTime >= request.EndTime)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "StartTime phải nhỏ hơn EndTime.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.RegistrationDeadline > request.StartTime)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "RegistrationDeadline phải trước hoặc bằng StartTime.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.StartTime <= DateTime.UtcNow)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "StartTime phải nằm trong tương lai.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.Capacity > venue.Capacity)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Capacity không được vượt quá sức chứa Venue ({venue.Capacity}).",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var eventEntity = new Domain.Entities.Event
+        {
+            ClubId = club.Id,
+            VenueId = venue.Id,
+            Title = title,
+            Description = string.IsNullOrWhiteSpace(request.Description)
+                ? null
+                : request.Description.Trim(),
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            RegistrationDeadline = request.RegistrationDeadline,
+            Capacity = request.Capacity,
+            Status = EventStatus.Draft,
+            CreatedByUserId = organizerId.Value,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _unitOfWork.Events.AddAsync(eventEntity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var detail = await GetEventByIdAsync(
+            eventEntity.Id,
+            user,
+            cancellationToken);
+        return detail.Success
+            ? Result<EventDetailResponseDto>.Created(detail.Data!)
+            : detail;
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)

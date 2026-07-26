@@ -5507,6 +5507,30 @@
             "description": "Phase 73 kiểm thử Event không tồn tại hoặc không thuộc quyền xem trả 404."
           },
           "response": []
+        },
+        {
+          "name": "Phase 75 - Create Event Draft - Organizer",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Phase 75 Organizer Workshop\",\"clubId\":1,\"venueId\":1,\"startTime\":\"2026-08-15T09:00:00Z\",\"endTime\":\"2026-08-15T12:00:00Z\",\"registrationDeadline\":\"2026-08-13T23:59:00Z\",\"capacity\":80}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events"]
+            },
+            "description": "Phase 75 Organizer tạo Event Draft cho Club Approved mình phụ trách và Venue không bảo trì."
+          },
+          "response": []
         }
       ]
     }
