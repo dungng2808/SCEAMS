@@ -720,9 +720,9 @@ Domain entity/enum
 
 ### Phase 86 - MVC: Từ chối Event
 
-- [ ] Tạo modal nhập lý do.
-- [ ] Hiển thị lý do ở trang Event của Organizer.
-- [ ] Không cho gửi lý do rỗng.
+- [x] Tạo modal nhập lý do.
+- [x] Hiển thị lý do ở trang Event của Organizer.
+- [x] Không cho gửi lý do rỗng.
 
 ### Phase 87 - API: Hủy Event
 

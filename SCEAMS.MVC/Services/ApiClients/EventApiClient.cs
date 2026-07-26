@@ -294,6 +294,65 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<RejectEventApiResult> RejectEventAsync(
+        int eventId,
+        RejectEventApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/events/{eventId}/reject",
+            request,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new RejectEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về Event đã từ chối không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest => new RejectEventApiResult
+            {
+                ErrorMessage = message ?? "Lý do từ chối không hợp lệ."
+            },
+            HttpStatusCode.Unauthorized => new RejectEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new RejectEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền từ chối Event."
+            },
+            HttpStatusCode.NotFound => new RejectEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new RejectEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Event không còn ở trạng thái chờ duyệt."
+            },
+            _ => new RejectEventApiResult
+            {
+                ErrorMessage = message ?? "Không thể từ chối Event."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

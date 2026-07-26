@@ -1103,6 +1103,13 @@ Content-Type: application/json
 Event có thể xem lý do trên trang chi tiết. Request mẫu nằm trong Postman
 **Events** folder.
 
+## MVC từ chối Event
+
+Admin/Staff có thể bấm **Từ chối Event** trên trang chi tiết để mở modal nhập
+lý do. Form MVC dùng anti-forgery token, bắt buộc nội dung không rỗng (2–500 ký
+tự) và xác nhận trước khi gửi. Organizer sở hữu Event sẽ thấy badge `Rejected`
+và phần **Lý do từ chối** khi mở lại chi tiết.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

@@ -113,6 +113,23 @@
                         <button type="submit" class="btn-app btn-app--primary">Approve Event</button>
                     </form>
                 }
+                @if (Model.Permissions.CanReject)
+                {
+                    <button type="button" class="btn-app btn-app--ghost" style="margin-top: .75rem; color: var(--sceams-danger);" onclick="document.getElementById('rejectEventModal').showModal();">Từ chối Event</button>
+                    <dialog id="rejectEventModal" class="surface-card" style="padding: 1.75rem; border-radius: var(--sceams-radius-md); border: 1px solid var(--sceams-border); max-width: 34rem; width: 90vw; margin: auto;">
+                        <form asp-controller="Events" asp-action="Reject" asp-route-id="@Model.Id" method="post" onsubmit="var reason = this.Reason.value.trim(); if (!reason) { alert('Vui lòng nhập lý do từ chối.'); return false; } return confirm('Xác nhận từ chối Event này?');">
+                            @Html.AntiForgeryToken()
+                            <h3 style="margin-top: 0; color: var(--sceams-danger); font-size: 1.25rem;">Từ chối Event</h3>
+                            <p style="font-size: .9rem; color: var(--sceams-text-soft);">Lý do sẽ được lưu để Organizer xem lại.</p>
+                            <label for="event-rejection-reason" style="display:block;font-weight:700;margin:.75rem 0 .35rem;">Lý do từ chối <span style="color:var(--sceams-danger);">*</span></label>
+                            <textarea id="event-rejection-reason" name="Reason" rows="4" required minlength="2" maxlength="500" class="form-control" placeholder="Nhập lý do cụ thể..." style="width:100%;padding:.75rem;border-radius:var(--sceams-radius-sm);border:1px solid var(--sceams-border);font-family:inherit;resize:vertical;"></textarea>
+                            <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem;">
+                                <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('rejectEventModal').close();">Hủy bỏ</button>
+                                <button type="submit" class="btn-app btn-app--primary" style="background:var(--sceams-danger);border-color:var(--sceams-danger);">Xác nhận từ chối</button>
+                            </div>
+                        </form>
+                    </dialog>
+                }
             </aside>
         </div>
     }
