@@ -4,6 +4,7 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var isFullWidth = ViewData["FullWidth"] as bool? == true;
+    var isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
 
     string ActiveClass(string controller, string? action = null)
     {
@@ -29,181 +30,272 @@
 <body class="app-body">
     <a class="skip-link" href="#main-content">Chuyển đến nội dung chính</a>
 
-    <header class="app-header">
-        <nav class="navbar navbar-expand-lg app-nav" aria-label="Điều hướng chính">
-            <div class="app-container">
-                <a class="app-brand" asp-controller="Home" asp-action="Index" aria-label="SCEAMS - Trang chủ">
-                    <span class="app-brand__mark" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
-                            <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
-                            <path d="M20 8v6" />
-                        </svg>
-                    </span>
-                    <span>
-                        <strong>SCEAMS</strong>
-                        <small>Student Experience</small>
-                    </span>
-                </a>
+    @if (isAdminOrStaff)
+    {
+        <!-- Admin Sidebar Layout -->
+        <div class="admin-layout">
+            <aside class="admin-sidebar" aria-label="Menu quản trị">
+                <div class="admin-sidebar__header">
+                    <a class="admin-sidebar__brand" asp-controller="Home" asp-action="Index">
+                        <span class="app-brand__mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                                <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                                <path d="M20 8v6" />
+                            </svg>
+                        </span>
+                        <span class="admin-sidebar__brand-title">
+                            <strong>SCEAMS</strong>
+                            <small>Admin Portal</small>
+                        </span>
+                    </a>
+                </div>
 
-                <button class="navbar-toggler app-nav__toggle"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#mainNavigation"
-                        aria-controls="mainNavigation"
-                        aria-expanded="false"
-                        aria-label="Mở menu">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M4 7h16M4 12h16M4 17h16" />
-                    </svg>
-                </button>
+                <nav class="admin-sidebar__nav">
+                    <div class="admin-sidebar__group">
+                        <span class="admin-sidebar__group-label">Tổng quan</span>
+                        <a class="admin-sidebar__link @ActiveClass("Home", "Index")" asp-controller="Home" asp-action="Index">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            <span>Trang chủ</span>
+                        </a>
+                        <a class="admin-sidebar__link @(currentController == "Clubs" && currentAction != "Pending" ? "is-active" : "")" asp-controller="Clubs" asp-action="Index">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span>Câu lạc bộ</span>
+                        </a>
+                        <a class="admin-sidebar__link @ActiveClass("ClubCategories")" asp-controller="ClubCategories" asp-action="Index">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            <span>Danh mục CLB</span>
+                        </a>
+                    </div>
 
-                <div class="collapse navbar-collapse" id="mainNavigation">
-                    <ul class="navbar-nav app-nav__links">
-                        <li class="nav-item">
-                            <a class="app-nav__link @ActiveClass("Home", "Index")"
-                               asp-controller="Home"
-                               asp-action="Index"
-                               aria-current="@(currentController == "Home" && currentAction == "Index" ? "page" : null)">
-                                Trang chủ
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="app-nav__link @ActiveClass("Clubs")"
-                               asp-controller="Clubs"
-                               asp-action="Index"
-                               aria-current="@(currentController == "Clubs" ? "page" : null)">
-                                Câu lạc bộ
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="app-nav__link @ActiveClass("ClubCategories")"
-                               asp-controller="ClubCategories"
-                               asp-action="Index"
-                               aria-current="@(currentController == "ClubCategories" ? "page" : null)">
-                                Danh mục CLB
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="app-nav__link @ActiveClass("System", "Health")"
-                               asp-controller="System"
-                               asp-action="Health"
-                               aria-current="@(currentController == "System" && currentAction == "Health" ? "page" : null)">
-                                Trạng thái
-                            </a>
-                        </li>
-                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                    <div class="admin-sidebar__group">
+                        <span class="admin-sidebar__group-label">Quản lý</span>
+                        <a class="admin-sidebar__link @ActiveClass("Clubs", "Pending")" asp-controller="Clubs" asp-action="Pending">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Duyệt CLB</span>
+                        </a>
+                        @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="app-nav__link @ActiveClass("Clubs", "Pending")"
-                                   asp-controller="Clubs"
-                                   asp-action="Pending"
-                                   aria-current="@(currentController == "Clubs" && currentAction == "Pending" ? "page" : null)">
-                                    Duyệt CLB
-                                </a>
-                            </li>
-                        }
-
-                        @if (User.Identity?.IsAuthenticated == true)
-
-                        {
-                            <li class="nav-item">
-                                <a class="app-nav__link @ActiveClass("Profile", "Index")"
-                                   asp-controller="Profile"
-                                   asp-action="Index"
-                                   aria-current="@(currentController == "Profile" ? "page" : null)">
-                                    Hồ sơ
-                                </a>
-                            </li>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="app-nav__link @ActiveClass("AdminUsers")"
-                                       asp-controller="AdminUsers"
-                                       asp-action="Index"
-                                       aria-current="@(currentController == "AdminUsers" ? "page" : null)">
-                                        Người dùng
-                                    </a>
-                                </li>
-                            }
-                        }
-                        @if (HostEnvironment.IsDevelopment())
-                        {
-                            <li class="nav-item">
-                                <a class="app-nav__link @ActiveClass("System", "DemoAccounts")"
-                                   asp-controller="System"
-                                   asp-action="DemoAccounts"
-                                   aria-current="@(currentController == "System" && currentAction == "DemoAccounts" ? "page" : null)">
-                                    Demo
-                                </a>
-                            </li>
-                        }
-                    </ul>
-
-                    <div class="app-nav__actions">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <a class="app-nav__user"
-                               asp-controller="Dashboard"
-                               asp-action="Index">
-                                <span>@User.Identity.Name</span>
-                                <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
-                            </a>
-                            <form asp-controller="Account"
-                                  asp-action="Logout"
-                                  method="post"
-                                  class="app-nav__logout">
-                                <button class="btn-app btn-app--ghost" type="submit">
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <a class="btn-app btn-app--ghost"
-                               asp-controller="Account"
-                               asp-action="Login">
-                                Đăng nhập
-                            </a>
-                            <a class="btn-app btn-app--primary"
-                               asp-controller="Account"
-                               asp-action="Register">
-                                Bắt đầu ngay
+                            <a class="admin-sidebar__link @ActiveClass("AdminUsers")" asp-controller="AdminUsers" asp-action="Index">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Người dùng</span>
                             </a>
                         }
                     </div>
-                </div>
-            </div>
-        </nav>
-    </header>
 
-    <main id="main-content" class="app-main @(isFullWidth ? string.Empty : "app-container")">
-        @RenderBody()
-    </main>
+                    <div class="admin-sidebar__group">
+                        <span class="admin-sidebar__group-label">Hệ thống</span>
+                        <a class="admin-sidebar__link @ActiveClass("Profile", "Index")" asp-controller="Profile" asp-action="Index">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>Hồ sơ</span>
+                        </a>
+                        <a class="admin-sidebar__link @ActiveClass("System", "Health")" asp-controller="System" asp-action="Health">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            <span>Trạng thái</span>
+                        </a>
+                        @if (HostEnvironment.IsDevelopment())
+                        {
+                            <a class="admin-sidebar__link @ActiveClass("System", "DemoAccounts")" asp-controller="System" asp-action="DemoAccounts">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9.5 15 12l-5 2.5v-5Z"/></svg>
+                                <span>Demo</span>
+                            </a>
+                        }
+                    </div>
+                </nav>
 
-    <footer class="app-footer">
-        <div class="app-container app-footer__inner">
-            <div class="app-footer__brand">
-                <span class="app-brand__mark app-brand__mark--small" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
-                        <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
-                    </svg>
-                </span>
-                <div>
-                    <strong>SCEAMS</strong>
-                    <p>Quản lý câu lạc bộ và hoạt động ngoại khóa sinh viên.</p>
+                <div class="admin-sidebar__footer">
+                    <div class="admin-sidebar__user">
+                        <span class="admin-sidebar__user-name">@User.Identity?.Name</span>
+                        <span class="admin-sidebar__user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="admin-sidebar__logout-btn" title="Đăng xuất">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </button>
+                    </form>
                 </div>
-            </div>
-            <div class="app-footer__links">
-                <a asp-controller="ClubCategories" asp-action="Index">Danh mục CLB</a>
-                <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
-                <a asp-controller="System" asp-action="Health">Trạng thái hệ thống</a>
-                <span>© 2026 SCEAMS</span>
+            </aside>
+
+            <div class="admin-content">
+                <header class="admin-topbar">
+                    <div class="admin-topbar__inner">
+                        <div class="admin-topbar__title">
+                            <span>Hệ thống quản lý SCEAMS Admin</span>
+                        </div>
+                        <div class="admin-topbar__user">
+                            <span class="admin-topbar__avatar">A</span>
+                            <span>@User.Identity?.Name</span>
+                            <span class="status-badge--success" style="font-size:0.75rem; padding: 0.2rem 0.6rem;">
+                                @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                            </span>
+                        </div>
+                    </div>
+                </header>
+
+                <main id="main-content" class="admin-main">
+                    @RenderBody()
+                </main>
             </div>
         </div>
-    </footer>
+    }
+    else
+    {
+        <!-- Standard Header Layout for Student / Organizer / Guest -->
+        <header class="app-header">
+            <nav class="navbar navbar-expand-lg app-nav" aria-label="Điều hướng chính">
+                <div class="app-container">
+                    <a class="app-brand" asp-controller="Home" asp-action="Index" aria-label="SCEAMS - Trang chủ">
+                        <span class="app-brand__mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                                <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                                <path d="M20 8v6" />
+                            </svg>
+                        </span>
+                        <span>
+                            <strong>SCEAMS</strong>
+                            <small>Student Experience</small>
+                        </span>
+                    </a>
+
+                    <button class="navbar-toggler app-nav__toggle"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#mainNavigation"
+                            aria-controls="mainNavigation"
+                            aria-expanded="false"
+                            aria-label="Mở menu">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="M4 7h16M4 12h16M4 17h16" />
+                        </svg>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="mainNavigation">
+                        <ul class="navbar-nav app-nav__links">
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("Home", "Index")"
+                                   asp-controller="Home"
+                                   asp-action="Index"
+                                   aria-current="@(currentController == "Home" && currentAction == "Index" ? "page" : null)">
+                                    Trang chủ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("Clubs")"
+                                   asp-controller="Clubs"
+                                   asp-action="Index"
+                                   aria-current="@(currentController == "Clubs" ? "page" : null)">
+                                    Câu lạc bộ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("ClubCategories")"
+                                   asp-controller="ClubCategories"
+                                   asp-action="Index"
+                                   aria-current="@(currentController == "ClubCategories" ? "page" : null)">
+                                    Danh mục CLB
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("System", "Health")"
+                                   asp-controller="System"
+                                   asp-action="Health"
+                                   aria-current="@(currentController == "System" && currentAction == "Health" ? "page" : null)">
+                                    Trạng thái
+                                </a>
+                            </li>
+
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item">
+                                    <a class="app-nav__link @ActiveClass("Profile", "Index")"
+                                       asp-controller="Profile"
+                                       asp-action="Index"
+                                       aria-current="@(currentController == "Profile" ? "page" : null)">
+                                        Hồ sơ
+                                    </a>
+                                </li>
+                            }
+
+                            @if (HostEnvironment.IsDevelopment())
+                            {
+                                <li class="nav-item">
+                                    <a class="app-nav__link @ActiveClass("System", "DemoAccounts")"
+                                       asp-controller="System"
+                                       asp-action="DemoAccounts"
+                                       aria-current="@(currentController == "System" && currentAction == "DemoAccounts" ? "page" : null)">
+                                        Demo
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+
+                        <div class="app-nav__actions">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a class="app-nav__user"
+                                   asp-controller="Dashboard"
+                                   asp-action="Index">
+                                    <span>@User.Identity.Name</span>
+                                    <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
+                                </a>
+                                <form asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="app-nav__logout">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn-app btn-app--ghost" type="submit">
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a class="btn-app btn-app--ghost"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+                                    Đăng nhập
+                                </a>
+                                <a class="btn-app btn-app--primary"
+                                   asp-controller="Account"
+                                   asp-action="Register">
+                                    Bắt đầu ngay
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main id="main-content" class="app-main @(isFullWidth ? string.Empty : "app-container")">
+            @RenderBody()
+        </main>
+
+        <footer class="app-footer">
+            <div class="app-container app-footer__inner">
+                <div class="app-footer__brand">
+                    <span class="app-brand__mark app-brand__mark--small" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                            <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                        </svg>
+                    </span>
+                    <div>
+                        <strong>SCEAMS</strong>
+                        <p>Quản lý câu lạc bộ và hoạt động ngoại khóa sinh viên.</p>
+                    </div>
+                </div>
+                <div class="app-footer__links">
+                    <a asp-controller="ClubCategories" asp-action="Index">Danh mục CLB</a>
+                    <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
+                    <a asp-controller="System" asp-action="Health">Trạng thái hệ thống</a>
+                    <span>© 2026 SCEAMS</span>
+                </div>
+            </div>
+        </footer>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
