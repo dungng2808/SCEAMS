@@ -431,9 +431,10 @@ Domain entity/enum
 
 ### Phase 42 - MVC: Form đề xuất CLB
 
-- [ ] Tạo form Organizer chọn category và nhập thông tin CLB.
-- [ ] Sau khi gửi, hiển thị status `PendingApproval`.
-- [ ] Student không nhìn thấy menu tạo CLB.
+- [x] Tạo form Organizer chọn category và nhập thông tin CLB.
+- [x] Sau khi gửi, hiển thị status `PendingApproval`.
+- [x] Student không nhìn thấy menu tạo CLB.
+
 
 ### Phase 43 - API: Duyệt CLB
 

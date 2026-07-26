@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SCEAMS.MVC.Models.Api;
 using SCEAMS.MVC.Services.ApiClients;
@@ -236,6 +237,88 @@ public sealed class ClubsController : Controller
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
+    }
+
+    [HttpGet("Create")]
+    [Authorize(Roles = "Organizer,Admin")]
+    public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
+    {
+        var categoryOptions = await GetCategoryOptionsAsync(cancellationToken);
+        return View(new CreateClubViewModel { Categories = categoryOptions });
+    }
+
+    [HttpPost("Create")]
+    [Authorize(Roles = "Organizer,Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        CreateClubViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+            return View(model);
+        }
+
+        try
+        {
+            var apiRequest = new CreateClubApiRequest
+            {
+                Name = model.Name.Trim(),
+                Description = model.Description?.Trim(),
+                CategoryId = model.CategoryId
+            };
+
+            var result = await _clubApiClient.CreateClubAsync(apiRequest, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+                model.ErrorMessage = result.ErrorMessage ?? "Bạn không có quyền gửi đề xuất câu lạc bộ.";
+                return View(model);
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+                model.ErrorMessage = result.ErrorMessage ?? "Không thể gửi đề xuất câu lạc bộ. Vui lòng kiểm tra lại.";
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Đề xuất thành lập câu lạc bộ '{result.Club.Name}' đã được gửi thành công! Trạng thái hiện tại: Chờ duyệt.";
+            return RedirectToAction(nameof(Details), new { id = result.Club.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send create club request to API.");
+
+            model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+            model.ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return View(model);
+        }
+    }
+
+    private async Task<List<ClubCategorySelectItemViewModel>> GetCategoryOptionsAsync(CancellationToken cancellationToken)
+    {
+        var categoryResult = await _clubCategoryApiClient.GetClubCategoriesAsync(cancellationToken);
+        if (categoryResult.IsSuccess)
+        {
+            return categoryResult.Categories
+                .Select(c => new ClubCategorySelectItemViewModel { Id = c.Id, Name = c.Name })
+                .ToList();
+        }
+
+        return [];
     }
 
     private int? GetCurrentUserId()

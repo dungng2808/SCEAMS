@@ -11,4 +11,8 @@ public interface IClubApiClient
     Task<ClubDetailApiResult> GetClubByIdAsync(
         int id,
         CancellationToken cancellationToken = default);
+
+    Task<CreateClubApiResult> CreateClubAsync(
+        CreateClubApiRequest request,
+        CancellationToken cancellationToken = default);
 }

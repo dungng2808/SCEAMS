@@ -166,6 +166,98 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<CreateClubApiResult> CreateClubAsync(
+        CreateClubApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync("api/clubs", request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var createdClub = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new CreateClubApiResult
+            {
+                IsSuccess = true,
+                Club = createdClub
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new CreateClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Tên câu lạc bộ đã tồn tại."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new CreateClubApiResult
+            {
+                ErrorMessage = message ?? "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new CreateClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new CreateClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền thực hiện đề xuất câu lạc bộ."
+            };
+        }
+
+        return new CreateClubApiResult
+        {
+            ErrorMessage = "Không thể gửi đề xuất câu lạc bộ vào lúc này."
+        };
+    }
+
+    private static async Task<string?> TryReadErrorMessageAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var body = await response.Content
+                .ReadFromJsonAsync<JsonElement>(
+                    cancellationToken: cancellationToken);
+
+            if (body.ValueKind == JsonValueKind.Object)
+            {
+                if (body.TryGetProperty("message", out var msgProp) && msgProp.ValueKind == JsonValueKind.String)
+                {
+                    return msgProp.GetString();
+                }
+                if (body.TryGetProperty("detail", out var detailProp) && detailProp.ValueKind == JsonValueKind.String)
+                {
+                    return detailProp.GetString();
+                }
+            }
+        }
+        catch
+        {
+            // Fallback
+        }
+
+        return null;
+    }
+
     private static string NormalizeOrderBy(string? orderBy)
     {
         return orderBy?.ToLowerInvariant() switch

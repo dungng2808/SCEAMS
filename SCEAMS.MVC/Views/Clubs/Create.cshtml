@@ -1,0 +1,114 @@
+@model SCEAMS.MVC.ViewModels.CreateClubViewModel
+
+@{
+    ViewData["Title"] = "Đề xuất thành lập câu lạc bộ";
+}
+
+<section class="clubs-page" aria-labelledby="create-club-title">
+    <nav class="breadcrumb-nav" aria-label="Điều hướng">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a asp-controller="Clubs" asp-action="Index">Câu lạc bộ</a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span aria-current="page">Đề xuất CLB mới</span>
+    </nav>
+
+    <header class="category-hero" style="padding-block: 2rem;">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone E &middot; Đề xuất thành lập</p>
+            <h1 id="create-club-title" style="margin-top: 0.25rem;">Đề xuất câu lạc bộ mới</h1>
+            <p style="color: rgba(255, 255, 255, 0.82);">
+                Điền đầy đủ thông tin để gửi yêu cầu thành lập câu lạc bộ tới Ban quản trị hệ thống SCEAMS.
+            </p>
+        </div>
+    </header>
+
+    <div class="surface-card" style="padding: clamp(1.5rem, 3vw, 2.5rem); max-width: 52rem; margin-inline: auto; width: 100%;">
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="category-state category-state--error surface-card" style="padding: 1.25rem; margin-bottom: 1.5rem;" role="alert">
+                <span class="category-state__icon" aria-hidden="true" style="width: 2.25rem; height: 2.25rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 8v4M12 16h.01" />
+                    </svg>
+                </span>
+                <div>
+                    <strong style="color: var(--sceams-danger);">Gửi đề xuất thất bại</strong>
+                    <p style="margin: 0.25rem 0 0; font-size: 0.9rem;">@Model.ErrorMessage</p>
+                </div>
+            </div>
+        }
+
+        <form asp-controller="Clubs"
+              asp-action="Create"
+              method="post"
+              novalidate
+              aria-label="Form đề xuất câu lạc bộ">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="category-state category-state--error surface-card" style="padding: 1rem; margin-bottom: 1.25rem;" role="alert"></div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label asp-for="Name" style="display: block; font-weight: 700; margin-bottom: 0.4rem; color: var(--sceams-text);">
+                    Tên câu lạc bộ <span style="color: var(--sceams-danger);">*</span>
+                </label>
+                <input asp-for="Name"
+                       class="form-control"
+                       placeholder="Ví dụ: FPT Robotics & Automation Club"
+                       maxlength="150"
+                       style="width: 100%; padding: 0.75rem 1rem; border-radius: var(--sceams-radius-sm); border: 1px solid var(--sceams-border); font-size: 1rem;" />
+                <span asp-validation-for="Name" style="color: var(--sceams-danger); font-size: 0.85rem; display: block; margin-top: 0.35rem;"></span>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label asp-for="CategoryId" style="display: block; font-weight: 700; margin-bottom: 0.4rem; color: var(--sceams-text);">
+                    Lĩnh vực / Danh mục <span style="color: var(--sceams-danger);">*</span>
+                </label>
+                <select asp-for="CategoryId"
+                        style="width: 100%; padding: 0.75rem 1rem; border-radius: var(--sceams-radius-sm); border: 1px solid var(--sceams-border); font-size: 1rem; background: var(--sceams-surface);">
+                    <option value="">-- Chọn lĩnh vực cho câu lạc bộ --</option>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" style="color: var(--sceams-danger); font-size: 0.85rem; display: block; margin-top: 0.35rem;"></span>
+            </div>
+
+            <div style="margin-bottom: 1.75rem;">
+                <label asp-for="Description" style="display: block; font-weight: 700; margin-bottom: 0.4rem; color: var(--sceams-text);">
+                    Mô tả câu lạc bộ
+                </label>
+                <textarea asp-for="Description"
+                          rows="5"
+                          placeholder="Mô tả mục tiêu, định hướng, lịch sinh hoạt và các hoạt động nổi bật của câu lạc bộ..."
+                          maxlength="1000"
+                          style="width: 100%; padding: 0.75rem 1rem; border-radius: var(--sceams-radius-sm); border: 1px solid var(--sceams-border); font-size: 1rem; font-family: inherit; line-height: 1.5;"></textarea>
+                <span asp-validation-for="Description" style="color: var(--sceams-danger); font-size: 0.85rem; display: block; margin-top: 0.35rem;"></span>
+            </div>
+
+            <div style="background: var(--sceams-blue-50); border: 1px solid var(--sceams-blue-100); border-radius: var(--sceams-radius-sm); padding: 1rem 1.25rem; margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: flex-start;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.35rem; height: 1.35rem; color: var(--sceams-blue-600); flex-shrink: 0; margin-top: 0.15rem;" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v4M12 16h.01" />
+                </svg>
+                <div style="font-size: 0.9rem; color: var(--sceams-navy-900); line-height: 1.5;">
+                    <strong>Quy trình phê duyệt:</strong> Sau khi gửi form, câu lạc bộ sẽ tự động được khởi tạo với trạng thái <span class="status-badge--warning" style="font-size: 0.75rem; vertical-align: middle;">Chờ duyệt</span>. Ban quản trị (Admin / Staff) sẽ xem xét thông tin trước khi chuyển sang trạng thái Đã duyệt để công khai tới sinh viên.
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end;">
+                <a class="btn-app btn-app--ghost" asp-controller="Clubs" asp-action="Index">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn-app btn-app--primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 1.1rem; height: 1.1rem;" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Gửi đề xuất thành lập
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
