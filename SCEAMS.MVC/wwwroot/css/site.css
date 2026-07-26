@@ -3246,10 +3246,11 @@ svg {
   padding-inline: 0.15rem;
 }
 
+.clubs-page,
 .category-page {
   display: grid;
   gap: 1.5rem;
-  padding-block: clamp(2rem, 5vw, 4rem);
+  margin-top: 0.5rem;
 }
 
 .category-hero {
@@ -3257,14 +3258,14 @@ svg {
   background:
     radial-gradient(circle at 88% 20%, rgba(125, 211, 252, 0.2), transparent 27%),
     linear-gradient(135deg, var(--sceams-navy-950), var(--sceams-navy-800));
-  border-radius: clamp(1.25rem, 3vw, 2rem);
+  border-radius: clamp(1rem, 2vw, 1.5rem);
   box-shadow: var(--sceams-shadow-md);
   color: #ffffff;
   display: grid;
-  gap: clamp(1.5rem, 4vw, 4rem);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
   grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
-  padding: clamp(2rem, 5vw, 4rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
   position: relative;
 }
 
@@ -3290,16 +3291,16 @@ svg {
 }
 
 .category-hero h1 {
-  font-size: clamp(2.15rem, 5vw, 4.25rem);
-  letter-spacing: -0.045em;
-  line-height: 1.02;
-  margin: 0.75rem 0 1rem;
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0.5rem 0 0.75rem;
   max-width: 42rem;
 }
 
 .category-hero__copy > p:last-child {
-  color: rgba(255, 255, 255, 0.74);
-  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   margin: 0;
   max-width: 38rem;
 }
@@ -3309,13 +3310,13 @@ svg {
   backdrop-filter: blur(0.75rem);
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 1.35rem;
+  border-radius: 1.2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 11rem;
-  min-width: 12rem;
-  padding: 1.5rem;
+  min-height: 8rem;
+  min-width: 10rem;
+  padding: 1.15rem;
   position: relative;
   text-align: center;
   z-index: 1;
@@ -3323,18 +3324,19 @@ svg {
 
 .category-hero__summary span {
   color: rgba(255, 255, 255, 0.68);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .category-hero__summary strong {
-  font-size: 3.75rem;
-  letter-spacing: -0.06em;
+  font-size: 2.5rem;
+  letter-spacing: -0.04em;
   line-height: 1;
-  margin-block: 0.55rem;
+  margin-block: 0.35rem;
 }
+
 
 .category-hero__summary small {
   color: var(--sceams-sky-300);
@@ -3515,9 +3517,10 @@ svg {
 
 .category-grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
 }
+
 
 .category-card {
   --category-accent: #2563eb;

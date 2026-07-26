@@ -511,4 +511,18 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Phase 39 - GET /api/clubs/{id} (Public access for Approved club)
+GET {{SCEAMS.API_HostAddress}}/api/clubs/1
+Accept: application/json
+
+###
+
+# Phase 39 - GET /api/clubs/{id} (Public access for non-existent or Pending club returns 404)
+GET {{SCEAMS.API_HostAddress}}/api/clubs/9999
+Accept: application/json
+
+###
+
+
+
 

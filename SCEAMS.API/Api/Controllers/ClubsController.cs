@@ -26,4 +26,16 @@ public sealed class ClubsController : ApiControllerBase
         var query = _clubService.GetClubsQuery(User);
         return Ok(query);
     }
+
+    [HttpGet("{id:int}")]
+    [AllowAnonymous]
+    [ProducesResponseType<ClubDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetClubById(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _clubService.GetClubByIdAsync(id, User, cancellationToken);
+        return ToActionResult(result);
+    }
 }

@@ -410,9 +410,10 @@ Domain entity/enum
 
 ### Phase 39 - API: Chi tiết CLB
 
-- [ ] Thêm `GET /api/clubs/{id}`.
-- [ ] Trả thông tin category, organizer và số thành viên active; không lộ dữ liệu cá nhân không cần thiết.
-- [ ] Public không xem được Club chưa Approved.
+- [x] Thêm `GET /api/clubs/{id}`.
+- [x] Trả thông tin category, organizer và số thành viên active; không lộ dữ liệu cá nhân không cần thiết.
+- [x] Public không xem được Club chưa Approved.
+
 
 ### Phase 40 - MVC: Trang chi tiết CLB
 

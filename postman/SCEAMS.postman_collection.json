@@ -3314,10 +3314,87 @@
             "description": "Phase 37 Admin role can view and filter clubs by any status."
           },
           "response": []
+        },
+        {
+          "name": "Phase 39 - Get Club Details - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1"
+              ]
+            },
+            "description": "Phase 39 returns detailed information for an approved club."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 39 - Get Club Details - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "9999"
+              ]
+            },
+            "description": "Phase 39 returns 404 for non-existent club or unapproved club for public users."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
