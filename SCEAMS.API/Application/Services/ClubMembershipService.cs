@@ -313,4 +313,86 @@ public sealed class ClubMembershipService : IClubMembershipService
 
         return Result<ClubMembershipResponseDto>.Ok(dto);
     }
+
+    public async Task<Result<ClubMembershipResponseDto>> RemoveMembershipAsync(
+        int clubId,
+        int userId,
+        RemoveClubMembershipRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (!int.TryParse(userIdClaim, out var currentUserId) || currentUserId <= 0)
+        {
+            return Result<ClubMembershipResponseDto>.Fail(
+                "Không xác định được danh tính người thực hiện từ token xác thực.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var club = await _unitOfWork.Clubs.GetByIdAsync(clubId, cancellationToken);
+        if (club == null)
+        {
+            return Result<ClubMembershipResponseDto>.Fail(
+                $"Câu lạc bộ với ID {clubId} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isAdminOrStaff = user.IsInRole(nameof(UserRole.Admin)) ||
+                             user.IsInRole(nameof(UserRole.Staff));
+        var isOwner = club.CreatedByUserId == currentUserId;
+
+        if (!isAdminOrStaff && !isOwner)
+        {
+            return Result<ClubMembershipResponseDto>.Fail(
+                "Bạn không có quyền loại thành viên khỏi câu lạc bộ này.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var memberships = await _unitOfWork.ClubMemberships.FindAsync(
+            m => m.StudentId == userId && m.ClubId == clubId,
+            cancellationToken);
+
+        var membership = memberships.FirstOrDefault();
+        if (membership == null)
+        {
+            return Result<ClubMembershipResponseDto>.Fail(
+                $"Người dùng #{userId} không phải là thành viên của câu lạc bộ này.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (membership.Status != ClubMembershipStatus.Active)
+        {
+            return Result<ClubMembershipResponseDto>.Fail(
+                $"Chỉ thành viên đang Active mới có thể bị loại. Trạng thái hiện tại: {membership.Status}.",
+                StatusCodes.Status409Conflict);
+        }
+
+        membership.Status = ClubMembershipStatus.Removed;
+        membership.RemovalReason = request.Reason.Trim();
+        membership.DecidedByUserId = currentUserId;
+        membership.DecisionAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var student = await _unitOfWork.Users.GetByIdAsync(membership.StudentId, cancellationToken);
+        var dto = new ClubMembershipResponseDto
+        {
+            Id = membership.Id,
+            StudentId = membership.StudentId,
+            StudentName = student?.FullName ?? string.Empty,
+            StudentEmail = student?.Email ?? string.Empty,
+            ClubId = club.Id,
+            ClubName = club.Name,
+            RoleInClub = membership.RoleInClub,
+            JoinDate = membership.JoinDate,
+            Status = membership.Status,
+            DecidedByUserId = membership.DecidedByUserId,
+            DecisionAt = membership.DecisionAt,
+            RemovalReason = membership.RemovalReason
+        };
+
+        return Result<ClubMembershipResponseDto>.Ok(dto);
+    }
 }

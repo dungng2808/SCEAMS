@@ -755,6 +755,29 @@ membership returns `409`. Phase 55 requests are in the Postman **Clubs**
 folder; set `decisionClubId` and `decisionUserId` to a pending application
 before running the approve or reject request.
 
+## API loại thành viên khỏi Club
+
+Admin, Staff hoặc Organizer sở hữu Club có thể loại một thành viên đang Active:
+
+```text
+PUT http://localhost:5195/api/clubs/{clubId}/members/{userId}/remove
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+Request bắt buộc có lý do:
+
+```json
+{
+  "reason": "Vi phạm quy định hoạt động của câu lạc bộ."
+}
+```
+
+API chuyển status sang `Removed`, lưu lý do và giữ nguyên row membership để
+bảo toàn lịch sử. Chỉ membership `Active` mới được loại; xử lý lại một row đã
+`Removed` hoặc trạng thái khác trả `409`. Request Phase 57 nằm trong Postman
+**Clubs** folder.
+
 ## MVC xử lý đơn gia nhập
 
 Tại trang quản lý thành viên:

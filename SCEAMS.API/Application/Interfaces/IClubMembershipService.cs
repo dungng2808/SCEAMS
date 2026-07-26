@@ -25,4 +25,11 @@ public interface IClubMembershipService
         DecideClubMembershipRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ClubMembershipResponseDto>> RemoveMembershipAsync(
+        int clubId,
+        int userId,
+        RemoveClubMembershipRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

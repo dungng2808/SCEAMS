@@ -538,9 +538,9 @@ Domain entity/enum
 
 ### Phase 57 - API: Loại thành viên khỏi CLB
 
-- [ ] Thêm `PUT /api/clubs/{id}/members/{userId}/remove`.
-- [ ] Chuyển status sang `Removed`; không xóa lịch sử membership.
-- [ ] Organizer chỉ thao tác trong Club mình phụ trách.
+- [x] Thêm `PUT /api/clubs/{id}/members/{userId}/remove`.
+- [x] Chuyển status sang `Removed`; không xóa lịch sử membership.
+- [x] Organizer chỉ thao tác trong Club mình phụ trách.
 
 ### Phase 58 - MVC: Loại thành viên
 

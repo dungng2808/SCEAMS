@@ -125,6 +125,11 @@
       "key": "decisionUserId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "removalReason",
+      "value": "Vi phạm quy định hoạt động của câu lạc bộ.",
+      "type": "string"
     }
   ],
   "item": [
@@ -4262,12 +4267,135 @@
             "description": "Phase 55 từ chối xử lý lại membership đã Active hoặc Rejected; chạy sau một request Approve/Reject thành công."
           },
           "response": []
+        },
+        {
+          "name": "Phase 57 - Remove Membership - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Membership is Removed\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql(4);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"{{removalReason}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/{{decisionClubId}}/members/{{decisionUserId}}/remove",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "{{decisionClubId}}",
+                "members",
+                "{{decisionUserId}}",
+                "remove"
+              ]
+            },
+            "description": "Phase 57 chuyển thành viên Active sang Removed và lưu lý do. Đặt decisionClubId và decisionUserId là một thành viên Active trước khi chạy."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 57 - Remove Membership - Non-Active Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"{{removalReason}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/{{decisionClubId}}/members/{{decisionUserId}}/remove",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "{{decisionClubId}}",
+                "members",
+                "{{decisionUserId}}",
+                "remove"
+              ]
+            },
+            "description": "Phase 57 không cho loại lại membership đã Removed/không còn Active; chạy sau request Remove thành công."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
-
 
 
 
