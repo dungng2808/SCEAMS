@@ -3590,11 +3590,118 @@
             "description": "Phase 43 returns 409 Conflict when approving a club that is not in PendingApproval status."
           },
           "response": []
+        },
+        {
+          "name": "Phase 45 - Reject Club - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Mô tả chưa rõ ràng về kế hoạch nhân sự và ngân sách.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/3/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "3",
+                "reject"
+              ]
+            },
+            "description": "Phase 45 allows Admin/Staff to reject a PendingApproval club with a required reason."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 45 - Reject Club - Empty Reason BadRequest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"   \"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/3/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "3",
+                "reject"
+              ]
+            },
+            "description": "Phase 45 returns 400 Bad Request when rejecting a club without providing a non-whitespace reason."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 

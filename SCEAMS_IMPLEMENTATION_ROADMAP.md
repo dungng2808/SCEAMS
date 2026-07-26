@@ -452,9 +452,10 @@ Domain entity/enum
 
 ### Phase 45 - API: Từ chối CLB
 
-- [ ] Thêm `PUT /api/clubs/{id}/reject` với lý do bắt buộc.
-- [ ] Chỉ từ `PendingApproval` sang `Rejected`.
-- [ ] Organizer sở hữu Club có thể xem lý do từ chối.
+- [x] Thêm `PUT /api/clubs/{id}/reject` với lý do bắt buộc.
+- [x] Chỉ từ `PendingApproval` sang `Rejected`.
+- [x] Organizer sở hữu Club có thể xem lý do từ chối.
+
 
 ### Phase 46 - MVC: Từ chối CLB
 

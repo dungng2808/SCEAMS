@@ -563,6 +563,30 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Phase 45 - PUT /api/clubs/{id}/reject (Admin/Staff rejects a PendingApproval club with reason)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/3/reject
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "reason": "Thông tin mô tả câu lạc bộ chưa đáp ứng quy định tối thiểu về số lượng thành viên dự kiến."
+}
+
+###
+
+# Phase 45 - PUT /api/clubs/{id}/reject (Validation error when reason is empty)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/3/reject
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "reason": "   "
+}
+
+###
+
+
+
 
 
 
