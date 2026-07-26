@@ -99,6 +99,55 @@ public sealed class EventsController : Controller
         }
     }
 
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Detail(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventApiClient.GetEventByIdAsync(
+                id,
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (!result.IsSuccess || result.Event is null)
+            {
+                if (result.IsNotFound)
+                {
+                    Response.StatusCode = StatusCodes.Status404NotFound;
+                }
+
+                return View(new EventDetailViewModel
+                {
+                    Id = id,
+                    IsNotFound = result.IsNotFound,
+                    ErrorMessage = result.ErrorMessage ??
+                        "Không thể tải chi tiết Event."
+                });
+            }
+
+            return View(MapDetail(result.Event));
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load event {EventId}.", id);
+            return View(new EventDetailViewModel
+            {
+                Id = id,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     private static EventListItemViewModel MapEvent(EventApiResponse eventItem)
     {
         return new EventListItemViewModel
@@ -117,6 +166,38 @@ public sealed class EventsController : Controller
             Capacity = eventItem.Capacity,
             RegisteredCount = eventItem.RegisteredCount,
             SlotsRemaining = eventItem.SlotsRemaining
+        };
+    }
+
+    private static EventDetailViewModel MapDetail(EventDetailApiResponse eventItem)
+    {
+        return new EventDetailViewModel
+        {
+            Id = eventItem.Id,
+            Title = eventItem.Title,
+            Status = eventItem.Status,
+            Description = eventItem.Description,
+            ClubName = eventItem.ClubName,
+            VenueName = eventItem.VenueName,
+            VenueLocation = eventItem.VenueLocation,
+            StartTime = eventItem.StartTime,
+            EndTime = eventItem.EndTime,
+            RegistrationDeadline = eventItem.RegistrationDeadline,
+            Capacity = eventItem.Capacity,
+            RegisteredCount = eventItem.RegisteredCount,
+            SlotsRemaining = eventItem.SlotsRemaining,
+            CreatedByUserName = eventItem.CreatedByUserName,
+            RejectionReason = eventItem.RejectionReason,
+            CancellationReason = eventItem.CancellationReason,
+            Permissions = new EventPermissionsViewModel
+            {
+                CanEdit = eventItem.Permissions.CanEdit,
+                CanSubmit = eventItem.Permissions.CanSubmit,
+                CanApprove = eventItem.Permissions.CanApprove,
+                CanReject = eventItem.Permissions.CanReject,
+                CanCancel = eventItem.Permissions.CanCancel,
+                CanRegister = eventItem.Permissions.CanRegister
+            }
         };
     }
 

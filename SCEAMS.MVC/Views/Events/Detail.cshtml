@@ -1,0 +1,93 @@
+@model SCEAMS.MVC.ViewModels.EventDetailViewModel
+
+@{
+    ViewData["Title"] = Model.IsNotFound ? "Không tìm thấy Event" : Model.Title;
+}
+
+<section class="profile-page" aria-labelledby="event-detail-title">
+    <div class="profile-page__header">
+        <div>
+            <p class="eyebrow">Milestone H · Chi tiết sự kiện</p>
+            <h1 id="event-detail-title">@(Model.IsNotFound ? "Event không tồn tại" : Model.Title)</h1>
+            @if (!Model.IsNotFound)
+            {
+                <p>Thông tin Event #@Model.Id, quyền thao tác được quyết định bởi API.</p>
+            }
+        </div>
+        <a class="btn-app btn-app--ghost" asp-action="Index">&larr; Danh sách sự kiện</a>
+    </div>
+
+    @if (Model.IsNotFound || !string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <section class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">@(Model.IsNotFound ? "404 · Không tìm thấy" : "Kết nối gián đoạn")</p>
+                <h2>@(Model.IsNotFound ? "Bạn không có quyền xem Event này" : "Chưa thể tải chi tiết Event")</h2>
+                <p>@Model.ErrorMessage</p>
+                <a class="btn-app btn-app--primary" asp-action="Index">Quay lại danh sách</a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="profile-layout">
+            <section class="surface-card profile-form" aria-labelledby="event-overview-title">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <div>
+                        <p class="eyebrow">Trạng thái hiện tại</p>
+                        <h2 id="event-overview-title" style="margin: 0;">@Model.Title</h2>
+                    </div>
+                    <span class="status-badge @Model.StatusClass">@Model.Status</span>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p style="margin-top: 1.25rem;">@Model.Description</p>
+                }
+
+                <dl class="detail-list" style="margin-top: 1.5rem;">
+                    <div><dt>Club</dt><dd>@Model.ClubName</dd></div>
+                    <div><dt>Địa điểm</dt><dd>@Model.VenueName · @Model.VenueLocation</dd></div>
+                    <div><dt>Thời gian</dt><dd>@Model.StartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm") - @Model.EndTime.ToLocalTime().ToString("HH:mm")</dd></div>
+                    <div><dt>Hạn đăng ký</dt><dd>@Model.RegistrationDeadline.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd></div>
+                    <div><dt>Người tạo</dt><dd>@Model.CreatedByUserName</dd></div>
+                </dl>
+
+                @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+                {
+                    <div class="alert alert-danger" role="status"><strong>Lý do từ chối:</strong> @Model.RejectionReason</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.CancellationReason))
+                {
+                    <div class="alert alert-danger" role="status"><strong>Lý do hủy:</strong> @Model.CancellationReason</div>
+                }
+            </section>
+
+            <aside class="surface-card profile-aside" aria-label="Sức chứa và quyền thao tác">
+                <p class="eyebrow">Sức chứa</p>
+                <h2>@Model.SlotsRemaining / @Model.Capacity</h2>
+                <p>@Model.RegisteredCount đăng ký hợp lệ đã được ghi nhận.</p>
+
+                <p class="eyebrow" style="margin-top: 1.5rem;">Action khả dụng</p>
+                <ul>
+                    @if (Model.Permissions.CanRegister) { <li>Đăng ký Event</li> }
+                    @if (Model.Permissions.CanEdit) { <li>Chỉnh sửa thông tin</li> }
+                    @if (Model.Permissions.CanSubmit) { <li>Gửi duyệt</li> }
+                    @if (Model.Permissions.CanApprove) { <li>Duyệt Event</li> }
+                    @if (Model.Permissions.CanReject) { <li>Từ chối Event</li> }
+                    @if (Model.Permissions.CanCancel) { <li>Hủy Event</li> }
+                    @if (!Model.Permissions.CanRegister && !Model.Permissions.CanEdit && !Model.Permissions.CanSubmit && !Model.Permissions.CanApprove && !Model.Permissions.CanReject && !Model.Permissions.CanCancel)
+                    {
+                        <li>Không có action khả dụng ở trạng thái hiện tại.</li>
+                    }
+                </ul>
+            </aside>
+        </div>
+    }
+</section>

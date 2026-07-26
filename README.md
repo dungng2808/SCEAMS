@@ -1012,3 +1012,15 @@ Response gồm Club, Venue, thời gian, deadline đăng ký, capacity, số đ�
 ownership, status và deadline. Event Draft/Pending của Organizer khác không bị
 public; API trả `404` cho URL không có quyền xem. Request mẫu nằm trong Postman
 **Events** folder.
+
+## MVC chi tiết sự kiện
+
+Từ danh sách Event chọn tiêu đề hoặc mở trực tiếp:
+
+```text
+https://localhost:7034/Events/{id}
+```
+
+Trang hiển thị Club, Venue, thời gian, deadline, sức chứa, lý do từ chối/hủy
+và các action được API cấp quyền. Direct URL tới Event Draft/Pending của người
+khác hiển thị 404 và không lộ dữ liệu.

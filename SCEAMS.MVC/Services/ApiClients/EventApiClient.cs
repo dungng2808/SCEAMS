@@ -14,6 +14,62 @@ public sealed class EventApiClient : IEventApiClient
         _httpClient = httpClient;
     }
 
+    public async Task<EventDetailApiResult> GetEventByIdAsync(
+        int eventId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            $"api/events/{eventId}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new EventDetailApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về chi tiết Event không hợp lệ."
+                    : null
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new EventDetailApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = "Event không tồn tại hoặc bạn không có quyền xem."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new EventDetailApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new EventDetailApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền xem Event này."
+            };
+        }
+
+        return new EventDetailApiResult
+        {
+            ErrorMessage = "Không thể tải chi tiết Event vào lúc này."
+        };
+    }
+
     public async Task<EventListApiResult> GetEventsAsync(
         string? search,
         int? clubId,

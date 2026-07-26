@@ -648,9 +648,9 @@ Domain entity/enum
 
 ### Phase 74 - MVC: Trang chi tiết sự kiện
 
-- [ ] Hiển thị đầy đủ thông tin và trạng thái.
-- [ ] Chỉ hiện action hợp lệ theo role, ownership, deadline và status.
-- [ ] Kiểm thử direct URL tới Event không có quyền.
+- [x] Hiển thị đầy đủ thông tin và trạng thái.
+- [x] Chỉ hiện action hợp lệ theo role, ownership, deadline và status.
+- [x] Kiểm thử direct URL tới Event không có quyền.
 
 ### Phase 75 - API: Organizer tạo Event Draft
 

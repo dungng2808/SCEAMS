@@ -123,7 +123,7 @@
                         {
                             <tr style="border-bottom: 1px solid var(--sceams-border);">
                                 <td style="padding: 1rem 1.5rem;">
-                                    <strong>@eventItem.Title</strong>
+                                    <a asp-controller="Events" asp-action="Detail" asp-route-id="@eventItem.Id"><strong>@eventItem.Title</strong></a>
                                     <small style="display: block; color: var(--sceams-text-soft);">#@eventItem.Id</small>
                                 </td>
                                 <td>
