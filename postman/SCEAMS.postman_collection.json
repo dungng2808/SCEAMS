@@ -2389,6 +2389,116 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Club Categories",
+      "item": [
+        {
+          "name": "List Club Categories - Public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Compact category DTOs are returned in name order\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "    const names = body.map(category => category.name);",
+                  "    const sortedNames = [...names].sort((left, right) => left.localeCompare(right));",
+                  "    pm.expect(names).to.eql(sortedNames);",
+                  "    body.forEach(function (category) {",
+                  "        pm.expect(category).to.have.all.keys(\"id\", \"name\", \"description\");",
+                  "        pm.expect(category).not.to.have.property(\"clubs\");",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories"
+              ]
+            },
+            "description": "Phase 29 public club-category list with compact DTOs ordered by name."
+          },
+          "response": []
+        },
+        {
+          "name": "List Club Categories - Authenticated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Authenticated clients receive the category list\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories"
+              ]
+            },
+            "description": "Phase 29 verifies that authenticated users can read the same public category list. Run Login - Success first."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

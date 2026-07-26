@@ -10,7 +10,7 @@ public sealed class UnitOfWork : IUnitOfWork
     private readonly SceamsDbContext _context;
 
     private IUserRepository? _users;
-    private IGenericRepository<ClubCategory>? _clubCategories;
+    private IClubCategoryRepository? _clubCategories;
     private IClubRepository? _clubs;
     private IGenericRepository<ClubMembership>? _clubMemberships;
     private IGenericRepository<Venue>? _venues;
@@ -28,9 +28,9 @@ public sealed class UnitOfWork : IUnitOfWork
     public IUserRepository Users =>
         _users ??= new UserRepository(_context);
 
-    public IGenericRepository<ClubCategory> ClubCategories =>
+    public IClubCategoryRepository ClubCategories =>
         _clubCategories ??=
-            new GenericRepository<ClubCategory>(_context);
+            new ClubCategoryRepository(_context);
 
     public IClubRepository Clubs =>
         _clubs ??= new ClubRepository(_context);

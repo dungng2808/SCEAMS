@@ -5,6 +5,19 @@ Accept: application/json
 
 ###
 
+# Public and authenticated clients can read this endpoint.
+GET {{SCEAMS.API_HostAddress}}/api/club-categories
+Accept: application/json
+
+###
+
+# Define AccessToken from any successful login.
+GET {{SCEAMS.API_HostAddress}}/api/club-categories
+Accept: application/json
+Authorization: Bearer {{AccessToken}}
+
+###
+
 # Define LoginEmail and LoginPassword in your local HTTP client environment.
 POST {{SCEAMS.API_HostAddress}}/api/auth/login
 Content-Type: application/json

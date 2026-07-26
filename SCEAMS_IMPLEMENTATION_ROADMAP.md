@@ -342,9 +342,9 @@ Domain entity/enum
 
 ### Phase 29 - API: Xem danh mục CLB
 
-- [ ] Thêm `GET /api/club-categories`.
-- [ ] Cho phép public/authenticated đọc danh sách.
-- [ ] Trả DTO gọn, sắp xếp theo tên.
+- [x] Thêm `GET /api/club-categories`.
+- [x] Cho phép public/authenticated đọc danh sách.
+- [x] Trả DTO gọn, sắp xếp theo tên.
 
 ### Phase 30 - MVC: Danh sách danh mục CLB
 

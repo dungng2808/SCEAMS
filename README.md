@@ -425,6 +425,38 @@ persisted role. Submitting the current role is rejected by MVC without revoking
 the existing session. API authorization and last-active-Admin errors are
 displayed on the user list without losing the active filters.
 
+## Club-category list API
+
+Public visitors and authenticated users can retrieve the shared club-category
+list:
+
+```text
+GET http://localhost:5195/api/club-categories
+Accept: application/json
+```
+
+No access token is required. Sending a valid token for any role returns the same
+list. Each item is a compact DTO containing only `id`, `name` and
+`description`:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Academic and Technology",
+    "description": "Clubs focused on academic and technology activities."
+  }
+]
+```
+
+The repository projects these fields directly in SQL without loading the
+`Clubs` navigation. Results are ordered by name and then ID for deterministic
+output. When no categories exist, the endpoint returns `200 OK` with an empty
+JSON array.
+
+Ready-to-run public and authenticated Phase 29 requests are available in
+`SCEAMS.API/SCEAMS.API.http` and the Postman **Club Categories** folder.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

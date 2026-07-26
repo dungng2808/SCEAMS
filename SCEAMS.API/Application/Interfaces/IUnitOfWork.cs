@@ -5,7 +5,7 @@ namespace SCEAMS.Application.Interfaces;
 public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {
     IUserRepository Users { get; }
-    IGenericRepository<ClubCategory> ClubCategories { get; }
+    IClubCategoryRepository ClubCategories { get; }
     IClubRepository Clubs { get; }
     IGenericRepository<ClubMembership> ClubMemberships { get; }
     IGenericRepository<Venue> Venues { get; }
