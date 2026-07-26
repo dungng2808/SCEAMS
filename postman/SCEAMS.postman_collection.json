@@ -100,6 +100,21 @@
       "key": "createClubCategoryDuplicateName",
       "value": "community service",
       "type": "string"
+    },
+    {
+      "key": "updateClubCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "updateClubCategoryName",
+      "value": "Community Engagement",
+      "type": "string"
+    },
+    {
+      "key": "existingClubCategoryName",
+      "value": "Academic and Technology",
+      "type": "string"
     }
   ],
   "item": [
@@ -2740,6 +2755,245 @@
               ]
             },
             "description": "Phase 31 validation rejects a whitespace-only category name."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Club Category - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Updated compact category DTO is returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.all.keys(\"id\", \"name\", \"description\");",
+                  "    pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"updateClubCategoryId\")));",
+                  "    pm.expect(body.name).to.eql(pm.collectionVariables.get(\"updateClubCategoryName\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{updateClubCategoryName}}\",\n  \"description\": \"Category updated during Phase 33 verification.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{updateClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{updateClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 33 Admin-only category update. Set updateClubCategoryId to an existing category."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Club Category - Duplicate Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{existingClubCategoryName}}\",\n  \"description\": \"Duplicate category name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{updateClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{updateClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 33 rejects a category name already used by another category, case-insensitively."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Club Category - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Missing Category\",\n  \"description\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "2147483647"
+              ]
+            },
+            "description": "Phase 33 returns 404 for an unknown category ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Club Category - Staff Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Forbidden Category Update\",\n  \"description\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{updateClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{updateClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 33 verifies that non-Admin roles cannot update categories."
           },
           "response": []
         }

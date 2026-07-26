@@ -13,4 +13,9 @@ public interface IClubCategoryRepository
     Task<bool> NameExistsAsync(
         string normalizedName,
         CancellationToken cancellationToken = default);
+
+    Task<bool> NameBelongsToOtherCategoryAsync(
+        string normalizedName,
+        int categoryId,
+        CancellationToken cancellationToken = default);
 }

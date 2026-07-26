@@ -526,6 +526,35 @@ duplicate name is attached to the `Name` field as
 `/ClubCategories`, reloads the categories from the public API, displays a
 success notification and marks the newly created card with **Vừa tạo**.
 
+## Admin update club-category API
+
+Only an authenticated Admin can update a category:
+
+```text
+PUT http://localhost:5195/api/club-categories/{id}
+Authorization: Bearer <admin-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Community Engagement",
+  "description": "Clubs focused on volunteering and community projects."
+}
+```
+
+The endpoint applies the same validation and whitespace normalization as
+category creation. It returns `404 Not Found` when the category does not
+exist, or `409 Conflict` when another category already uses the submitted name
+regardless of casing. A successful request returns `200 OK` with the compact
+`id`, `name` and `description` DTO.
+
+The service retrieves the tracked category and changes only its `Name` and
+`Description` scalar properties. It neither loads nor replaces the `Clubs`
+navigation, so every existing Club keeps the same `CategoryId` relationship.
+Ready-to-run Phase 33 requests are available in
+`SCEAMS.API/SCEAMS.API.http` and the Postman **Club Categories** folder.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

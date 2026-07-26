@@ -366,9 +366,9 @@ Domain entity/enum
 
 ### Phase 33 - API: Sửa danh mục CLB
 
-- [ ] Thêm `PUT /api/club-categories/{id}` cho Admin.
-- [ ] Kiểm tra tên trùng và category không tồn tại.
-- [ ] Không làm thay đổi quan hệ Club hiện có.
+- [x] Thêm `PUT /api/club-categories/{id}` cho Admin.
+- [x] Kiểm tra tên trùng và category không tồn tại.
+- [x] Không làm thay đổi quan hệ Club hiện có.
 
 ### Phase 34 - MVC: Sửa danh mục CLB
 

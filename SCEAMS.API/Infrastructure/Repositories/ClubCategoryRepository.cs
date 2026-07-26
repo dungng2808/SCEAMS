@@ -41,4 +41,18 @@ public sealed class ClubCategoryRepository
                     category.Name.ToUpper() == normalizedName,
                 cancellationToken);
     }
+
+    public Task<bool> NameBelongsToOtherCategoryAsync(
+        string normalizedName,
+        int categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet
+            .AsNoTracking()
+            .AnyAsync(
+                category =>
+                    category.Id != categoryId &&
+                    category.Name.ToUpper() == normalizedName,
+                cancellationToken);
+    }
 }

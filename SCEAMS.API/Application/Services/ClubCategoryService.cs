@@ -71,6 +71,60 @@ public sealed class ClubCategoryService : IClubCategoryService
             .Ok(categories);
     }
 
+    public async Task<Result<ClubCategoryResponseDto>>
+        UpdateClubCategoryAsync(
+            int categoryId,
+            UpdateClubCategoryRequestDto request,
+            CancellationToken cancellationToken = default)
+    {
+        var category = await _unitOfWork.ClubCategories
+            .GetByIdAsync(
+                categoryId,
+                cancellationToken);
+
+        if (category is null)
+        {
+            return Result<ClubCategoryResponseDto>.Fail(
+                "Club category does not exist.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var name = NormalizeRequiredValue(request.Name);
+
+        if (name.Length == 0)
+        {
+            return Result<ClubCategoryResponseDto>.Fail(
+                "Club category name is required.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var normalizedName = name.ToUpperInvariant();
+
+        if (await _unitOfWork.ClubCategories
+                .NameBelongsToOtherCategoryAsync(
+                    normalizedName,
+                    categoryId,
+                    cancellationToken))
+        {
+            return Result<ClubCategoryResponseDto>.Fail(
+                "Club category name already exists.",
+                StatusCodes.Status409Conflict);
+        }
+
+        category.Name = name;
+        category.Description = NormalizeOptionalValue(
+            request.Description);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<ClubCategoryResponseDto>.Ok(
+            new ClubCategoryResponseDto(
+                category.Id,
+                category.Name,
+                category.Description),
+            "Club category updated successfully.");
+    }
+
     private static string NormalizeRequiredValue(string value)
     {
         return string.Join(
