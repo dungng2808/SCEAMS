@@ -196,6 +196,90 @@ public sealed class ProfileController : Controller
         return View(model);
     }
 
+    [HttpGet("Password")]
+    public IActionResult Password()
+    {
+        return View(new ChangePasswordViewModel());
+    }
+
+    [HttpPost("Password")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Password(
+        ChangePasswordViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _userApiClient
+                .ChangeCurrentUserPasswordAsync(
+                    new ChangeCurrentUserPasswordApiRequest(
+                        CurrentPassword: model.CurrentPassword,
+                        NewPassword: model.NewPassword,
+                        ConfirmPassword: model.ConfirmPassword),
+                    cancellationToken);
+
+            if (result.IsUnauthorized || result.IsNotFound)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.",
+                    "/Profile/Password");
+            }
+
+            if (result.IsSuccess)
+            {
+                HttpContext.Session.Clear();
+                await HttpContext.SignOutAsync(
+                    CookieAuthenticationDefaults
+                        .AuthenticationScheme);
+
+                TempData["PasswordChangeSuccess"] =
+                    "Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.";
+
+                return RedirectToAction(
+                    nameof(AccountController.Login),
+                    "Account");
+            }
+
+            foreach (var fieldError in result.FieldErrors)
+            {
+                foreach (var message in fieldError.Value)
+                {
+                    ModelState.AddModelError(
+                        fieldError.Key,
+                        message);
+                }
+            }
+
+            if (result.ErrorMessage is not null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage);
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to change the current SCEAMS password.");
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Không thể kết nối tới API. Vui lòng thử lại sau.");
+        }
+
+        return View(model);
+    }
+
     private async Task<IActionResult> EndInvalidSessionAsync(
         string message,
         string returnUrl = "/Profile")

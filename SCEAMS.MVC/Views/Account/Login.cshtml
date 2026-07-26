@@ -94,6 +94,16 @@
                 </div>
             }
 
+            @if (TempData["PasswordChangeSuccess"] is string passwordMessage)
+            {
+                <div class="auth-success" role="status" aria-live="polite">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    <span>@passwordMessage</span>
+                </div>
+            }
+
             @if (TempData["AuthenticationError"] is string authenticationError)
             {
                 <div class="login-summary" role="alert" aria-live="assertive">

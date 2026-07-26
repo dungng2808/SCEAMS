@@ -256,9 +256,9 @@ Domain entity/enum
 
 ### Phase 16 - MVC: Form đổi mật khẩu
 
-- [ ] Tạo form current/new/confirm password.
-- [ ] Sau khi đổi thành công, xóa session token và yêu cầu đăng nhập lại.
-- [ ] Xác nhận token cũ không còn dùng được.
+- [x] Tạo form current/new/confirm password.
+- [x] Sau khi đổi thành công, xóa session token và yêu cầu đăng nhập lại.
+- [x] Xác nhận token cũ không còn dùng được.
 
 ### Phase 17 - API: Refresh token
 

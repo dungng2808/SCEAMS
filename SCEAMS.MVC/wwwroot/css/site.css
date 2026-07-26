@@ -1898,6 +1898,56 @@ svg {
   box-shadow: 0 0 0 0.2rem rgba(185, 28, 28, 0.08);
 }
 
+.profile-password-input .form-control {
+  padding-right: 3.25rem;
+}
+
+.profile-password-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.6rem;
+  color: var(--sceams-text-faint);
+  display: flex;
+  height: 2.35rem;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.35rem;
+}
+
+.profile-password-toggle:hover {
+  background: var(--sceams-blue-50);
+  color: var(--sceams-blue-700);
+}
+
+.profile-password-toggle:focus-visible {
+  box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.16);
+  outline: 2px solid var(--sceams-blue-600);
+  outline-offset: 1px;
+}
+
+.profile-password-toggle svg {
+  height: 1.15rem;
+  stroke-width: 1.8;
+  width: 1.15rem;
+}
+
+.profile-password-toggle [data-eye-closed] {
+  display: none;
+}
+
+.profile-password-toggle[aria-pressed="true"] [data-eye-open] {
+  display: none;
+}
+
+.profile-password-toggle[aria-pressed="true"] [data-eye-closed] {
+  display: block;
+}
+
 .profile-edit-field .field-error {
   color: var(--sceams-danger);
   font-size: 0.75rem;
@@ -1907,6 +1957,33 @@ svg {
 .profile-edit-field__hint {
   color: var(--sceams-text-faint);
   font-size: 0.73rem;
+  margin: 0;
+}
+
+.profile-password-policy {
+  align-items: flex-start;
+  background: var(--sceams-blue-50);
+  border: 1px solid #bfdbfe;
+  border-radius: 0.8rem;
+  color: var(--sceams-blue-700);
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+}
+
+.profile-password-policy svg {
+  flex: 0 0 auto;
+  height: 1rem;
+  margin-top: 0.1rem;
+  stroke-width: 2;
+  width: 1rem;
+}
+
+.profile-password-policy p {
+  color: #1e40af;
+  font-size: 0.73rem;
+  line-height: 1.55;
   margin: 0;
 }
 
@@ -2016,6 +2093,16 @@ svg {
   font-size: 0.75rem;
   line-height: 1.55;
   margin: 0;
+}
+
+.profile-edit-tip--warning {
+  background: var(--sceams-warning-soft);
+  border-color: #fde68a;
+  color: var(--sceams-warning);
+}
+
+.profile-edit-tip--warning p {
+  color: #854d0e;
 }
 
 @media (max-width: 991.98px) {

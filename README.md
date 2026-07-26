@@ -299,5 +299,24 @@ refresh-token hash and expiry in the same database save. Success returns
 `204 No Content`, so no password data is included in the response. An incorrect
 current password or invalid new-password policy returns `400`.
 
+## MVC password change
+
+After logging in, use the **Đổi mật khẩu** action on `/Profile` or open:
+
+```text
+http://localhost:5206/Profile/Password
+```
+
+The form collects the current password, new password and confirmation. It
+applies the same password policy on the client and MVC server, then sends only
+those three values to `PUT /api/users/me/password`. Submitted passwords are
+never rendered back into the HTML when validation or API errors occur.
+
+After a successful `204 No Content`, MVC clears the server-side Session that
+contains the JWT, signs out the encrypted authentication cookie and redirects
+to Login with a success message. A copied pre-change browser cookie cannot
+reuse the cleared server-side token and is redirected to Login. The user must
+authenticate again with the new password.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

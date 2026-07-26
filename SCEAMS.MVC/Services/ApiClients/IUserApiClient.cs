@@ -11,4 +11,9 @@ public interface IUserApiClient
         UpdateCurrentUserAsync(
             UpdateCurrentUserProfileApiRequest request,
             CancellationToken cancellationToken = default);
+
+    Task<ChangeCurrentUserPasswordApiResult>
+        ChangeCurrentUserPasswordAsync(
+            ChangeCurrentUserPasswordApiRequest request,
+            CancellationToken cancellationToken = default);
 }

@@ -138,6 +138,81 @@ public sealed class UserApiClient : IUserApiClient
         };
     }
 
+    public async Task<ChangeCurrentUserPasswordApiResult>
+        ChangeCurrentUserPasswordAsync(
+            ChangeCurrentUserPasswordApiRequest request,
+            CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            "api/users/me/password",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            return new ChangeCurrentUserPasswordApiResult
+            {
+                IsSuccess = true
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var validationProblem =
+                DeserializeOrDefault<ValidationProblemApiResponse>(
+                    content);
+
+            if (validationProblem?.Errors is { Count: > 0 })
+            {
+                return new ChangeCurrentUserPasswordApiResult
+                {
+                    FieldErrors = validationProblem.Errors
+                };
+            }
+
+            var badRequest = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return new ChangeCurrentUserPasswordApiResult
+            {
+                ErrorMessage = badRequest?.Message ==
+                    "Current password is incorrect."
+                    ? "Mật khẩu hiện tại không chính xác."
+                    : badRequest?.Message ??
+                        "Thông tin đổi mật khẩu không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new ChangeCurrentUserPasswordApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage =
+                    "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new ChangeCurrentUserPasswordApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage =
+                    "Tài khoản không còn tồn tại trong hệ thống."
+            };
+        }
+
+        return new ChangeCurrentUserPasswordApiResult
+        {
+            ErrorMessage =
+                "Không thể đổi mật khẩu vào lúc này."
+        };
+    }
+
     private sealed record ApiErrorResponse(string? Message);
 
     private sealed record ValidationProblemApiResponse(
