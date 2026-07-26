@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
 
@@ -115,6 +116,33 @@ public sealed class EventsController : ApiControllerBase
     {
         var result = await _eventService.SubmitEventAsync(
             id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
+    [HttpGet("pending-approval")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ProducesResponseType<PagedResult<EventListResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetPendingApprovalEvents(
+        [FromQuery] int? clubId,
+        [FromQuery] int? venueId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _eventService.GetPendingApprovalEventsAsync(
+            clubId,
+            venueId,
+            from,
+            to,
+            page,
+            pageSize,
             User,
             cancellationToken);
 

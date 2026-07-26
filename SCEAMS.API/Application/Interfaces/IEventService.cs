@@ -28,4 +28,14 @@ public interface IEventService
         int id,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<PagedResult<EventListResponseDto>>> GetPendingApprovalEventsAsync(
+        int? clubId,
+        int? venueId,
+        DateTime? from,
+        DateTime? to,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

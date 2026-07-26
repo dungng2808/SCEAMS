@@ -690,9 +690,9 @@ Domain entity/enum
 
 ### Phase 81 - API: Danh sách Event chờ duyệt
 
-- [ ] Thêm `GET /api/events/pending-approval` cho Admin/Staff.
-- [ ] Hỗ trợ lọc Club, Venue, date và phân trang.
-- [ ] Chỉ trả `PendingApproval`.
+- [x] Thêm `GET /api/events/pending-approval` cho Admin/Staff.
+- [x] Hỗ trợ lọc Club, Venue, date và phân trang.
+- [x] Chỉ trả `PendingApproval`.
 
 ### Phase 82 - MVC: Queue duyệt Event
 

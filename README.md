@@ -1060,6 +1060,17 @@ Chỉ Organizer sở hữu Event được chuyển `Draft -> PendingApproval`. A
 lại title, Club/Venue, thời gian, deadline và capacity trước khi đổi status;
 Event ở trạng thái khác Draft trả `409 Conflict`.
 
+## API queue Event chờ duyệt
+
+Admin/Staff dùng:
+
+```text
+GET http://localhost:5195/api/events/pending-approval?clubId=1&venueId=1&page=1&pageSize=10
+```
+
+Endpoint chỉ trả Event `PendingApproval`, hỗ trợ lọc Club/Venue/ngày và phân
+trang. Request mẫu nằm trong Postman **Events** folder.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

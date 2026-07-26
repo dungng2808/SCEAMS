@@ -5591,6 +5591,30 @@
             "description": "Phase 80 API contract được MVC gọi bằng form POST anti-forgery và confirm."
           },
           "response": []
+        },
+        {
+          "name": "Phase 81 - Pending Approval Queue - Admin",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminAccessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/pending-approval?clubId=1&venueId=1&page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "pending-approval"],
+              "query": [
+                { "key": "clubId", "value": "1" },
+                { "key": "venueId", "value": "1" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Phase 81 Admin/Staff xem queue PendingApproval với lọc Club, Venue và phân trang."
+          },
+          "response": []
         }
       ]
     }

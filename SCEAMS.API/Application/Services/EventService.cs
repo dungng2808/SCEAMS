@@ -427,6 +427,62 @@ public sealed class EventService : IEventService
         return await GetEventByIdAsync(id, user, cancellationToken);
     }
 
+    public async Task<Result<PagedResult<EventListResponseDto>>> GetPendingApprovalEventsAsync(
+        int? clubId,
+        int? venueId,
+        DateTime? from,
+        DateTime? to,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var isAdminOrStaff = user.IsInRole(nameof(UserRole.Admin)) ||
+                             user.IsInRole(nameof(UserRole.Staff));
+        if (!isAdminOrStaff)
+        {
+            return Result<PagedResult<EventListResponseDto>>.Fail(
+                "Chỉ Admin hoặc Staff mới có thể xem queue duyệt Event.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var query = GetEventsQuery(user)
+            .Where(eventItem => eventItem.Status == EventStatus.PendingApproval);
+        if (clubId is > 0)
+        {
+            query = query.Where(eventItem => eventItem.ClubId == clubId.Value);
+        }
+
+        if (venueId is > 0)
+        {
+            query = query.Where(eventItem => eventItem.VenueId == venueId.Value);
+        }
+
+        if (from.HasValue)
+        {
+            query = query.Where(eventItem => eventItem.StartTime >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(eventItem => eventItem.StartTime < to.Value.Date.AddDays(1));
+        }
+
+        var totalItems = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions
+            .CountAsync(query, cancellationToken);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var items = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions
+            .ToListAsync(
+                query.OrderBy(eventItem => eventItem.StartTime)
+                    .Skip((normalizedPage - 1) * normalizedPageSize)
+                    .Take(normalizedPageSize),
+                cancellationToken);
+
+        return Result<PagedResult<EventListResponseDto>>.Ok(
+            new PagedResult<EventListResponseDto>(items, totalItems));
+    }
+
     private static string? ValidateEventForSubmission(
         Domain.Entities.Event eventEntity,
         Domain.Entities.Venue? venue)
