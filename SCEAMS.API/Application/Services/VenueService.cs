@@ -159,4 +159,56 @@ public sealed class VenueService : IVenueService
             IsUnderMaintenance = venue.IsUnderMaintenance
         });
     }
+
+    public async Task<Result<VenueResponseDto>> UpdateMaintenanceAsync(
+        int id,
+        UpdateVenueMaintenanceRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var venue = await _unitOfWork.Venues.GetByIdAsync(id, cancellationToken);
+        if (venue == null)
+        {
+            return Result<VenueResponseDto>.Fail(
+                $"Địa điểm với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (request.IsUnderMaintenance && !venue.IsUnderMaintenance)
+        {
+            var conflicts = await _unitOfWork.Events.GetActiveEventsForVenueAsync(
+                id,
+                DateTime.UtcNow,
+                cancellationToken);
+
+            if (conflicts.Count > 0)
+            {
+                var conflictDtos = conflicts.Select(eventEntity =>
+                    new VenueMaintenanceConflictDto
+                    {
+                        EventId = eventEntity.Id,
+                        Title = eventEntity.Title,
+                        Status = eventEntity.Status.ToString(),
+                        StartTime = eventEntity.StartTime,
+                        EndTime = eventEntity.EndTime
+                    }).ToList();
+
+                return Result<VenueResponseDto>.Fail(
+                    "Không thể bật bảo trì vì địa điểm đang được sử dụng bởi Event Approved/Ongoing.",
+                    StatusCodes.Status409Conflict,
+                    conflictDtos);
+            }
+        }
+
+        venue.IsUnderMaintenance = request.IsUnderMaintenance;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<VenueResponseDto>.Ok(new VenueResponseDto
+        {
+            Id = venue.Id,
+            Name = venue.Name,
+            Location = venue.Location,
+            Capacity = venue.Capacity,
+            IsUnderMaintenance = venue.IsUnderMaintenance
+        });
+    }
 }

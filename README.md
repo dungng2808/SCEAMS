@@ -894,5 +894,27 @@ MVC giữ nguyên dữ liệu trên form và hiển thị lý do để người 
 Lưu thành công sẽ redirect về danh sách, lọc theo venue vừa cập nhật để xác nhận
 dữ liệu mới.
 
+## API bật/tắt bảo trì địa điểm
+
+Admin và Staff dùng endpoint riêng để thay đổi trạng thái bảo trì:
+
+```text
+PUT http://localhost:5195/api/venues/{id}/maintenance
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "isUnderMaintenance": true
+}
+```
+
+Khi bật bảo trì, API kiểm tra các Event `Approved`/`Ongoing` chưa kết thúc đang
+dùng venue. Nếu có xung đột, API trả `409 Conflict` với mảng `conflicts` gồm
+`eventId`, `title`, `status`, `startTime` và `endTime`; trạng thái venue không
+bị thay đổi. Tắt bảo trì không có điều kiện xung đột. Request kiểm thử nằm trong
+Postman **Venues** folder.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

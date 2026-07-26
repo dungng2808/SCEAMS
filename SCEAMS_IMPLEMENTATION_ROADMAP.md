@@ -590,9 +590,9 @@ Domain entity/enum
 
 ### Phase 65 - API: Bật/tắt bảo trì địa điểm
 
-- [ ] Thêm `PUT /api/venues/{id}/maintenance`.
-- [ ] Chặn chuyển sang maintenance nếu có Event Approved/Ongoing bị ảnh hưởng, hoặc trả danh sách conflict.
-- [ ] Chỉ Admin/Staff được thao tác.
+- [x] Thêm `PUT /api/venues/{id}/maintenance`.
+- [x] Chặn chuyển sang maintenance nếu có Event Approved/Ongoing bị ảnh hưởng và trả danh sách conflict.
+- [x] Chỉ Admin/Staff được thao tác.
 
 ### Phase 66 - MVC: Cập nhật bảo trì
 

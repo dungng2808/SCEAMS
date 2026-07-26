@@ -4801,7 +4801,197 @@
             "999999"
           ]
         },
-        "description": "Phase 63 kiểm thử venue không tồn tại trả 404 Not Found."
+      "description": "Phase 63 kiểm thử venue không tồn tại trả 404 Not Found."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 65 - Enable Maintenance - Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Venue is under maintenance\", function () {",
+              "    pm.expect(pm.response.json().isUnderMaintenance).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isUnderMaintenance\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{venueId}}/maintenance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{venueId}}",
+            "maintenance"
+          ]
+        },
+        "description": "Phase 65 bật bảo trì cho venue không có Event Approved/Ongoing xung đột."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 65 - Disable Maintenance - Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Venue is available\", function () {",
+              "    pm.expect(pm.response.json().isUnderMaintenance).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isUnderMaintenance\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{venueId}}/maintenance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{venueId}}",
+            "maintenance"
+          ]
+        },
+        "description": "Phase 65 tắt bảo trì; thao tác này không có conflict Event."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 65 - Maintenance Conflict - Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"Conflict events are returned\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.conflicts).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isUnderMaintenance\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/{{venueId}}/maintenance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "{{venueId}}",
+            "maintenance"
+          ]
+        },
+        "description": "Chọn venueId đang có Event Approved/Ongoing để kiểm thử 409 và danh sách conflicts."
       },
       "response": []
     }

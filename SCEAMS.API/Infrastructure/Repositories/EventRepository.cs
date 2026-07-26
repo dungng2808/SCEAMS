@@ -73,4 +73,20 @@ public sealed class EventRepository
                     registration.Status == RegistrationStatus.Attended),
             cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Event>> GetActiveEventsForVenueAsync(
+        int venueId,
+        DateTime fromUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Where(eventEntity =>
+                eventEntity.VenueId == venueId &&
+                eventEntity.EndTime >= fromUtc &&
+                (eventEntity.Status == EventStatus.Approved ||
+                    eventEntity.Status == EventStatus.Ongoing))
+            .OrderBy(eventEntity => eventEntity.StartTime)
+            .ToListAsync(cancellationToken);
+    }
 }

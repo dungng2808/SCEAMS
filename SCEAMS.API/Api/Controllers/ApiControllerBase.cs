@@ -16,7 +16,7 @@ public abstract class ApiControllerBase : ControllerBase
 
         return StatusCode(
             result.StatusCode,
-            new { message = result.Message });
+            BuildErrorPayload(result));
     }
 
     protected IActionResult ToActionResult<T>(Result<T> result)
@@ -28,6 +28,13 @@ public abstract class ApiControllerBase : ControllerBase
 
         return StatusCode(
             result.StatusCode,
-            new { message = result.Message });
+            BuildErrorPayload(result));
+    }
+
+    private static object BuildErrorPayload(Result result)
+    {
+        return result.ErrorData is null
+            ? new { message = result.Message }
+            : new { message = result.Message, conflicts = result.ErrorData };
     }
 }

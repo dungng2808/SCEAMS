@@ -23,4 +23,9 @@ public interface IEventRepository : IGenericRepository<Event>
         int venueId,
         DateTime fromUtc,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Event>> GetActiveEventsForVenueAsync(
+        int venueId,
+        DateTime fromUtc,
+        CancellationToken cancellationToken = default);
 }
