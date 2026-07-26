@@ -4,8 +4,17 @@ namespace SCEAMS.MVC.Services.ApiClients;
 
 public interface IVenueApiClient
 {
+    Task<VenueApiResult> GetVenueAsync(
+        int venueId,
+        CancellationToken cancellationToken = default);
+
     Task<CreateVenueApiResult> CreateVenueAsync(
         CreateVenueApiRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<UpdateVenueApiResult> UpdateVenueAsync(
+        int venueId,
+        UpdateVenueApiRequest request,
         CancellationToken cancellationToken = default);
 
     Task<VenueListApiResult> GetVenuesAsync(

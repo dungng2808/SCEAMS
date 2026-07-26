@@ -1,0 +1,93 @@
+@model SCEAMS.MVC.ViewModels.EditVenueViewModel
+
+@{
+    ViewData["Title"] = "Sửa địa điểm";
+}
+
+<section class="profile-page" aria-labelledby="edit-venue-title">
+    <div class="profile-page__header">
+        <div>
+            <p class="eyebrow">Milestone G · Quản trị địa điểm</p>
+            <h1 id="edit-venue-title">Sửa thông tin địa điểm</h1>
+            <p>Cập nhật tên, vị trí và sức chứa. Trạng thái bảo trì được quản lý ở thao tác riêng.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-action="Index">&larr; Danh sách địa điểm</a>
+    </div>
+
+    @if (Model.IsNotFound || !string.IsNullOrWhiteSpace(Model.LoadErrorMessage))
+    {
+        <section class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">@(Model.IsNotFound ? "404 · Không tìm thấy" : "Kết nối gián đoạn")</p>
+                <h2>@(Model.IsNotFound ? "Địa điểm không tồn tại" : "Chưa thể tải địa điểm")</h2>
+                <p>@Model.LoadErrorMessage</p>
+                <a class="btn-app btn-app--primary" asp-action="Index">Quay lại danh sách</a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="profile-layout">
+            <form asp-action="Edit"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  class="surface-card profile-form">
+                @Html.AntiForgeryToken()
+
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <div class="profile-form__field">
+                    <label asp-for="Name">Tên địa điểm</label>
+                    <input asp-for="Name" maxlength="200" autocomplete="off" autofocus />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="profile-form__field">
+                    <label asp-for="Location">Vị trí</label>
+                    <input asp-for="Location" maxlength="300" autocomplete="off" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <div class="profile-form__field">
+                    <label asp-for="Capacity">Sức chứa (người)</label>
+                    <input asp-for="Capacity" type="number" min="1" max="2147483647" />
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                    <small class="form-text">Không thể giảm dưới số đăng ký hợp lệ của Event sắp tới.</small>
+                </div>
+
+                <div class="profile-form__actions">
+                    <a class="btn-app btn-app--ghost" asp-action="Index">Hủy</a>
+                    <button type="submit" class="btn-app btn-app--primary">Lưu thay đổi</button>
+                </div>
+            </form>
+
+            <aside class="surface-card profile-aside">
+                <p class="eyebrow">Trạng thái hiện tại</p>
+                <h2>@(Model.IsUnderMaintenance ? "Đang bảo trì" : "Sẵn sàng")</h2>
+                <span class="status-badge @(Model.IsUnderMaintenance ? "status-badge--warning" : "status-badge--success")">
+                    @(Model.IsUnderMaintenance ? "Đang bảo trì" : "Sẵn sàng")
+                </span>
+                <ul>
+                    <li>Chỉ tên, vị trí và sức chứa được thay đổi ở đây.</li>
+                    <li>Tên và vị trí không được trùng với venue khác.</li>
+                    <li>Nếu capacity không hợp lệ, form sẽ giữ lại dữ liệu để bạn chỉnh sửa.</li>
+                </ul>
+            </aside>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -880,5 +880,19 @@ nguyên để xử lý riêng ở Phase 65. API trả `409 Conflict` nếu cặp
 tồn tại hoặc sức chứa mới nhỏ hơn số đăng ký `Confirmed`/`Attended` của các
 Event `Approved` sắp tới. Request kiểm thử nằm trong Postman **Venues** folder.
 
+## MVC sửa địa điểm
+
+Admin và Staff mở nút **Sửa** tại danh sách địa điểm hoặc truy cập:
+
+```text
+https://localhost:7034/Venues/{id}/Edit
+```
+
+Form tải dữ liệu hiện tại từ API, chỉ cho sửa tên, vị trí và capacity. Khi API
+trả `409 Conflict` (trùng tên/vị trí hoặc giảm capacity dưới số đăng ký hợp lệ),
+MVC giữ nguyên dữ liệu trên form và hiển thị lý do để người dùng điều chỉnh.
+Lưu thành công sẽ redirect về danh sách, lọc theo venue vừa cập nhật để xác nhận
+dữ liệu mới.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

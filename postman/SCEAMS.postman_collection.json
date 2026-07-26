@@ -4516,8 +4516,10 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test(\"Venue is available by default\", function () {",
-                  "    pm.expect(pm.response.json().isUnderMaintenance).to.eql(false);",
+              "pm.test(\"Venue is available by default\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.isUnderMaintenance).to.eql(false);",
+              "    pm.collectionVariables.set(\"venueId\", body.id);",
                   "});"
                 ]
               }

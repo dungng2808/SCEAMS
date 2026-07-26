@@ -584,9 +584,9 @@ Domain entity/enum
 
 ### Phase 64 - MVC: Sửa địa điểm
 
-- [ ] Tạo form edit venue.
-- [ ] Hiển thị lỗi conflict khi capacity mới không hợp lệ.
-- [ ] Tải lại chi tiết sau khi lưu.
+- [x] Tạo form edit venue.
+- [x] Hiển thị lỗi conflict khi capacity mới không hợp lệ.
+- [x] Tải lại chi tiết/danh sách sau khi lưu.
 
 ### Phase 65 - API: Bật/tắt bảo trì địa điểm
 

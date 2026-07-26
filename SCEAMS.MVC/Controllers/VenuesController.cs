@@ -167,9 +167,150 @@ public sealed class VenuesController : Controller
         }
     }
 
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Staff")]
+    [HttpGet("{id:int}/Edit")]
+    public async Task<IActionResult> Edit(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _venueApiClient.GetVenueAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (!result.IsSuccess || result.Venue is null)
+            {
+                if (result.IsNotFound)
+                {
+                    Response.StatusCode = StatusCodes.Status404NotFound;
+                }
+
+                return View(new EditVenueViewModel
+                {
+                    Id = id,
+                    IsNotFound = result.IsNotFound,
+                    LoadErrorMessage = result.ErrorMessage ??
+                        "Không thể tải địa điểm để chỉnh sửa."
+                });
+            }
+
+            return View(MapEditVenue(result.Venue));
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load venue {VenueId} for editing.", id);
+            return View(new EditVenueViewModel
+            {
+                Id = id,
+                LoadErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,Staff")]
+    [HttpPost("{id:int}/Edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id,
+        EditVenueViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _venueApiClient.UpdateVenueAsync(
+                id,
+                new UpdateVenueApiRequest(
+                    model.Name.Trim(),
+                    model.Location.Trim(),
+                    model.Capacity),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return View(new EditVenueViewModel
+                {
+                    Id = id,
+                    Name = model.Name,
+                    Location = model.Location,
+                    Capacity = model.Capacity,
+                    IsNotFound = true,
+                    LoadErrorMessage = result.ErrorMessage ?? "Địa điểm không tồn tại."
+                });
+            }
+
+            if (result.IsConflict)
+            {
+                ModelState.AddModelError(
+                    nameof(EditVenueViewModel.Capacity),
+                    result.ErrorMessage ?? "Sức chứa mới xung đột với đăng ký hiện tại.");
+                model.ErrorMessage = result.ErrorMessage;
+                return View(model);
+            }
+
+            if (result.IsSuccess && result.Venue is not null)
+            {
+                TempData["SuccessMessage"] =
+                    $"Đã cập nhật địa điểm '{result.Venue.Name}' thành công.";
+                return RedirectToAction(
+                    nameof(Index),
+                    new { search = result.Venue.Name, page = 1, pageSize = 10 });
+            }
+
+            model.ErrorMessage = result.ErrorMessage ??
+                "Không thể cập nhật địa điểm. Vui lòng thử lại.";
+            return View(model);
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to update venue {VenueId} from MVC.", id);
+            model.ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return View(model);
+        }
+    }
+
     private static VenueListItemViewModel MapVenue(VenueApiResponse venue)
     {
         return new VenueListItemViewModel
+        {
+            Id = venue.Id,
+            Name = venue.Name,
+            Location = venue.Location,
+            Capacity = venue.Capacity,
+            IsUnderMaintenance = venue.IsUnderMaintenance
+        };
+    }
+
+    private static EditVenueViewModel MapEditVenue(VenueApiResponse venue)
+    {
+        return new EditVenueViewModel
         {
             Id = venue.Id,
             Name = venue.Name,

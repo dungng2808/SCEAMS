@@ -63,6 +63,11 @@
         </div>
     </form>
 
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="status">@successMessage</div>
+    }
+
     @if (Model.CanManage)
     {
         <aside class="category-admin surface-card" aria-label="Quyền quản trị địa điểm">
@@ -128,7 +133,10 @@
                             <th>Vị trí</th>
                             <th>Sức chứa</th>
                             <th>Tình trạng</th>
-                            <th class="text-end">Mã</th>
+                            @if (Model.CanManage)
+                            {
+                                <th class="text-end">Thao tác</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -144,7 +152,17 @@
                                 <td>@venue.Location</td>
                                 <td><strong>@venue.Capacity</strong> người</td>
                                 <td><span class="status-badge @venue.MaintenanceBadgeClass">@venue.MaintenanceLabel</span></td>
-                                <td class="text-end" style="color: var(--sceams-text-soft);">#@venue.Id</td>
+                                @if (Model.CanManage)
+                                {
+                                    <td class="text-end">
+                                        <a class="btn-app btn-app--ghost btn-sm"
+                                           asp-controller="Venues"
+                                           asp-action="Edit"
+                                           asp-route-id="@venue.Id">
+                                            Sửa
+                                        </a>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
