@@ -145,6 +145,8 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHostedService<EventStatusSyncBackgroundService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
 

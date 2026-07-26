@@ -842,9 +842,9 @@ Domain entity/enum
 
 ### Phase 105 - API: Báo cáo Event theo trạng thái
 
-- [ ] Thêm `GET /api/reports/event-summary` cho Admin/Staff.
-- [ ] Trả số Event theo status và khoảng thời gian.
-- [ ] Test tổng khớp với dữ liệu seed.
+- [x] Thêm `GET /api/reports/event-summary` cho Admin/Staff.
+- [x] Trả số Event theo status và khoảng thời gian.
+- [x] Test tổng khớp với dữ liệu seed.
 
 ### Phase 106 - MVC: Dashboard Event summary
 
