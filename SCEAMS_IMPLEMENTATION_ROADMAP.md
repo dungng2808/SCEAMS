@@ -473,9 +473,10 @@ Domain entity/enum
 
 ### Phase 48 - MVC: Sửa thông tin CLB
 
-- [ ] Tạo form edit chỉ hiện cho Admin hoặc Organizer sở hữu.
-- [ ] Xử lý `403` khi ownership đã thay đổi.
-- [ ] Tải lại chi tiết sau khi lưu.
+- [x] Tạo form edit chỉ hiện cho Admin hoặc Organizer sở hữu.
+- [x] Xử lý `403` khi ownership đã thay đổi.
+- [x] Tải lại chi tiết sau khi lưu.
+
 
 ### Phase 49 - API: Giải thể CLB
 

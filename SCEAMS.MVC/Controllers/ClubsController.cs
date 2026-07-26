@@ -465,6 +465,154 @@ public sealed class ClubsController : Controller
         }
     }
 
+    [HttpGet("{id:int}/Edit")]
+    [Authorize(Roles = "Organizer,Admin")]
+    public async Task<IActionResult> Edit(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _clubApiClient.GetClubByIdAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return View("Edit", new EditClubViewModel
+                {
+                    Id = id,
+                    IsNotFound = true,
+                    ErrorMessage = result.ErrorMessage ?? "Không tìm thấy câu lạc bộ."
+                });
+            }
+
+            if (result.IsForbidden || result.Club == null)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return View("Edit", new EditClubViewModel
+                {
+                    Id = id,
+                    IsForbidden = true,
+                    ErrorMessage = result.ErrorMessage ?? "Bạn không có quyền chỉnh sửa câu lạc bộ này."
+                });
+            }
+
+            var club = result.Club;
+            var currentUserId = GetCurrentUserId();
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = currentUserId.HasValue && currentUserId.Value == club.CreatedByUserId;
+
+            if (!isAdmin && !isOwner)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return View("Edit", new EditClubViewModel
+                {
+                    Id = id,
+                    IsForbidden = true,
+                    ErrorMessage = "Bạn không phải là chủ sở hữu câu lạc bộ này."
+                });
+            }
+
+            var (label, badgeClass) = GetStatusInfo(club.Status);
+            var categoryOptions = await GetCategoryOptionsAsync(cancellationToken);
+
+            var viewModel = new EditClubViewModel
+            {
+                Id = club.Id,
+                Name = club.Name,
+                Description = club.Description,
+                CategoryId = club.CategoryId,
+                StatusLabel = label,
+                StatusBadgeClass = badgeClass,
+                Categories = categoryOptions
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load club details #{ClubId} for edit.", id);
+
+            return View("Edit", new EditClubViewModel
+            {
+                Id = id,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    [HttpPost("{id:int}/Edit")]
+    [Authorize(Roles = "Organizer,Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id,
+        EditClubViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+            return View(model);
+        }
+
+        try
+        {
+            var apiRequest = new UpdateClubApiRequest
+            {
+                Name = model.Name.Trim(),
+                Description = model.Description?.Trim(),
+                CategoryId = model.CategoryId
+            };
+
+            var result = await _clubApiClient.UpdateClubAsync(id, apiRequest, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                model.IsForbidden = true;
+                model.ErrorMessage = result.ErrorMessage ?? "Bạn không còn quyền chỉnh sửa câu lạc bộ này (Quyền sở hữu có thể đã thay đổi).";
+                model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+                return View(model);
+            }
+
+            if (!result.IsSuccess || result.Club == null)
+            {
+                model.ErrorMessage = result.ErrorMessage ?? "Không thể cập nhật thông tin câu lạc bộ vào lúc này.";
+                model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Đã cập nhật thông tin câu lạc bộ '{result.Club.Name}' thành công!";
+            return RedirectToAction(nameof(Details), new { id = result.Club.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to send update club #{ClubId} request.", id);
+
+            model.ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            model.Categories = await GetCategoryOptionsAsync(cancellationToken);
+            return View(model);
+        }
+    }
+
     private async Task<List<ClubCategorySelectItemViewModel>> GetCategoryOptionsAsync(CancellationToken cancellationToken)
     {
         var categoryResult = await _clubCategoryApiClient.GetClubCategoriesAsync(cancellationToken);

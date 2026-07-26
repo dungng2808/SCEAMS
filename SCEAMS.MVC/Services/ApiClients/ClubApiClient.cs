@@ -362,6 +362,78 @@ public sealed class ClubApiClient : IClubApiClient
         };
     }
 
+    public async Task<UpdateClubApiResult> UpdateClubAsync(
+        int id,
+        UpdateClubApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync($"api/clubs/{id}", request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var updatedClub = await response.Content
+                .ReadFromJsonAsync<ClubDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateClubApiResult
+            {
+                IsSuccess = true,
+                Club = updatedClub
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new UpdateClubApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = $"Không tìm thấy câu lạc bộ #{id}."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new UpdateClubApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền chỉnh sửa thông tin câu lạc bộ này."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new UpdateClubApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Tên câu lạc bộ đã tồn tại."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var message = await TryReadErrorMessageAsync(response, cancellationToken);
+            return new UpdateClubApiResult
+            {
+                ErrorMessage = message ?? "Dữ liệu cập nhật không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new UpdateClubApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        return new UpdateClubApiResult
+        {
+            ErrorMessage = "Không thể cập nhật thông tin câu lạc bộ vào lúc này."
+        };
+    }
+
     private static async Task<string?> TryReadErrorMessageAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

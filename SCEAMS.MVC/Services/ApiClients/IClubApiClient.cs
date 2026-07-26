@@ -24,4 +24,9 @@ public interface IClubApiClient
         int id,
         RejectClubApiRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<UpdateClubApiResult> UpdateClubAsync(
+        int id,
+        UpdateClubApiRequest request,
+        CancellationToken cancellationToken = default);
 }
