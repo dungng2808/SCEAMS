@@ -13,6 +13,70 @@ public sealed class VenueApiClient : IVenueApiClient
         _httpClient = httpClient;
     }
 
+    public async Task<CreateVenueApiResult> CreateVenueAsync(
+        CreateVenueApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/venues",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var venue = await response.Content
+                .ReadFromJsonAsync<VenueApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new CreateVenueApiResult
+            {
+                IsSuccess = true,
+                Venue = venue
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            return new CreateVenueApiResult
+            {
+                IsValidationError = true,
+                ErrorMessage = "Thông tin địa điểm chưa hợp lệ. Vui lòng kiểm tra lại."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new CreateVenueApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new CreateVenueApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Chỉ Admin hoặc Staff mới có thể tạo địa điểm."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            return new CreateVenueApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = "Tên và vị trí địa điểm này đã tồn tại."
+            };
+        }
+
+        return new CreateVenueApiResult
+        {
+            ErrorMessage = "Không thể tạo địa điểm vào lúc này."
+        };
+    }
+
     public async Task<VenueListApiResult> GetVenuesAsync(
         string? search,
         bool? maintenance,

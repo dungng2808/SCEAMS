@@ -845,5 +845,17 @@ Tên, vị trí và sức chứa được validate; venue mới luôn bắt đ�
 khác hoa thường; lỗi trùng trả `409 Conflict`. Request Phase 61 nằm trong
 Postman **Venues** folder.
 
+## MVC tạo địa điểm
+
+Admin và Staff mở form tại:
+
+```text
+https://localhost:7034/Venues/Create
+```
+
+Form có validation phía client/server cho tên, vị trí và capacity; conflict
+`409` được gắn vào trường tên. Khi tạo thành công, MVC redirect về danh sách
+với filter tên venue mới để xác nhận dữ liệu đã được lưu qua API.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

@@ -572,9 +572,9 @@ Domain entity/enum
 
 ### Phase 62 - MVC: Tạo địa điểm
 
-- [ ] Tạo form create venue.
-- [ ] Hiển thị validation từ API.
-- [ ] Xác nhận venue mới xuất hiện trong danh sách.
+- [x] Tạo form create venue.
+- [x] Hiển thị validation từ API.
+- [x] Xác nhận venue mới xuất hiện trong danh sách.
 
 ### Phase 63 - API: Cập nhật địa điểm
 

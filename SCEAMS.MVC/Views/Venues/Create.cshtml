@@ -1,0 +1,66 @@
+@model SCEAMS.MVC.ViewModels.CreateVenueViewModel
+
+@{
+    ViewData["Title"] = "Tạo địa điểm";
+}
+
+<section class="profile-page" aria-labelledby="create-venue-title">
+    <div class="profile-page__header">
+        <div>
+            <p class="eyebrow">Quản trị địa điểm</p>
+            <h1 id="create-venue-title">Tạo địa điểm mới</h1>
+            <p>Thêm không gian để Admin, Staff và Organizer có thể sử dụng trong các phase sự kiện tiếp theo.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-action="Index">&larr; Danh sách địa điểm</a>
+    </div>
+
+    <div class="profile-layout">
+        <form asp-action="Create" method="post" class="surface-card profile-form">
+            @Html.AntiForgeryToken()
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+            }
+
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="profile-form__field">
+                <label asp-for="Name">Tên địa điểm</label>
+                <input asp-for="Name" maxlength="200" autocomplete="off" placeholder="Ví dụ: Innovation Hall" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="profile-form__field">
+                <label asp-for="Location">Vị trí</label>
+                <input asp-for="Location" maxlength="300" autocomplete="off" placeholder="Ví dụ: Tòa A - Tầng 2" />
+                <span asp-validation-for="Location" class="text-danger"></span>
+            </div>
+
+            <div class="profile-form__field">
+                <label asp-for="Capacity">Sức chứa (người)</label>
+                <input asp-for="Capacity" type="number" min="1" max="2147483647" />
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+
+            <div class="profile-form__actions">
+                <a class="btn-app btn-app--ghost" asp-action="Index">Hủy</a>
+                <button type="submit" class="btn-app btn-app--primary">Tạo địa điểm</button>
+            </div>
+        </form>
+
+        <aside class="surface-card profile-aside">
+            <p class="eyebrow">Lưu ý</p>
+            <h2>Thông tin venue</h2>
+            <ul>
+                <li>Tên và vị trí không được trùng nhau.</li>
+                <li>Sức chứa phải lớn hơn 0.</li>
+                <li>Venue mới bắt đầu ở trạng thái Sẵn sàng.</li>
+            </ul>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
