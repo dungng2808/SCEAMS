@@ -8,6 +8,15 @@ public interface IUserApiClient
         CreateUserApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<AdminUserApiResult> GetUserAsync(
+        int userId,
+        CancellationToken cancellationToken = default);
+
+    Task<UpdateUserProfileApiResult> UpdateUserAsync(
+        int userId,
+        UpdateUserProfileApiRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<UserListApiResult> GetUsersAsync(
         UserListApiQuery query,
         CancellationToken cancellationToken = default);

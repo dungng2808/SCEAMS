@@ -308,9 +308,9 @@ Domain entity/enum
 
 ### Phase 24 - MVC: Admin sửa tài khoản
 
-- [ ] Tạo form edit riêng cho thông tin tài khoản.
-- [ ] Không trộn thao tác role/lock vào form edit.
-- [ ] Sau khi lưu, tải lại chi tiết để xác nhận.
+- [x] Tạo form edit riêng cho thông tin tài khoản.
+- [x] Không trộn thao tác role/lock vào form edit.
+- [x] Sau khi lưu, tải lại chi tiết để xác nhận.
 
 ### Phase 25 - API: Khóa hoặc mở khóa tài khoản
 

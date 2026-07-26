@@ -153,6 +153,150 @@ public sealed class UserApiClient : IUserApiClient
         };
     }
 
+    public async Task<AdminUserApiResult> GetUserAsync(
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        const int pageSize = 100;
+        var page = 1;
+
+        while (true)
+        {
+            var result = await GetUsersAsync(
+                new UserListApiQuery(
+                    Search: null,
+                    Role: null,
+                    IsActive: null,
+                    Page: page,
+                    PageSize: pageSize),
+                cancellationToken);
+
+            if (!result.IsSuccess || result.Users is null)
+            {
+                return new AdminUserApiResult
+                {
+                    IsUnauthorized = result.IsUnauthorized,
+                    IsForbidden = result.IsForbidden,
+                    ErrorMessage = result.ErrorMessage ??
+                        "Không thể tải thông tin tài khoản."
+                };
+            }
+
+            var user = result.Users.Items.FirstOrDefault(
+                item => item.Id == userId);
+
+            if (user is not null)
+            {
+                return new AdminUserApiResult
+                {
+                    IsSuccess = true,
+                    User = user
+                };
+            }
+
+            if (!result.Users.HasNextPage)
+            {
+                return new AdminUserApiResult
+                {
+                    IsNotFound = true,
+                    ErrorMessage =
+                        "Tài khoản không còn tồn tại trong hệ thống."
+                };
+            }
+
+            page++;
+        }
+    }
+
+    public async Task<UpdateUserProfileApiResult> UpdateUserAsync(
+        int userId,
+        UpdateUserProfileApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/users/{userId.ToString(CultureInfo.InvariantCulture)}",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var user = await response.Content
+                .ReadFromJsonAsync<UserListItemApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateUserProfileApiResult
+            {
+                IsSuccess = user is not null,
+                User = user,
+                ErrorMessage = user is null
+                    ? "API trả về tài khoản đã cập nhật không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var validationProblem =
+                DeserializeOrDefault<ValidationProblemApiResponse>(
+                    content);
+
+            if (validationProblem?.Errors is { Count: > 0 })
+            {
+                return new UpdateUserProfileApiResult
+                {
+                    FieldErrors = validationProblem.Errors
+                };
+            }
+
+            var badRequest = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return UpdateUserBadRequestResult(
+                badRequest?.Message);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var conflict = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return UpdateUserConflictResult(conflict?.Message);
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized =>
+                new UpdateUserProfileApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new UpdateUserProfileApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền sửa tài khoản người dùng."
+                },
+            HttpStatusCode.NotFound =>
+                new UpdateUserProfileApiResult
+                {
+                    IsNotFound = true,
+                    ErrorMessage =
+                        "Tài khoản không còn tồn tại trong hệ thống."
+                },
+            _ => new UpdateUserProfileApiResult
+            {
+                ErrorMessage =
+                    "Không thể cập nhật tài khoản vào lúc này."
+            }
+        };
+    }
+
     public async Task<CurrentUserProfileApiResult> GetCurrentUserAsync(
         CancellationToken cancellationToken = default)
     {
@@ -440,6 +584,69 @@ public sealed class UserApiClient : IUserApiClient
         string message)
     {
         return new CreateUserApiResult
+        {
+            FieldErrors = new Dictionary<string, string[]>
+            {
+                [field] = [message]
+            }
+        };
+    }
+
+    private static UpdateUserProfileApiResult
+        UpdateUserBadRequestResult(string? message)
+    {
+        if (message == "StudentCode is required for Student role.")
+        {
+            return UpdateUserFieldErrorResult(
+                "StudentCode",
+                "Vui lòng nhập mã sinh viên cho tài khoản sinh viên.");
+        }
+
+        if (message ==
+            "FullName must contain at least 2 characters.")
+        {
+            return UpdateUserFieldErrorResult(
+                "FullName",
+                "Họ và tên phải có ít nhất 2 ký tự.");
+        }
+
+        return new UpdateUserProfileApiResult
+        {
+            ErrorMessage = message ??
+                "Thông tin cập nhật tài khoản không hợp lệ."
+        };
+    }
+
+    private static UpdateUserProfileApiResult
+        UpdateUserConflictResult(string? message)
+    {
+        if (message == "Email is already registered.")
+        {
+            return UpdateUserFieldErrorResult(
+                "Email",
+                "Email này đã được sử dụng.");
+        }
+
+        if (message == "StudentCode is already registered.")
+        {
+            return UpdateUserFieldErrorResult(
+                "StudentCode",
+                "Mã sinh viên này đã được sử dụng.");
+        }
+
+        return new UpdateUserProfileApiResult
+        {
+            ErrorMessage = message ??
+                "Email hoặc mã sinh viên đã tồn tại."
+        };
+    }
+
+    private static UpdateUserProfileApiResult
+        UpdateUserFieldErrorResult(
+            string field,
+            string message)
+    {
+        return new UpdateUserProfileApiResult
         {
             FieldErrors = new Dictionary<string, string[]>
             {

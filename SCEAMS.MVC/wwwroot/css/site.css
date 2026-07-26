@@ -2225,6 +2225,44 @@ svg {
   font-weight: 500;
 }
 
+.user-edit-layout {
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+}
+
+.user-edit-protected {
+  align-items: center;
+  background: var(--sceams-background);
+  border: 1px solid var(--sceams-border);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.8rem 1rem;
+  grid-template-columns: repeat(2, auto) minmax(12rem, 1fr);
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.user-edit-protected > div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.user-edit-protected > div > span {
+  color: var(--sceams-text-faint);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.user-edit-protected > p {
+  border-left: 1px solid var(--sceams-border);
+  color: var(--sceams-text-faint);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 1rem;
+}
+
 .users-page {
   display: grid;
   gap: 1.5rem;
@@ -2602,6 +2640,38 @@ svg {
   background: var(--sceams-blue-50);
 }
 
+.users-row-action {
+  align-items: center;
+  border: 1px solid var(--sceams-border-strong);
+  border-radius: 0.65rem;
+  color: var(--sceams-blue-700);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 750;
+  gap: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.users-row-action:hover {
+  background: #ffffff;
+  border-color: var(--sceams-blue-600);
+  color: var(--sceams-blue-700);
+}
+
+.users-row-action:focus-visible {
+  box-shadow: 0 0 0 0.22rem var(--sceams-focus);
+  outline: 2px solid var(--sceams-blue-600);
+  outline-offset: 1px;
+}
+
+.users-row-action svg {
+  height: 0.95rem;
+  stroke-width: 1.9;
+  width: 0.95rem;
+}
+
 .users-identity {
   align-items: center;
   display: flex;
@@ -2863,6 +2933,10 @@ svg {
     grid-template-columns: 1fr;
   }
 
+  .user-edit-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3066,6 +3140,18 @@ svg {
 
   .user-create-field--wide {
     grid-column: auto;
+  }
+
+  .user-edit-protected {
+    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .user-edit-protected > p {
+    border-left: 0;
+    border-top: 1px solid var(--sceams-border);
+    grid-column: 1 / -1;
+    padding: 0.75rem 0 0;
   }
 
   .users-filters {

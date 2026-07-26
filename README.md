@@ -320,6 +320,25 @@ code already assigned to another account returns `409`. Ready-to-run Phase 23
 requests are available in `SCEAMS.API/SCEAMS.API.http` and the Postman
 **Users** folder.
 
+## MVC Admin edit user
+
+After signing in as Admin, select **Sửa** on `/Admin/Users` or open:
+
+```text
+https://localhost:7034/Admin/Users/{id}/Edit
+```
+
+MVC loads the exact account by ID through the Admin user-list API and pre-fills
+only full name, email, optional student code and phone number. Role and active
+status are displayed as protected context; they are not rendered as form
+inputs and are not included in the update request.
+
+MVC validation and API conflicts are displayed next to the corresponding
+field. After a successful `PUT /api/users/{id}`, MVC retrieves the account from
+the API again, then redirects to the user list filtered by the confirmed email
+and displays a success notification. A missing account renders a dedicated
+`404` state without an editable form.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

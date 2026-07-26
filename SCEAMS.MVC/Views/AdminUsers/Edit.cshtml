@@ -1,0 +1,266 @@
+@model SCEAMS.MVC.ViewModels.EditAdminUserViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa tài khoản";
+}
+
+<section class="profile-edit-page user-edit-page" aria-labelledby="user-edit-title">
+    <div class="page-heading profile-heading">
+        <div>
+            <p class="eyebrow">Milestone C · Admin</p>
+            <h1 id="user-edit-title">Chỉnh sửa tài khoản</h1>
+            <p class="page-heading__copy">
+                Cập nhật thông tin hồ sơ mà không ảnh hưởng đến quyền hoặc trạng thái đăng nhập.
+            </p>
+        </div>
+        <a class="btn-app btn-app--ghost"
+           asp-controller="AdminUsers"
+           asp-action="Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+            </svg>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    @if (Model.LoadErrorMessage is not null)
+    {
+        <div class="profile-error surface-card" role="alert">
+            <span class="profile-error__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    @if (Model.IsNotFound)
+                    {
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9 9l6 6M15 9l-6 6" />
+                    }
+                    else
+                    {
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 7v6M12 17h.01" />
+                    }
+                </svg>
+            </span>
+            <div>
+                <h2>
+                    @(Model.IsNotFound
+                        ? "Không tìm thấy tài khoản"
+                        : "Chưa thể mở biểu mẫu")
+                </h2>
+                <p>@Model.LoadErrorMessage</p>
+                <div class="profile-error__actions">
+                    @if (!Model.IsNotFound)
+                    {
+                        <a class="btn-app btn-app--primary"
+                           asp-controller="AdminUsers"
+                           asp-action="Edit"
+                           asp-route-id="@Model.Id">
+                            Thử tải lại
+                        </a>
+                    }
+                    <a class="btn-app btn-app--ghost"
+                       asp-controller="AdminUsers"
+                       asp-action="Index">
+                        Về danh sách người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="profile-edit-layout user-edit-layout">
+            <section class="profile-edit-card surface-card" aria-labelledby="user-edit-form-title">
+                <div class="profile-card__heading">
+                    <span class="profile-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="m4 16-.8 4 4-.8L18 8.4 15.6 6 4 16Z" />
+                            <path d="m13.8 7.8 2.4 2.4" />
+                        </svg>
+                    </span>
+                    <div>
+                        <p>Tài khoản #@Model.Id</p>
+                        <h2 id="user-edit-form-title">Thông tin hồ sơ</h2>
+                    </div>
+                </div>
+
+                <div class="user-edit-protected" aria-label="Thông tin không chỉnh sửa">
+                    <div>
+                        <span>Vai trò</span>
+                        <strong class="users-role users-role--@Model.RoleCssClass">
+                            @Model.RoleLabel
+                        </strong>
+                    </div>
+                    <div>
+                        <span>Trạng thái</span>
+                        <strong class="users-status @(Model.IsActive ? "users-status--active" : "users-status--locked")">
+                            <span aria-hidden="true"></span>
+                            @(Model.IsActive ? "Hoạt động" : "Đã khóa")
+                        </strong>
+                    </div>
+                    <p>
+                        Role và trạng thái được bảo vệ, không gửi trong biểu mẫu này.
+                    </p>
+                </div>
+
+                <form asp-controller="AdminUsers"
+                      asp-action="Edit"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      novalidate
+                      data-auth-form
+                      data-loading-label="Đang lưu và xác nhận...">
+                    <div asp-validation-summary="ModelOnly"
+                         class="profile-edit-summary"
+                         role="alert"
+                         aria-live="polite"></div>
+
+                    <div class="profile-edit-fields user-create-fields">
+                        <div class="profile-edit-field user-create-field--wide">
+                            <label asp-for="FullName">
+                                Họ và tên
+                                <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                            <div class="profile-edit-input">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 21a8 8 0 0 1 16 0" />
+                                </svg>
+                                <input asp-for="FullName"
+                                       class="form-control"
+                                       autocomplete="name"
+                                       placeholder="Nguyễn Văn An" />
+                            </div>
+                            <span asp-validation-for="FullName"
+                                  class="field-error"
+                                  role="alert"></span>
+                        </div>
+
+                        <div class="profile-edit-field">
+                            <label asp-for="Email">
+                                Email
+                                <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                            <div class="profile-edit-input">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="m4 7 8 6 8-6" />
+                                </svg>
+                                <input asp-for="Email"
+                                       class="form-control"
+                                       autocomplete="email"
+                                       inputmode="email"
+                                       placeholder="user@sceams.edu.vn" />
+                            </div>
+                            <span asp-validation-for="Email"
+                                  class="field-error"
+                                  role="alert"></span>
+                        </div>
+
+                        <div class="profile-edit-field">
+                            <label asp-for="PhoneNumber">
+                                Số điện thoại
+                                <small>Tùy chọn</small>
+                            </label>
+                            <div class="profile-edit-input">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <path d="M7 3H4.5A1.5 1.5 0 0 0 3 4.5C3 13.6 10.4 21 19.5 21a1.5 1.5 0 0 0 1.5-1.5V17l-4-1-1.2 2a14 14 0 0 1-9.8-9.8L8 7 7 3Z" />
+                                </svg>
+                                <input asp-for="PhoneNumber"
+                                       class="form-control"
+                                       autocomplete="tel"
+                                       inputmode="tel"
+                                       placeholder="090 123 4567" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber"
+                                  class="field-error"
+                                  role="alert"></span>
+                        </div>
+
+                        <div class="profile-edit-field user-create-field--wide">
+                            <label asp-for="StudentCode">
+                                Mã sinh viên
+                                @if (Model.Role == "Student")
+                                {
+                                    <span class="required-mark" aria-hidden="true">*</span>
+                                }
+                                else
+                                {
+                                    <small>Tùy chọn</small>
+                                }
+                            </label>
+                            <div class="profile-edit-input">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="M7 9h4M7 13h7M17 9h.01" />
+                                </svg>
+                                <input asp-for="StudentCode"
+                                       class="form-control"
+                                       autocomplete="off"
+                                       placeholder="SE123456" />
+                            </div>
+                            <span asp-validation-for="StudentCode"
+                                  class="field-error"
+                                  role="alert"></span>
+                            <p class="profile-edit-field__hint">
+                                Bắt buộc với tài khoản Sinh viên; để trống nếu không áp dụng.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="profile-edit-actions">
+                        <a class="btn-app btn-app--ghost"
+                           asp-controller="AdminUsers"
+                           asp-action="Index">
+                            Hủy
+                        </a>
+                        <button type="submit"
+                                class="btn-app btn-app--primary profile-save-button"
+                                data-submit-button>
+                            <span data-submit-label>Lưu thay đổi</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M5 12h14M13 6l6 6-6 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="profile-edit-side" aria-label="Phạm vi chỉnh sửa">
+                <section class="profile-edit-security surface-card">
+                    <span class="profile-edit-security__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </span>
+                    <h2>Tách biệt thao tác nhạy cảm</h2>
+                    <p>
+                        Biểu mẫu này chỉ cập nhật thông tin nhận diện và liên hệ của tài khoản.
+                    </p>
+                    <ul>
+                        <li>Không gửi role hoặc trạng thái tới API.</li>
+                        <li>Không thay đổi mật khẩu hay phiên đăng nhập.</li>
+                        <li>Email và mã sinh viên vẫn phải duy nhất.</li>
+                    </ul>
+                </section>
+
+                <div class="profile-edit-tip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11v5M12 8h.01" />
+                    </svg>
+                    <p>
+                        Tài khoản được tạo ngày
+                        <strong>@Model.CreatedAtLocal.ToString("dd/MM/yyyy")</strong>.
+                        Sau khi lưu, MVC tải lại tài khoản từ API trước khi báo thành công.
+                    </p>
+                </div>
+            </aside>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}
