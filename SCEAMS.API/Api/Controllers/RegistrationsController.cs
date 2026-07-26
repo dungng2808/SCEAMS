@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
 
@@ -54,6 +55,28 @@ public sealed class RegistrationsController : ApiControllerBase
     {
         var result = await _registrationService.CancelAsync(
             id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
+    [HttpGet("me")]
+    [Authorize(Roles = "Student")]
+    [ProducesResponseType<PagedResult<RegistrationHistoryItemDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetMyHistory(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _registrationService.GetMyHistoryAsync(
+            status,
+            page,
+            pageSize,
             User,
             cancellationToken);
 

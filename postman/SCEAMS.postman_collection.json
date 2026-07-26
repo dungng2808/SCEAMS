@@ -5743,6 +5743,29 @@
             "description": "Phase 93 Student chỉ hủy registration của mình trước StartTime ít nhất 24 giờ."
           },
           "response": []
+        },
+        {
+          "name": "Phase 95 - My Registrations - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/registrations/me?status=Confirmed&page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registrations", "me"],
+              "query": [
+                { "key": "status", "value": "Confirmed" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Phase 95 Student xem lịch sử của chính mình, không truyền StudentId tùy ý."
+          },
+          "response": []
         }
       ]
     }

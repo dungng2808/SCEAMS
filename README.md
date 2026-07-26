@@ -1219,6 +1219,20 @@ hộp xác nhận; sau khi thành công tải lại detail để thấy status
 `CancelledByStudent` và slots remaining tăng. Lỗi quá hạn, đã điểm danh hoặc
 không đúng chủ sở hữu được giữ lại trên trang.
 
+## API lịch sử đăng ký của Student
+
+Student xem lịch sử bằng:
+
+```text
+GET http://localhost:5195/api/registrations/me?status=Confirmed&page=1&pageSize=10
+Authorization: Bearer <student-access-token>
+```
+
+API lấy Student từ JWT, không nhận `studentId` từ query. Có thể lọc status
+`Pending`, `Confirmed`, `Attended` hoặc `CancelledByStudent`, phân trang tối đa
+50 bản ghi/trang; response gồm Event, thời gian, registration status và thông
+tin điểm danh nếu đã có.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

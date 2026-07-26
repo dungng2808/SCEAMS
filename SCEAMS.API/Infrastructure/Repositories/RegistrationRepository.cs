@@ -52,4 +52,30 @@ public sealed class RegistrationRepository
                     registration.Status == RegistrationStatus.Attended),
             cancellationToken);
     }
+
+    public async Task<(IReadOnlyList<Registration> Items, int TotalItems)> GetForStudentAsync(
+        int studentId,
+        RegistrationStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .AsNoTracking()
+            .Include(registration => registration.Event)
+            .Include(registration => registration.Attendance)
+            .Where(registration => registration.StudentId == studentId);
+        if (status.HasValue)
+        {
+            query = query.Where(registration => registration.Status == status.Value);
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(registration => registration.RegisteredAt)
+            .Skip((Math.Max(page, 1) - 1) * Math.Clamp(pageSize, 1, 50))
+            .Take(Math.Clamp(pageSize, 1, 50))
+            .ToListAsync(cancellationToken);
+        return (items, totalItems);
+    }
 }

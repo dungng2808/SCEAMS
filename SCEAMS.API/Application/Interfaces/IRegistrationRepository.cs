@@ -1,4 +1,5 @@
 using SCEAMS.Domain.Entities;
+using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Application.Interfaces;
 
@@ -16,5 +17,12 @@ public interface IRegistrationRepository
 
     Task<int> CountActiveForEventAsync(
         int eventId,
+        CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<Registration> Items, int TotalItems)> GetForStudentAsync(
+        int studentId,
+        RegistrationStatus? status,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

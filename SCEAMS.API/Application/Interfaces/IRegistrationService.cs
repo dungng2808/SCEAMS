@@ -15,4 +15,11 @@ public interface IRegistrationService
         int registrationId,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<PagedResult<RegistrationHistoryItemDto>>> GetMyHistoryAsync(
+        string? status,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

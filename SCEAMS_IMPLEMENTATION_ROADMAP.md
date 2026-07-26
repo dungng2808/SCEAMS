@@ -778,9 +778,9 @@ Domain entity/enum
 
 ### Phase 95 - API: Lịch sử đăng ký của Student
 
-- [ ] Thêm `GET /api/registrations/me`.
-- [ ] Lấy Student từ JWT; hỗ trợ status filter và phân trang.
-- [ ] Không cho truyền StudentId tùy ý.
+- [x] Thêm `GET /api/registrations/me`.
+- [x] Lấy Student từ JWT; hỗ trợ status filter và phân trang.
+- [x] Không cho truyền StudentId tùy ý.
 
 ### Phase 96 - MVC: Lịch sử đăng ký
 

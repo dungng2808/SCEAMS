@@ -183,6 +183,70 @@ public sealed class RegistrationService : IRegistrationService
             });
     }
 
+    public async Task<Result<PagedResult<RegistrationHistoryItemDto>>> GetMyHistoryAsync(
+        string? status,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        if (!user.IsInRole(nameof(UserRole.Student)))
+        {
+            return Result<PagedResult<RegistrationHistoryItemDto>>.Fail(
+                "Chỉ Student mới có thể xem lịch sử đăng ký.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var studentId = GetUserId(user);
+        if (!studentId.HasValue)
+        {
+            return Result<PagedResult<RegistrationHistoryItemDto>>.Fail(
+                "Không xác định được Student từ token.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        RegistrationStatus? parsedStatus = null;
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<RegistrationStatus>(status, true, out var statusValue))
+            {
+                return Result<PagedResult<RegistrationHistoryItemDto>>.Fail(
+                    "Status registration không hợp lệ.",
+                    StatusCodes.Status400BadRequest);
+            }
+
+            parsedStatus = statusValue;
+        }
+
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var result = await _unitOfWork.Registrations.GetForStudentAsync(
+            studentId.Value,
+            parsedStatus,
+            normalizedPage,
+            normalizedPageSize,
+            cancellationToken);
+        var items = result.Items.Select(registration =>
+            new RegistrationHistoryItemDto
+            {
+                Id = registration.Id,
+                EventId = registration.EventId,
+                EventTitle = registration.Event.Title,
+                EventStatus = registration.Event.Status,
+                StartTime = registration.Event.StartTime,
+                EndTime = registration.Event.EndTime,
+                RegistrationStatus = registration.Status,
+                RegisteredAt = registration.RegisteredAt,
+                CancelledAt = registration.CancelledAt,
+                IsAttended = registration.Attendance is not null ||
+                              registration.Status == RegistrationStatus.Attended,
+                CheckInTime = registration.Attendance?.CheckInTime
+            }).ToList();
+
+        return Result<PagedResult<RegistrationHistoryItemDto>>.Ok(
+            new PagedResult<RegistrationHistoryItemDto>(items, result.TotalItems));
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)
