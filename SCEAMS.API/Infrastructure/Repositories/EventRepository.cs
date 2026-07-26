@@ -52,6 +52,26 @@ public sealed class EventRepository
             cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Event>> GetVenueConflictsAsync(
+        int venueId,
+        DateTime startTime,
+        DateTime endTime,
+        int? excludedEventId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Where(eventEntity =>
+                eventEntity.VenueId == venueId &&
+                (!excludedEventId.HasValue || eventEntity.Id != excludedEventId.Value) &&
+                (eventEntity.Status == EventStatus.Approved ||
+                    eventEntity.Status == EventStatus.Ongoing) &&
+                eventEntity.StartTime < endTime &&
+                startTime < eventEntity.EndTime)
+            .OrderBy(eventEntity => eventEntity.StartTime)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<int> GetConfirmedRegistrationCountAsync(
         int eventId,
         CancellationToken cancellationToken = default)

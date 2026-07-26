@@ -148,4 +148,23 @@ public sealed class EventsController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/approve")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ProducesResponseType<EventDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<object>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ApproveEvent(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _eventService.ApproveEventAsync(
+            id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

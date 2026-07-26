@@ -483,6 +483,83 @@ public sealed class EventService : IEventService
             new PagedResult<EventListResponseDto>(items, totalItems));
     }
 
+    public async Task<Result<EventDetailResponseDto>> ApproveEventAsync(
+        int id,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(id, cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var reviewerId = GetUserId(user);
+        if (!reviewerId.HasValue)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không xác định được người duyệt từ token.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        if (eventEntity.Status != EventStatus.PendingApproval)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Chỉ Event PendingApproval mới có thể duyệt. Trạng thái hiện tại: {eventEntity.Status}.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var venue = await _unitOfWork.Venues.GetByIdAsync(
+            eventEntity.VenueId,
+            cancellationToken);
+        if (venue == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Venue của Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (venue.IsUnderMaintenance)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không thể duyệt Event tại Venue đang bảo trì.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var conflicts = await _unitOfWork.Events.GetVenueConflictsAsync(
+            eventEntity.VenueId,
+            eventEntity.StartTime,
+            eventEntity.EndTime,
+            eventEntity.Id,
+            cancellationToken);
+        if (conflicts.Count > 0)
+        {
+            var conflictDtos = conflicts.Select(conflict =>
+                new EventApprovalConflictDto
+                {
+                    EventId = conflict.Id,
+                    Title = conflict.Title,
+                    VenueName = venue.Name,
+                    Status = conflict.Status.ToString(),
+                    StartTime = conflict.StartTime,
+                    EndTime = conflict.EndTime
+                }).ToList();
+            return Result<EventDetailResponseDto>.Fail(
+                "Không thể duyệt vì Event bị trùng Venue với lịch Approved/Ongoing.",
+                StatusCodes.Status409Conflict,
+                conflictDtos);
+        }
+
+        eventEntity.Status = EventStatus.Approved;
+        eventEntity.ApprovedByUserId = reviewerId.Value;
+        eventEntity.ApprovedAt = DateTime.UtcNow;
+        eventEntity.UpdatedAt = DateTime.UtcNow;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return await GetEventByIdAsync(id, user, cancellationToken);
+    }
+
     private static string? ValidateEventForSubmission(
         Domain.Entities.Event eventEntity,
         Domain.Entities.Venue? venue)

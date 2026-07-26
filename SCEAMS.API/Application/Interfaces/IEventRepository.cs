@@ -17,6 +17,13 @@ public interface IEventRepository : IGenericRepository<Event>
         int? excludedEventId = null,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Event>> GetVenueConflictsAsync(
+        int venueId,
+        DateTime startTime,
+        DateTime endTime,
+        int? excludedEventId = null,
+        CancellationToken cancellationToken = default);
+
     Task<int> GetConfirmedRegistrationCountAsync(
         int eventId,
         CancellationToken cancellationToken = default);

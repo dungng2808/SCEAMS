@@ -5615,6 +5615,24 @@
             "description": "Phase 81 Admin/Staff xem queue PendingApproval với lọc Club, Venue và phân trang."
           },
           "response": []
+        },
+        {
+          "name": "Phase 83 - Approve Event - Admin",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "approve"]
+            },
+            "description": "Phase 83 Admin/Staff duyệt PendingApproval sau khi kiểm tra Venue maintenance và overlap."
+          },
+          "response": []
         }
       ]
     }

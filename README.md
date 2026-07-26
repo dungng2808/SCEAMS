@@ -1071,6 +1071,17 @@ GET http://localhost:5195/api/events/pending-approval?clubId=1&venueId=1&page=1&
 Endpoint chỉ trả Event `PendingApproval`, hỗ trợ lọc Club/Venue/ngày và phân
 trang. Request mẫu nằm trong Postman **Events** folder.
 
+## API duyệt Event và kiểm tra trùng lịch
+
+```text
+PUT http://localhost:5195/api/events/{id}/approve
+Authorization: Bearer <admin-or-staff-access-token>
+```
+
+API chỉ chuyển `PendingApproval -> Approved`, kiểm tra Venue không bảo trì và
+không overlap Event `Approved/Ongoing` khác. Conflict trả `409` với danh sách
+Event, Venue và khung giờ bị trùng.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

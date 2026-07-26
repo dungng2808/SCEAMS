@@ -38,4 +38,9 @@ public interface IEventService
         int pageSize,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<EventDetailResponseDto>> ApproveEventAsync(
+        int id,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

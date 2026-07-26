@@ -702,9 +702,9 @@ Domain entity/enum
 
 ### Phase 83 - API: Duyệt Event và kiểm tra trùng lịch
 
-- [ ] Thêm `PUT /api/events/{id}/approve` cho Admin/Staff.
-- [ ] Kiểm tra Venue không maintenance và không overlap Event Approved/Ongoing khác.
-- [ ] Chỉ chuyển `PendingApproval -> Approved`; conflict trả `409` kèm Event xung đột.
+- [x] Thêm `PUT /api/events/{id}/approve` cho Admin/Staff.
+- [x] Kiểm tra Venue không maintenance và không overlap Event Approved/Ongoing khác.
+- [x] Chỉ chuyển `PendingApproval -> Approved`; conflict trả `409` kèm Event xung đột.
 
 ### Phase 84 - MVC: Duyệt Event
 
