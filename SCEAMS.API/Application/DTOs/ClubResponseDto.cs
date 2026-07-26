@@ -2,17 +2,19 @@ using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Application.DTOs;
 
-public sealed record ClubResponseDto(
-    int Id,
-    string Name,
-    string? Description,
-    int CategoryId,
-    string CategoryName,
-    ClubStatus Status,
-    int CreatedByUserId,
-    string CreatedByUserName,
-    int ActiveMemberCount,
-    DateTime CreatedAt,
-    DateTime? ReviewedAt,
-    string? RejectionReason,
-    DateTime? DissolvedAt);
+public sealed class ClubResponseDto
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public int CategoryId { get; init; }
+    public string CategoryName { get; init; } = string.Empty;
+    public ClubStatus Status { get; init; }
+    public int CreatedByUserId { get; init; }
+    public string CreatedByUserName { get; init; } = string.Empty;
+    public int ActiveMemberCount { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime? ReviewedAt { get; init; }
+    public string? RejectionReason { get; init; }
+    public DateTime? DissolvedAt { get; init; }
+}

@@ -26,19 +26,21 @@ public sealed class ClubService : IClubService
             query = query.Where(club => club.Status == ClubStatus.Approved);
         }
 
-        return query.Select(club => new ClubResponseDto(
-            club.Id,
-            club.Name,
-            club.Description,
-            club.CategoryId,
-            club.Category != null ? club.Category.Name : string.Empty,
-            club.Status,
-            club.CreatedByUserId,
-            club.CreatedByUser != null ? club.CreatedByUser.FullName : string.Empty,
-            club.Memberships.Count(m => m.Status == ClubMembershipStatus.Active),
-            club.CreatedAt,
-            club.ReviewedAt,
-            club.RejectionReason,
-            club.DissolvedAt));
+        return query.Select(club => new ClubResponseDto
+        {
+            Id = club.Id,
+            Name = club.Name,
+            Description = club.Description,
+            CategoryId = club.CategoryId,
+            CategoryName = club.Category != null ? club.Category.Name : string.Empty,
+            Status = club.Status,
+            CreatedByUserId = club.CreatedByUserId,
+            CreatedByUserName = club.CreatedByUser != null ? club.CreatedByUser.FullName : string.Empty,
+            ActiveMemberCount = club.Memberships.Count(m => m.Status == ClubMembershipStatus.Active),
+            CreatedAt = club.CreatedAt,
+            ReviewedAt = club.ReviewedAt,
+            RejectionReason = club.RejectionReason,
+            DissolvedAt = club.DissolvedAt
+        });
     }
 }
