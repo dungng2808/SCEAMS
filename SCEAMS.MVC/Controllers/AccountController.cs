@@ -208,11 +208,6 @@ public sealed class AccountController : Controller
         HttpContext.Session.SetString(
             SessionKeys.AccessToken,
             response.AccessToken);
-        HttpContext.Session.SetString(
-            SessionKeys.AccessTokenExpiresAtUtc,
-            response.ExpiresAtUtc.ToUniversalTime().ToString(
-                "O",
-                CultureInfo.InvariantCulture));
 
         var claims = new[]
         {
@@ -236,15 +231,36 @@ public sealed class AccountController : Controller
         var principal = new ClaimsPrincipal(identity);
         var expiresAtUtc = new DateTimeOffset(
             response.ExpiresAtUtc.ToUniversalTime());
+        var authenticationProperties = new AuthenticationProperties
+        {
+            AllowRefresh = false,
+            IsPersistent = false,
+            ExpiresUtc = expiresAtUtc
+        };
+        authenticationProperties.StoreTokens(
+        [
+            new AuthenticationToken
+            {
+                Name = "access_token",
+                Value = response.AccessToken
+            },
+            new AuthenticationToken
+            {
+                Name = "token_type",
+                Value = response.TokenType
+            },
+            new AuthenticationToken
+            {
+                Name = "expires_at",
+                Value = expiresAtUtc.ToString(
+                    "O",
+                    CultureInfo.InvariantCulture)
+            }
+        ]);
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal,
-            new AuthenticationProperties
-            {
-                AllowRefresh = false,
-                IsPersistent = false,
-                ExpiresUtc = expiresAtUtc
-            });
+            authenticationProperties);
     }
 }

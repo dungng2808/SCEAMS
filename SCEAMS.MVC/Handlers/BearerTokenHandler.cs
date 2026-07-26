@@ -1,5 +1,6 @@
-using System.Globalization;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using SCEAMS.MVC.Services.Authentication;
 
 namespace SCEAMS.MVC.Handlers;
@@ -7,37 +8,34 @@ namespace SCEAMS.MVC.Handlers;
 public sealed class BearerTokenHandler : DelegatingHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly TimeProvider _timeProvider;
 
-    public BearerTokenHandler(
-        IHttpContextAccessor httpContextAccessor,
-        TimeProvider timeProvider)
+    public BearerTokenHandler(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
-        _timeProvider = timeProvider;
     }
 
-    protected override Task<HttpResponseMessage> SendAsync(
+    protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var session = _httpContextAccessor.HttpContext?.Session;
+        var httpContext = _httpContextAccessor.HttpContext;
+        var session = httpContext?.Session;
         var accessToken = session?.GetString(SessionKeys.AccessToken);
-        var expiresAtValue = session?.GetString(
-            SessionKeys.AccessTokenExpiresAtUtc);
 
-        if (!string.IsNullOrWhiteSpace(accessToken) &&
-            DateTimeOffset.TryParse(
-                expiresAtValue,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal,
-                out var expiresAtUtc) &&
-            expiresAtUtc > _timeProvider.GetUtcNow())
+        if (string.IsNullOrWhiteSpace(accessToken) &&
+            httpContext is not null)
+        {
+            accessToken = await httpContext.GetTokenAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                "access_token");
+        }
+
+        if (!string.IsNullOrWhiteSpace(accessToken))
         {
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", accessToken);
         }
 
-        return base.SendAsync(request, cancellationToken);
+        return await base.SendAsync(request, cancellationToken);
     }
 }
