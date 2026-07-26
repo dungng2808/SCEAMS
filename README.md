@@ -339,6 +339,30 @@ the API again, then redirects to the user list filtered by the confirmed email
 and displays a success notification. A missing account renders a dedicated
 `404` state without an editable form.
 
+## Admin account active-status API
+
+Only an authenticated Admin can lock or unlock an account:
+
+```text
+PUT http://localhost:5195/api/users/{id}/active-status
+Authorization: Bearer <admin-access-token>
+Content-Type: application/json
+```
+
+Use `{ "isActive": false }` to lock and `{ "isActive": true }` to unlock.
+Success returns `200 OK` with safe account identity, role and the persisted
+active status. Repeating the same desired state is idempotent.
+
+An Admin cannot lock the account represented by the current JWT; that request
+returns `400`. An unknown target returns `404`, and non-Admin roles receive
+`403`. Locking also clears the stored refresh-token hash and expiry. The locked
+account receives `403` on login and any refresh token issued before locking
+receives `401`; an access token already issued remains subject to its normal
+short expiry.
+
+Ready-to-run Phase 25 requests are available in
+`SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

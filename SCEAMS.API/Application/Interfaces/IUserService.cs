@@ -15,6 +15,13 @@ public interface IUserService
             UpdateUserProfileRequestDto request,
             CancellationToken cancellationToken = default);
 
+    Task<Result<UserActiveStatusResponseDto>>
+        UpdateUserActiveStatusAsync(
+            int actingAdminId,
+            int userId,
+            UpdateUserActiveStatusRequestDto request,
+            CancellationToken cancellationToken = default);
+
     Task<Result<PagedUsersResponseDto>> GetUsersAsync(
         UserListQueryDto query,
         CancellationToken cancellationToken = default);

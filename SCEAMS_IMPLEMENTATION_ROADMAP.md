@@ -314,9 +314,9 @@ Domain entity/enum
 
 ### Phase 25 - API: Khóa hoặc mở khóa tài khoản
 
-- [ ] Thêm `PUT /api/users/{id}/active-status`.
-- [ ] Chặn Admin tự khóa tài khoản đang đăng nhập.
-- [ ] Tài khoản bị khóa không thể login hoặc refresh token.
+- [x] Thêm `PUT /api/users/{id}/active-status`.
+- [x] Chặn Admin tự khóa tài khoản đang đăng nhập.
+- [x] Tài khoản bị khóa không thể login hoặc refresh token.
 
 ### Phase 26 - MVC: Nút khóa/mở khóa
 

@@ -190,6 +190,76 @@ public sealed class UserService : IUserService
             "User profile updated successfully.");
     }
 
+    public async Task<Result<UserActiveStatusResponseDto>>
+        UpdateUserActiveStatusAsync(
+            int actingAdminId,
+            int userId,
+            UpdateUserActiveStatusRequestDto request,
+            CancellationToken cancellationToken = default)
+    {
+        if (!request.IsActive.HasValue)
+        {
+            return Result<UserActiveStatusResponseDto>.Fail(
+                "IsActive is required.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var isActive = request.IsActive.Value;
+
+        if (actingAdminId == userId &&
+            !isActive)
+        {
+            return Result<UserActiveStatusResponseDto>.Fail(
+                "Administrators cannot lock their own account.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var user = await _unitOfWork.Users.GetByIdAsync(
+            userId,
+            cancellationToken);
+
+        if (user is null)
+        {
+            return Result<UserActiveStatusResponseDto>.Fail(
+                "User account does not exist.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var shouldSave = false;
+
+        if (user.IsActive != isActive)
+        {
+            user.IsActive = isActive;
+            shouldSave = true;
+        }
+
+        if (!isActive &&
+            (user.RefreshTokenHash is not null ||
+             user.RefreshTokenExpiresAt is not null))
+        {
+            user.RefreshTokenHash = null;
+            user.RefreshTokenExpiresAt = null;
+            shouldSave = true;
+        }
+
+        if (shouldSave)
+        {
+            await _unitOfWork.SaveChangesAsync(
+                cancellationToken);
+        }
+
+        return Result<UserActiveStatusResponseDto>.Ok(
+            new UserActiveStatusResponseDto(
+                Id: user.Id,
+                FullName: user.FullName,
+                Email: user.Email,
+                Role: user.Role.ToString(),
+                IsActive: user.IsActive),
+            isActive
+                ? "User account unlocked successfully."
+                : "User account locked successfully.");
+    }
+
     public async Task<Result<PagedUsersResponseDto>> GetUsersAsync(
         UserListQueryDto query,
         CancellationToken cancellationToken = default)

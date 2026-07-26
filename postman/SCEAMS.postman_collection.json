@@ -252,6 +252,13 @@
                   "        Student: \"studentAccessToken\"",
                   "    };",
                   "    pm.collectionVariables.set(roleTokenVariables[body.user.role], body.accessToken);",
+                  "    const roleIdVariables = {",
+                  "        Admin: \"adminUserId\",",
+                  "        Staff: \"staffUserId\",",
+                  "        Organizer: \"organizerUserId\",",
+                  "        Student: \"studentUserId\"",
+                  "    };",
+                  "    pm.collectionVariables.set(roleIdVariables[body.user.role], body.user.id);",
                   "});",
                   "",
                   "pm.test(\"JWT contains sub, email and role\", function () {",
@@ -1400,6 +1407,258 @@
               ]
             },
             "description": "Phase 23 verifies that Staff cannot update another user."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Active Status - Lock User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Account is locked without exposing sensitive data\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.collectionVariables.get(\"createdUserId\")));",
+                  "    pm.expect(body.isActive).to.eql(false);",
+                  "    pm.expect(body).not.to.have.property(\"passwordHash\");",
+                  "    pm.expect(body).not.to.have.property(\"refreshTokenHash\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}/active-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}",
+                "active-status"
+              ]
+            },
+            "description": "Phase 25 Admin locks the account created by Create User - Admin and revokes its stored refresh token."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Active Status - Self Lock Rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Admin cannot lock the current account\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Administrators cannot lock their own account.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{adminUserId}}/active-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{adminUserId}}",
+                "active-status"
+              ]
+            },
+            "description": "Phase 25 self-lock protection. Run Login - Success as Admin first to populate adminUserId and adminAccessToken."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Active Status - Unlock User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Account is active again\", function () {",
+                  "    pm.expect(pm.response.json().isActive).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}/active-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}",
+                "active-status"
+              ]
+            },
+            "description": "Phase 25 unlocks the test account after lock and self-lock checks."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Active Status - Staff Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{createdUserId}}/active-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}",
+                "active-status"
+              ]
+            },
+            "description": "Phase 25 verifies that Staff cannot change account status."
           },
           "response": []
         },

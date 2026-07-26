@@ -61,6 +61,34 @@ public sealed class UsersController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpPut("{id:int}/active-status")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType<UserActiveStatusResponseDto>(
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateUserActiveStatus(
+        int id,
+        [FromBody] UpdateUserActiveStatusRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var actingAdminId))
+        {
+            return InvalidTokenSubject();
+        }
+
+        var result = await _userService
+            .UpdateUserActiveStatusAsync(
+                actingAdminId,
+                id,
+                request,
+                cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpGet]
     [Authorize(Roles = nameof(UserRole.Admin))]
     [ProducesResponseType<PagedUsersResponseDto>(

@@ -152,6 +152,61 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Lock an account. Save its refresh token before running this request
+# if you want to verify the refresh rejection below.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}/active-status
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "isActive": false
+}
+
+###
+
+# A locked account must receive 403 even with the correct password.
+POST {{SCEAMS.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{LockedUserEmail}}",
+  "password": "{{LockedUserPassword}}"
+}
+
+###
+
+# A refresh token issued before locking must receive 401.
+POST {{SCEAMS.API_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{LockedUserRefreshToken}}"
+}
+
+###
+
+# Admin cannot lock the account represented by AdminAccessToken.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{AdminUserId}}/active-status
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "isActive": false
+}
+
+###
+
+# Unlock the test account.
+PUT {{SCEAMS.API_HostAddress}}/api/users/{{UpdateUserId}}/active-status
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "isActive": true
+}
+
+###
+
 # Define AccessToken from a successful login in your local HTTP client environment.
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json
