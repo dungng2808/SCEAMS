@@ -73,6 +73,42 @@ Authorization: Bearer {{NonAdminAccessToken}}
 
 ###
 
+# Define CreateUserPassword in your local HTTP client environment.
+POST {{SCEAMS.API_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "fullName": "New Staff Account",
+  "email": "new.staff@sceams.edu.vn",
+  "studentCode": null,
+  "phoneNumber": "0901234567",
+  "role": "Staff",
+  "isActive": true,
+  "password": "{{CreateUserPassword}}",
+  "confirmPassword": "{{CreateUserPassword}}"
+}
+
+###
+
+# Reusing the email from the previous request must return 409.
+POST {{SCEAMS.API_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+{
+  "fullName": "Duplicate Staff Account",
+  "email": "new.staff@sceams.edu.vn",
+  "studentCode": null,
+  "phoneNumber": null,
+  "role": "Staff",
+  "isActive": true,
+  "password": "{{CreateUserPassword}}",
+  "confirmPassword": "{{CreateUserPassword}}"
+}
+
+###
+
 # Define AccessToken from a successful login in your local HTTP client environment.
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json

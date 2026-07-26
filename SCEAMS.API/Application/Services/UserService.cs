@@ -1,6 +1,8 @@
 using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
+using SCEAMS.Domain.Entities;
+using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Application.Services;
 
@@ -8,13 +10,103 @@ public sealed class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordService _passwordService;
+    private readonly TimeProvider _timeProvider;
 
     public UserService(
         IUnitOfWork unitOfWork,
-        IPasswordService passwordService)
+        IPasswordService passwordService,
+        TimeProvider timeProvider)
     {
         _unitOfWork = unitOfWork;
         _passwordService = passwordService;
+        _timeProvider = timeProvider;
+    }
+
+    public async Task<Result<CreatedUserResponseDto>>
+        CreateUserAsync(
+            CreateUserRequestDto request,
+            CancellationToken cancellationToken = default)
+    {
+        if (!Enum.IsDefined(request.Role))
+        {
+            return Result<CreatedUserResponseDto>.Fail(
+                "Role is invalid.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var fullName = NormalizeFullName(request.FullName);
+        var email = request.Email.Trim().ToLowerInvariant();
+        var studentCode = NormalizeStudentCode(
+            request.StudentCode);
+
+        if (fullName.Length < 2)
+        {
+            return Result<CreatedUserResponseDto>.Fail(
+                "FullName must contain at least 2 characters.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.Role == UserRole.Student &&
+            studentCode is null)
+        {
+            return Result<CreatedUserResponseDto>.Fail(
+                "StudentCode is required for Student role.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (await _unitOfWork.Users.EmailExistsAsync(
+                email,
+                cancellationToken))
+        {
+            return Result<CreatedUserResponseDto>.Fail(
+                "Email is already registered.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (studentCode is not null &&
+            await _unitOfWork.Users.StudentCodeExistsAsync(
+                studentCode,
+                cancellationToken))
+        {
+            return Result<CreatedUserResponseDto>.Fail(
+                "StudentCode is already registered.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var user = new User
+        {
+            FullName = fullName,
+            Email = email,
+            StudentCode = studentCode,
+            PhoneNumber = NormalizeOptionalValue(
+                request.PhoneNumber),
+            Role = request.Role,
+            IsActive = request.IsActive,
+            CreatedAt = _timeProvider
+                .GetUtcNow()
+                .UtcDateTime
+        };
+
+        user.PasswordHash = _passwordService.HashPassword(
+            user,
+            request.Password);
+
+        await _unitOfWork.Users.AddAsync(
+            user,
+            cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<CreatedUserResponseDto>.Created(
+            new CreatedUserResponseDto(
+                Id: user.Id,
+                FullName: user.FullName,
+                Email: user.Email,
+                StudentCode: user.StudentCode,
+                PhoneNumber: user.PhoneNumber,
+                Role: user.Role.ToString(),
+                IsActive: user.IsActive,
+                CreatedAt: user.CreatedAt),
+            "User account created successfully.");
     }
 
     public async Task<Result<PagedUsersResponseDto>> GetUsersAsync(
@@ -88,12 +180,8 @@ public sealed class UserService : IUserService
                 StatusCodes.Status404NotFound);
         }
 
-        var normalizedFullName = string.Join(
-            ' ',
-            request.FullName.Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries |
-                StringSplitOptions.TrimEntries));
+        var normalizedFullName = NormalizeFullName(
+            request.FullName);
 
         if (normalizedFullName.Length < 2)
         {
@@ -152,7 +240,7 @@ public sealed class UserService : IUserService
     }
 
     private static CurrentUserProfileResponseDto MapProfile(
-        SCEAMS.Domain.Entities.User user)
+        User user)
     {
         return new CurrentUserProfileResponseDto(
             Id: user.Id,
@@ -163,6 +251,23 @@ public sealed class UserService : IUserService
             Role: user.Role.ToString(),
             IsActive: user.IsActive,
             CreatedAt: user.CreatedAt);
+    }
+
+    private static string NormalizeFullName(string fullName)
+    {
+        return string.Join(
+            ' ',
+            fullName.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries));
+    }
+
+    private static string? NormalizeStudentCode(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? null
+            : value.Trim().ToUpperInvariant();
     }
 
     private static string? NormalizeOptionalValue(string? value)

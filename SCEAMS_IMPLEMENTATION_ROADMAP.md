@@ -290,9 +290,9 @@ Domain entity/enum
 
 ### Phase 21 - API: Admin tạo tài khoản
 
-- [ ] Thêm `POST /api/users` cho `Admin`.
-- [ ] Cho chọn role, trạng thái và mật khẩu ban đầu; vẫn phải hash password.
-- [ ] Trả `201 Created`; test email trùng.
+- [x] Thêm `POST /api/users` cho `Admin`.
+- [x] Cho chọn role, trạng thái và mật khẩu ban đầu; vẫn phải hash password.
+- [x] Trả `201 Created`; test email trùng.
 
 ### Phase 22 - MVC: Admin tạo tài khoản
 

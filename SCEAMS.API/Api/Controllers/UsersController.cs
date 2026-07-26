@@ -20,6 +20,25 @@ public sealed class UsersController : ApiControllerBase
         _userService = userService;
     }
 
+    [HttpPost]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType<CreatedUserResponseDto>(
+        StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateUser(
+        [FromBody] CreateUserRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _userService.CreateUserAsync(
+            request,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpGet]
     [Authorize(Roles = nameof(UserRole.Admin))]
     [ProducesResponseType<PagedUsersResponseDto>(

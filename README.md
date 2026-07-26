@@ -250,6 +250,26 @@ No-result filters render a dedicated empty state. Non-Admin MVC users are sent
 to a styled `403 Forbidden` page, while an API-side `403` is also handled
 inside the Admin Users screen.
 
+## Admin create-user API
+
+Only an authenticated Admin can create an account:
+
+```text
+POST http://localhost:5195/api/users
+Authorization: Bearer <admin-access-token>
+```
+
+The request accepts full name, email, optional student code and phone number,
+role, active status, initial password and password confirmation. Role is one of
+`Admin`, `Staff`, `Organizer` or `Student`; a Student account requires a student
+code. Passwords follow the same complexity policy as Student registration.
+
+Email and student code are normalized and checked for uniqueness. The initial
+password is hashed before persistence and is never returned. Successful
+creation returns `201 Created` with safe account fields; a duplicate email or
+student code returns `409 Conflict`. Ready-to-run requests are available in
+`SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

@@ -75,6 +75,16 @@
       "key": "studentAccessToken",
       "value": "",
       "type": "secret"
+    },
+    {
+      "key": "createUserEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createUserPassword",
+      "value": "",
+      "type": "secret"
     }
   ],
   "item": [
@@ -936,6 +946,204 @@
               ]
             },
             "description": "Phase 19 verifies that Student receives 403."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User - Admin",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(",
+                  "    \"createUserEmail\",",
+                  "    `phase21.${Date.now()}@example.com`",
+                  ");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Created account is safe and normalized\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.be.a(\"number\");",
+                  "    pm.expect(body.email).to.eql(pm.collectionVariables.get(\"createUserEmail\"));",
+                  "    pm.expect(body.role).to.eql(\"Staff\");",
+                  "    pm.expect(body.isActive).to.eql(true);",
+                  "    pm.expect(body).not.to.have.property(\"password\");",
+                  "    pm.expect(body).not.to.have.property(\"passwordHash\");",
+                  "    pm.expect(body).not.to.have.property(\"refreshTokenHash\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"New Staff Account\",\n  \"email\": \"{{createUserEmail}}\",\n  \"studentCode\": null,\n  \"phoneNumber\": \"0901234567\",\n  \"role\": \"Staff\",\n  \"isActive\": true,\n  \"password\": \"{{createUserPassword}}\",\n  \"confirmPassword\": \"{{createUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 21 Admin creates a Staff account. Define createUserPassword only in the local Postman environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User - Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "pm.test(\"Duplicate email is rejected\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Email is already registered.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Duplicate Staff Account\",\n  \"email\": \"{{createUserEmail}}\",\n  \"studentCode\": null,\n  \"phoneNumber\": null,\n  \"role\": \"Staff\",\n  \"isActive\": true,\n  \"password\": \"{{createUserPassword}}\",\n  \"confirmPassword\": \"{{createUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 21 duplicate-email conflict. Run Create User - Admin first."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User - Staff Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Forbidden Account\",\n  \"email\": \"forbidden.phase21@example.com\",\n  \"studentCode\": null,\n  \"phoneNumber\": null,\n  \"role\": \"Staff\",\n  \"isActive\": true,\n  \"password\": \"{{createUserPassword}}\",\n  \"confirmPassword\": \"{{createUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 21 verifies that Staff cannot create accounts."
           },
           "response": []
         },
