@@ -111,12 +111,11 @@ builder.Services
 builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<SceamsDbContext>(options =>
-    options.UseSqlServer(
-        connectionString,
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
-            maxRetryDelay: TimeSpan.FromSeconds(5),
-            errorNumbersToAdd: null)));
+    // Các workflow đăng ký, điểm danh và feedback dùng transaction thủ công
+    // để bảo vệ capacity/concurrency. Không bật execution strategy retry ở
+    // đây vì EF Core không cho chạy user-initiated transaction bên trong
+    // strategy mặc định nếu chưa bọc toàn bộ workflow bằng ExecuteAsync.
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped(
     typeof(IGenericRepository<>),
