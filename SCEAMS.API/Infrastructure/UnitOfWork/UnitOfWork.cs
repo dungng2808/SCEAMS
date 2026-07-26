@@ -13,7 +13,7 @@ public sealed class UnitOfWork : IUnitOfWork
     private IClubCategoryRepository? _clubCategories;
     private IClubRepository? _clubs;
     private IGenericRepository<ClubMembership>? _clubMemberships;
-    private IGenericRepository<Venue>? _venues;
+    private IVenueRepository? _venues;
     private IEventRepository? _events;
     private IRegistrationRepository? _registrations;
     private IGenericRepository<Attendance>? _attendances;
@@ -39,8 +39,8 @@ public sealed class UnitOfWork : IUnitOfWork
         _clubMemberships ??=
             new GenericRepository<ClubMembership>(_context);
 
-    public IGenericRepository<Venue> Venues =>
-        _venues ??= new GenericRepository<Venue>(_context);
+    public IVenueRepository Venues =>
+        _venues ??= new VenueRepository(_context);
 
     public IEventRepository Events =>
         _events ??= new EventRepository(_context);

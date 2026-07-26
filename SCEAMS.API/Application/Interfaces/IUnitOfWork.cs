@@ -8,7 +8,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IClubCategoryRepository ClubCategories { get; }
     IClubRepository Clubs { get; }
     IGenericRepository<ClubMembership> ClubMemberships { get; }
-    IGenericRepository<Venue> Venues { get; }
+    IVenueRepository Venues { get; }
     IEventRepository Events { get; }
     IRegistrationRepository Registrations { get; }
     IGenericRepository<Attendance> Attendances { get; }

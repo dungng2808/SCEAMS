@@ -124,6 +124,7 @@ builder.Services.AddScoped<
     IClubCategoryRepository,
     ClubCategoryRepository>();
 builder.Services.AddScoped<IClubRepository, ClubRepository>();
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<
@@ -139,6 +140,7 @@ builder.Services.AddScoped<
     ClubCategoryService>();
 builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
 
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();

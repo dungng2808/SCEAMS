@@ -554,9 +554,9 @@ Domain entity/enum
 
 ### Phase 59 - API: Danh sách địa điểm
 
-- [ ] Thêm `GET /api/venues` có search, maintenance filter và phân trang.
-- [ ] Trả capacity và trạng thái bảo trì.
-- [ ] Không trả navigation graph gây vòng lặp JSON/XML.
+- [x] Thêm `GET /api/venues` có search, maintenance filter và phân trang.
+- [x] Trả capacity và trạng thái bảo trì.
+- [x] Không trả navigation graph gây vòng lặp JSON/XML.
 
 ### Phase 60 - MVC: Danh sách địa điểm
 

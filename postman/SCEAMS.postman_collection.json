@@ -4393,10 +4393,112 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Venues",
+      "item": [
+        {
+          "name": "Phase 59 - List Venues - Public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Paged venue response is safe\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.items).to.be.an(\"array\");",
+                  "    pm.expect(body.totalItems).to.be.a(\"number\");",
+                  "    body.items.forEach(function (venue) {",
+                  "        pm.expect(venue).to.not.have.property(\"events\");",
+                  "        pm.expect(venue.capacity).to.be.above(0);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/venues?page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Phase 59 trả danh sách venue dạng DTO gọn, không serialize navigation Events."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 59 - List Venues - Search and Maintenance Filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/venues?search=Hall&maintenance=false&page=1&pageSize=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "venues"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Hall"
+                },
+                {
+                  "key": "maintenance",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Phase 59 tìm theo tên/vị trí và lọc venue không bảo trì."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
-
 
 
 

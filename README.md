@@ -797,5 +797,18 @@ Admin và Staff có thể mở hộp thoại **Loại thành viên**, nhập lý
 xác nhận. MVC gọi API remove rồi tải lại tab Active; thành viên đã chuyển sang
 `Removed` sẽ không còn nằm trong danh sách Active nhưng lịch sử vẫn tồn tại.
 
+## API danh sách địa điểm
+
+Danh sách địa điểm được cung cấp công khai qua:
+
+```text
+GET http://localhost:5195/api/venues?search=Hall&maintenance=false&page=1&pageSize=10
+```
+
+API hỗ trợ tìm theo tên/vị trí, lọc `maintenance=true|false` và phân trang với
+`pageSize` tối đa 50. Response chỉ chứa `id`, `name`, `location`, `capacity` và
+`isUnderMaintenance`; không trả navigation `Events`, tránh vòng lặp khi dùng
+JSON/XML. Request Phase 59 nằm trong Postman **Venues** folder.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.
