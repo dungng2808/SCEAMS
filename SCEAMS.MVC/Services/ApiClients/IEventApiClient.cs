@@ -40,6 +40,10 @@ public interface IEventApiClient
         CancelEventApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<RegisterEventApiResult> RegisterEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

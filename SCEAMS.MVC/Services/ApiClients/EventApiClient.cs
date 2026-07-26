@@ -412,6 +412,60 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<RegisterEventApiResult> RegisterEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/registrations",
+            new RegisterEventApiRequest { EventId = eventId },
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var registration = await response.Content
+                .ReadFromJsonAsync<RegisterEventApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new RegisterEventApiResult
+            {
+                IsSuccess = registration is not null,
+                Registration = registration,
+                ErrorMessage = registration is null
+                    ? "API trả về registration không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new RegisterEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new RegisterEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Chỉ Student mới có thể đăng ký Event."
+            },
+            HttpStatusCode.NotFound => new RegisterEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new RegisterEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Không thể đăng ký Event."
+            },
+            _ => new RegisterEventApiResult
+            {
+                ErrorMessage = message ?? "Không thể đăng ký Event."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

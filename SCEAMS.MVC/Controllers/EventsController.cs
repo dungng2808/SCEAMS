@@ -588,6 +588,49 @@ public sealed class EventsController : Controller
         return RedirectToAction(nameof(Detail), new { id });
     }
 
+    [Authorize(Roles = "Student")]
+    [HttpPost("{id:int}/Register")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventApiClient.RegisterEventAsync(id, cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess && result.Registration is not null)
+            {
+                TempData["SuccessMessage"] =
+                    $"Đăng ký Event thành công. Còn {result.Registration.SlotsRemaining} chỗ trống.";
+            }
+            else
+            {
+                TempData["EventErrorMessage"] = result.ErrorMessage ?? "Không thể đăng ký Event.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to register for event {EventId} from MVC.", id);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,
@@ -755,6 +798,7 @@ public sealed class EventsController : Controller
             CreatedByUserName = eventItem.CreatedByUserName,
             RejectionReason = eventItem.RejectionReason,
             CancellationReason = eventItem.CancellationReason,
+            CurrentRegistrationStatus = eventItem.CurrentRegistrationStatus,
             Permissions = new EventPermissionsViewModel
             {
                 CanEdit = eventItem.Permissions.CanEdit,

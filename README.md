@@ -1188,6 +1188,14 @@ vượt capacity khi có nhiều request đồng thời. Thành công trả `201
 registration, status `Confirmed` và số slots còn lại; lỗi hết chỗ, quá hạn hoặc
 đăng ký trùng trả `409`.
 
+## MVC đăng ký Event
+
+Student thấy nút **Đăng ký Event** trên detail khi API xác nhận Event còn chỗ,
+chưa quá deadline và Student chưa có registration. MVC gửi form POST có
+anti-forgery token và hộp xác nhận; sau khi thành công tải lại detail để cập
+nhật slots remaining và hiển thị trạng thái `Confirmed`. Lỗi hết chỗ, quá hạn
+hoặc đăng ký trùng được hiển thị trực tiếp trên trang.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

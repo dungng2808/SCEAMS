@@ -23,6 +23,7 @@ public sealed class EventDetailResponseDto
     public string CreatedByUserName { get; init; } = string.Empty;
     public string? RejectionReason { get; init; }
     public string? CancellationReason { get; init; }
+    public string? CurrentRegistrationStatus { get; init; }
     public EventActionPermissionsDto Permissions { get; init; } = new();
 }
 

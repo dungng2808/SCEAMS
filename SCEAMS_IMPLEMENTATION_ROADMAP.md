@@ -760,9 +760,9 @@ Domain entity/enum
 
 ### Phase 92 - MVC: Nút đăng ký Event
 
-- [ ] Thêm Register trên Event detail khi đủ điều kiện.
-- [ ] Sau khi thành công, cập nhật slots remaining và trạng thái đăng ký.
-- [ ] Hiển thị rõ lỗi hết chỗ, quá deadline và đăng ký trùng.
+- [x] Thêm Register trên Event detail khi đủ điều kiện.
+- [x] Sau khi thành công, cập nhật slots remaining và trạng thái đăng ký.
+- [x] Hiển thị rõ lỗi hết chỗ, quá deadline và đăng ký trùng.
 
 ### Phase 93 - API: Student hủy đăng ký
 

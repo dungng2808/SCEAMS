@@ -110,6 +110,12 @@ public sealed class EventService : IEventService
         var slotsRemaining = Math.Max(0, eventEntity.Capacity - registeredCount);
         var isOrganizer = user.IsInRole(nameof(UserRole.Organizer));
         var isStudent = user.IsInRole(nameof(UserRole.Student));
+        var currentRegistrationStatus = isStudent
+            ? (await _unitOfWork.Registrations.GetByStudentAndEventAsync(
+                GetUserId(user) ?? 0,
+                id,
+                cancellationToken))?.Status.ToString()
+            : null;
         var now = DateTime.UtcNow;
         var canManage = isAdminOrStaff || (isOrganizer && isOwner);
 
@@ -134,6 +140,7 @@ public sealed class EventService : IEventService
             CreatedByUserName = eventEntity.CreatedByUser.FullName,
             RejectionReason = eventEntity.RejectionReason,
             CancellationReason = eventEntity.CancellationReason,
+            CurrentRegistrationStatus = currentRegistrationStatus,
             Permissions = new EventActionPermissionsDto
             {
                 CanEdit = canManage && eventEntity.Status is
@@ -151,7 +158,8 @@ public sealed class EventService : IEventService
                 CanRegister = isStudent &&
                               eventEntity.Status == EventStatus.Approved &&
                               eventEntity.RegistrationDeadline > now &&
-                              slotsRemaining > 0
+                              slotsRemaining > 0 &&
+                              currentRegistrationStatus is null
             }
         });
     }

@@ -75,6 +75,12 @@
                 {
                     <div class="alert alert-danger" role="status"><strong>Lý do hủy:</strong> @Model.CancellationReason</div>
                 }
+                @if (!string.IsNullOrWhiteSpace(Model.CurrentRegistrationStatus))
+                {
+                    <div class="alert alert-success" role="status" style="margin-top: 1.25rem;">
+                        Bạn đã đăng ký Event này. Trạng thái đăng ký: <strong>@Model.CurrentRegistrationStatus</strong>.
+                    </div>
+                }
 
                 @if (string.Equals(Model.Status, "Ongoing", StringComparison.OrdinalIgnoreCase))
                 {
@@ -119,6 +125,13 @@
                     <form asp-controller="Events" asp-action="Submit" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Gửi Event này để Admin/Staff duyệt?');" style="margin-top: .75rem;">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-app btn-app--primary">Gửi để duyệt</button>
+                    </form>
+                }
+                @if (Model.Permissions.CanRegister)
+                {
+                    <form asp-controller="Events" asp-action="Register" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Xác nhận đăng ký Event này?');" style="margin-top: .75rem;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-app btn-app--primary">Đăng ký Event</button>
                     </form>
                 }
                 @if (Model.Permissions.CanApprove)
