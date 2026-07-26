@@ -5573,6 +5573,24 @@
             "description": "Phase 79 chỉ chuyển Event Draft thuộc Organizer hiện tại sang PendingApproval."
           },
           "response": []
+        },
+        {
+          "name": "Phase 80 - Submit Event - MVC Contract",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "submit"]
+            },
+            "description": "Phase 80 API contract được MVC gọi bằng form POST anti-forgery và confirm."
+          },
+          "response": []
         }
       ]
     }

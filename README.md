@@ -1043,6 +1043,12 @@ Form tại `/Events/{id}/Edit` giữ nguyên Club, cho phép cập nhật nội 
 thời gian và capacity; lỗi ownership/status/business rule được giữ lại trên
 form. Lưu thành công sẽ redirect về trang chi tiết Event.
 
+## MVC gửi Event để duyệt
+
+Trên trang chi tiết Event Draft, Organizer có nút **Gửi để duyệt**. MVC dùng
+form POST có anti-forgery token và hộp xác nhận; sau khi API thành công, Event
+được tải lại với status `PendingApproval` và nút chỉnh sửa không còn hiển thị.
+
 ## API gửi Event để duyệt
 
 ```text

@@ -13,6 +13,10 @@ public interface IEventApiClient
         UpdateEventApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<SubmitEventApiResult> SubmitEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

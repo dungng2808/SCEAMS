@@ -36,6 +36,14 @@
     }
     else
     {
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="alert alert-success" role="status">@successMessage</div>
+        }
+        @if (TempData["EventErrorMessage"] is string eventErrorMessage)
+        {
+            <div class="alert alert-danger" role="alert">@eventErrorMessage</div>
+        }
         <div class="profile-layout">
             <section class="surface-card profile-form" aria-labelledby="event-overview-title">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -90,6 +98,13 @@
                 @if (Model.Permissions.CanEdit)
                 {
                     <a class="btn-app btn-app--primary" asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id">Chỉnh sửa Event</a>
+                }
+                @if (Model.Permissions.CanSubmit)
+                {
+                    <form asp-controller="Events" asp-action="Submit" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Gửi Event này để Admin/Staff duyệt?');" style="margin-top: .75rem;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-app btn-app--primary">Gửi để duyệt</button>
+                    </form>
                 }
             </aside>
         </div>

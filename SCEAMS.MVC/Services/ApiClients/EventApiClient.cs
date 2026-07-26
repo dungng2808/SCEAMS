@@ -126,6 +126,61 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<SubmitEventApiResult> SubmitEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync(
+            $"api/events/{eventId}/submit",
+            content: null,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new SubmitEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về Event vừa submit không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var error = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new SubmitEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new SubmitEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = error ?? "Bạn không có quyền gửi Event này."
+            },
+            HttpStatusCode.NotFound => new SubmitEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = error ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new SubmitEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = error ?? "Event không còn ở trạng thái Draft."
+            },
+            _ => new SubmitEventApiResult
+            {
+                ErrorMessage = error ?? "Không thể gửi Event để duyệt."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

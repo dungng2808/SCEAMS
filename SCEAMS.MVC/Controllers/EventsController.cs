@@ -324,6 +324,50 @@ public sealed class EventsController : Controller
         }
     }
 
+    [Authorize(Roles = "Organizer")]
+    [HttpPost("{id:int}/Submit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Submit(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventApiClient.SubmitEventAsync(id, cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess && result.Event is not null)
+            {
+                TempData["SuccessMessage"] =
+                    $"Event '{result.Event.Title}' đã chuyển sang PendingApproval.";
+            }
+            else
+            {
+                TempData["EventErrorMessage"] = result.ErrorMessage ??
+                    "Không thể gửi Event để duyệt.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to submit event {EventId} from MVC.", id);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,

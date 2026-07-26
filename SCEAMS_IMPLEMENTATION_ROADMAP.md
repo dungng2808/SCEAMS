@@ -684,9 +684,9 @@ Domain entity/enum
 
 ### Phase 80 - MVC: Gửi Event để duyệt
 
-- [ ] Thêm nút Submit for approval có xác nhận.
-- [ ] Sau khi thành công, khóa các trường không còn được phép sửa.
-- [ ] Hiển thị status `PendingApproval`.
+- [x] Thêm nút Submit for approval có xác nhận.
+- [x] Sau khi thành công, khóa các trường không còn được phép sửa.
+- [x] Hiển thị status `PendingApproval`.
 
 ### Phase 81 - API: Danh sách Event chờ duyệt
 
