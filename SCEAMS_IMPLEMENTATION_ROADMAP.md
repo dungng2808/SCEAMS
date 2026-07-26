@@ -519,9 +519,10 @@ Domain entity/enum
 
 ### Phase 54 - MVC: Danh sách đơn gia nhập
 
-- [ ] Tạo trang quản lý membership của Club.
-- [ ] Hiển thị pending applications có phân trang.
-- [ ] Kiểm thử Organizer khác Club nhận `403`.
+- [x] Tạo trang quản lý membership của Club.
+- [x] Hiển thị pending applications có phân trang.
+- [x] Kiểm thử Organizer khác Club nhận `403`.
+
 
 ### Phase 55 - API: Duyệt hoặc từ chối đơn gia nhập
 
