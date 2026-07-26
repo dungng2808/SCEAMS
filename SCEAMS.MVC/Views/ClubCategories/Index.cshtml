@@ -4,6 +4,10 @@
     ViewData["Title"] = "Danh mục câu lạc bộ";
     var isCategoryUpdate =
         TempData.Peek("CategoryUpdatedSuccess") is string;
+    var categoryDeleteSuccessMessage =
+        TempData["CategoryDeleteSuccess"] as string;
+    var categoryDeleteErrorMessage =
+        TempData["CategoryDeleteError"] as string;
     var categorySuccessMessage =
         Model.HighlightedCategoryId is not null
             ? (isCategoryUpdate
@@ -27,6 +31,44 @@
             <small>Cập nhật trực tiếp từ API</small>
         </div>
     </header>
+
+    @if (categoryDeleteSuccessMessage is not null)
+    {
+        <div class="category-success"
+             role="status"
+             aria-live="polite"
+             data-category-success>
+            <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8 12 2.5 2.5L16 9" />
+                </svg>
+            </span>
+            <div>
+                <strong>Xóa danh mục thành công</strong>
+                <p>@categoryDeleteSuccessMessage Danh mục đã được cập nhật lại từ API.</p>
+            </div>
+        </div>
+    }
+
+    @if (categoryDeleteErrorMessage is not null)
+    {
+        <div class="category-state category-state--error surface-card"
+             role="alert"
+             style="margin-bottom: 1.5rem; padding: 1.25rem;">
+            <span class="category-state__icon" aria-hidden="true" style="color: var(--sceams-danger);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow" style="color: var(--sceams-danger);">Thao tác xóa không thành công</p>
+                <h2 style="font-size: 1.1rem; margin: 0.15rem 0 0.35rem; color: var(--sceams-navy-950);">Không thể xóa danh mục</h2>
+                <p style="margin: 0; color: var(--sceams-text-soft);">@categoryDeleteErrorMessage</p>
+            </div>
+        </div>
+    }
 
     @if (categorySuccessMessage is not null)
     {
@@ -63,7 +105,7 @@
             <div>
                 <p class="category-admin__eyebrow">Quyền Admin</p>
                 <strong>Công cụ quản trị danh mục</strong>
-                <small>Tạo và cập nhật lĩnh vực dùng chung cho các câu lạc bộ.</small>
+                <small>Tạo, cập nhật và xóa lĩnh vực dùng chung cho các câu lạc bộ.</small>
             </div>
             <a class="btn-app btn-app--primary category-admin__action"
                asp-controller="ClubCategories"
@@ -180,13 +222,23 @@
                         </span>
                         @if (Model.CanManage)
                         {
-                            <a class="category-card__edit"
-                               asp-controller="ClubCategories"
-                               asp-action="Edit"
-                               asp-route-id="@category.Id"
-                               data-category-edit>
-                                Chỉnh sửa
-                            </a>
+                            <div class="category-card__actions">
+                                <a class="category-card__edit"
+                                   asp-controller="ClubCategories"
+                                   asp-action="Edit"
+                                   asp-route-id="@category.Id"
+                                   data-category-edit>
+                                    Chỉnh sửa
+                                </a>
+                                <button type="button"
+                                        class="category-card__delete"
+                                        data-category-delete
+                                        data-category-id="@category.Id"
+                                        data-category-name="@category.Name"
+                                        aria-label="Xóa danh mục @category.Name">
+                                    Xóa
+                                </button>
+                            </div>
                         }
                         else
                         {
@@ -196,6 +248,47 @@
                 </article>
             }
         </div>
+    }
+
+    @if (Model.CanManage)
+    {
+        <dialog class="users-confirm"
+                data-delete-category-dialog
+                data-action-base="@Url.Action("Index", "ClubCategories")"
+                aria-labelledby="delete-dialog-title">
+            <form method="post" data-delete-category-form>
+                @Html.AntiForgeryToken()
+                <div class="users-confirm__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                    </svg>
+                </div>
+                <p class="users-confirm__eyebrow">Xác nhận thao tác Admin</p>
+                <h2 id="delete-dialog-title">Xóa danh mục câu lạc bộ?</h2>
+                <p class="users-confirm__description">
+                    Bạn có chắc chắn muốn xóa danh mục này khỏi hệ thống? Thao tác này không thể hoàn tác.
+                </p>
+
+                <div class="users-confirm__account">
+                    <div>
+                        <span style="font-size: 0.68rem; text-transform: uppercase; color: var(--sceams-text-faint); font-weight: 750;">Danh mục đã chọn</span>
+                        <strong data-delete-category-name style="display: block; font-size: 1.05rem; color: var(--sceams-navy-950); margin-top: 0.2rem;"></strong>
+                    </div>
+                </div>
+
+                <div class="users-confirm__actions">
+                    <button type="button"
+                            class="btn-app btn-app--ghost"
+                            data-delete-category-cancel>
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="btn-app users-confirm__submit">
+                        <span>Xác nhận xóa</span>
+                    </button>
+                </div>
+            </form>
+        </dialog>
     }
 
     <footer class="category-footnote">
@@ -210,3 +303,8 @@
         </p>
     </footer>
 </section>
+
+@section Scripts {
+    <script src="~/js/club-categories.js" asp-append-version="true"></script>
+}
+

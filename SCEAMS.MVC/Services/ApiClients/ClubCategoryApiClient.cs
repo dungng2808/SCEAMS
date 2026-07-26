@@ -290,7 +290,79 @@ public sealed class ClubCategoryApiClient
         };
     }
 
+    public async Task<DeleteClubCategoryApiResult>
+        DeleteClubCategoryAsync(
+            int categoryId,
+            CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.DeleteAsync(
+            $"api/club-categories/{categoryId}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NoContent ||
+            response.StatusCode == HttpStatusCode.OK)
+        {
+            return new DeleteClubCategoryApiResult
+            {
+                IsSuccess = true
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var conflict = DeserializeOrDefault<ApiErrorResponse>(
+                content);
+
+            return new DeleteClubCategoryApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = conflict?.Message ==
+                    "Club category is currently in use by one or more clubs."
+                    ? "Không thể xóa danh mục đang được sử dụng bởi một hoặc nhiều câu lạc bộ."
+                    : conflict?.Message ??
+                        "Không thể xóa danh mục đang được câu lạc bộ sử dụng."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DeleteClubCategoryApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage =
+                    "Danh mục câu lạc bộ không tồn tại."
+            };
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized =>
+                new DeleteClubCategoryApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new DeleteClubCategoryApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền xóa danh mục câu lạc bộ."
+                },
+            _ => new DeleteClubCategoryApiResult
+            {
+                ErrorMessage =
+                    "Không thể xóa danh mục vào lúc này."
+            }
+        };
+    }
+
     private static T? DeserializeOrDefault<T>(string content)
+
         where T : class
     {
         if (string.IsNullOrWhiteSpace(content))

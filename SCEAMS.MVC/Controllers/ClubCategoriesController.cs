@@ -326,7 +326,81 @@ public sealed class ClubCategoriesController : Controller
         return View(model);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id:int}/Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var categoryResult = await _clubCategoryApiClient
+                .GetClubCategoryAsync(id, cancellationToken);
+            var categoryName = categoryResult.Category?.Name ?? $"#{id}";
+
+            var result = await _clubCategoryApiClient
+                .DeleteClubCategoryAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (result.IsSuccess)
+            {
+                TempData["CategoryDeleteSuccess"] =
+                    $"Đã xóa danh mục “{categoryName}” thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (result.IsConflict)
+            {
+                TempData["CategoryDeleteError"] =
+                    result.ErrorMessage ??
+                    "Không thể xóa danh mục đang được sử dụng bởi một hoặc nhiều câu lạc bộ.";
+            }
+            else if (result.IsNotFound)
+            {
+                TempData["CategoryDeleteError"] =
+                    result.ErrorMessage ??
+                    "Danh mục câu lạc bộ không tồn tại hoặc đã bị xóa trước đó.";
+            }
+            else
+            {
+                TempData["CategoryDeleteError"] =
+                    result.ErrorMessage ??
+                    "Không thể xóa danh mục vào lúc này.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to delete club category {CategoryId}.",
+                id);
+
+            TempData["CategoryDeleteError"] =
+                "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     private static ClubCategoryListItemViewModel MapCategory(
+
         ClubCategoryApiResponse category,
         int index)
     {

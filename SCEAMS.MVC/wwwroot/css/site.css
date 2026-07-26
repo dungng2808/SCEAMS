@@ -3651,6 +3651,12 @@ svg {
   color: var(--sceams-text-faint);
 }
 
+.category-card__actions {
+  align-items: center;
+  display: flex;
+  gap: 0.85rem;
+}
+
 .category-card__edit {
   color: var(--category-accent);
   font-size: 0.8rem;
@@ -3662,6 +3668,24 @@ svg {
   text-decoration: underline;
   text-underline-offset: 0.2rem;
 }
+
+.category-card__delete {
+  background: transparent;
+  border: 0;
+  color: #ef4444;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0;
+}
+
+.category-card__delete:hover {
+  color: #dc2626;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
 
 .category-footnote {
   align-items: center;

@@ -385,9 +385,10 @@ Domain entity/enum
 
 ### Phase 36 - MVC: Xóa danh mục CLB
 
-- [ ] Thêm hộp xác nhận xóa.
-- [ ] Hiển thị lý do không thể xóa nếu đang được sử dụng.
-- [ ] Không xóa row trên UI trước khi API trả thành công.
+- [x] Thêm hộp xác nhận xóa.
+- [x] Hiển thị lý do không thể xóa nếu đang được sử dụng.
+- [x] Không xóa row trên UI trước khi API trả thành công.
+
 
 ---
 
