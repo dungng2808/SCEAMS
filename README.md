@@ -272,5 +272,32 @@ redirects to `/Profile`, and calls `GET /api/users/me` again. The profile page
 therefore confirms the persisted API data and displays a success notification
 instead of relying on the submitted form values.
 
+## Current-user password change API
+
+An authenticated user can change their own password with:
+
+```text
+PUT http://localhost:5195/api/users/me/password
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+Example request:
+
+```json
+{
+  "currentPassword": "<current-password>",
+  "newPassword": "<new-strong-password>",
+  "confirmPassword": "<new-strong-password>"
+}
+```
+
+The new password must contain at least eight characters with uppercase,
+lowercase, numeric and special characters. The API verifies the current
+password against its hash, hashes the new password and clears both the stored
+refresh-token hash and expiry in the same database save. Success returns
+`204 No Content`, so no password data is included in the response. An incorrect
+current password or invalid new-password policy returns `400`.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

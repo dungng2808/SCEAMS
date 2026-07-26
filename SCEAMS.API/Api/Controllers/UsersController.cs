@@ -62,6 +62,29 @@ public sealed class UsersController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpPut("me/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChangeCurrentUserPassword(
+        [FromBody] ChangeCurrentUserPasswordRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return InvalidTokenSubject();
+        }
+
+        var result = await _userService
+            .ChangeCurrentUserPasswordAsync(
+                userId,
+                request,
+                cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     private bool TryGetCurrentUserId(out int userId)
     {
         var subject = User.FindFirstValue(

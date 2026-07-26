@@ -250,9 +250,9 @@ Domain entity/enum
 
 ### Phase 15 - API: Đổi mật khẩu
 
-- [ ] Thêm `PUT /api/users/me/password`.
-- [ ] Bắt buộc mật khẩu hiện tại đúng; hash mật khẩu mới; vô hiệu hóa refresh token cũ.
-- [ ] Test mật khẩu hiện tại sai và mật khẩu mới không đạt policy.
+- [x] Thêm `PUT /api/users/me/password`.
+- [x] Bắt buộc mật khẩu hiện tại đúng; hash mật khẩu mới; vô hiệu hóa refresh token cũ.
+- [x] Test mật khẩu hiện tại sai và mật khẩu mới không đạt policy.
 
 ### Phase 16 - MVC: Form đổi mật khẩu
 

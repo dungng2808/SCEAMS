@@ -14,4 +14,9 @@ public interface IUserService
             int userId,
             UpdateCurrentUserProfileRequestDto request,
             CancellationToken cancellationToken = default);
+
+    Task<Result> ChangeCurrentUserPasswordAsync(
+        int userId,
+        ChangeCurrentUserPasswordRequestDto request,
+        CancellationToken cancellationToken = default);
 }

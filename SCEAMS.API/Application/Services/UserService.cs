@@ -7,10 +7,14 @@ namespace SCEAMS.Application.Services;
 public sealed class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPasswordService _passwordService;
 
-    public UserService(IUnitOfWork unitOfWork)
+    public UserService(
+        IUnitOfWork unitOfWork,
+        IPasswordService passwordService)
     {
         _unitOfWork = unitOfWork;
+        _passwordService = passwordService;
     }
 
     public async Task<Result<CurrentUserProfileResponseDto>>
@@ -73,6 +77,44 @@ public sealed class UserService : IUserService
         return Result<CurrentUserProfileResponseDto>.Ok(
             MapProfile(user),
             "Profile updated successfully.");
+    }
+
+    public async Task<Result> ChangeCurrentUserPasswordAsync(
+        int userId,
+        ChangeCurrentUserPasswordRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(
+            userId,
+            cancellationToken);
+
+        if (user is null)
+        {
+            return Result.Fail(
+                "User account no longer exists.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (!_passwordService.VerifyPassword(
+                user,
+                user.PasswordHash,
+                request.CurrentPassword))
+        {
+            return Result.Fail(
+                "Current password is incorrect.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        user.PasswordHash = _passwordService.HashPassword(
+            user,
+            request.NewPassword);
+        user.RefreshTokenHash = null;
+        user.RefreshTokenExpiresAt = null;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.NoContent(
+            "Password changed successfully.");
     }
 
     private static CurrentUserProfileResponseDto MapProfile(

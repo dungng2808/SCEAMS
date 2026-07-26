@@ -55,6 +55,43 @@ Authorization: Bearer {{AccessToken}}
 
 ###
 
+# Define CurrentPassword and NewPassword in your local HTTP client environment.
+PUT {{SCEAMS.API_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{AccessToken}}
+
+{
+  "currentPassword": "{{CurrentPassword}}",
+  "newPassword": "{{NewPassword}}",
+  "confirmPassword": "{{NewPassword}}"
+}
+
+###
+
+PUT {{SCEAMS.API_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{AccessToken}}
+
+{
+  "currentPassword": "DefinitelyWrong1!",
+  "newPassword": "{{NewPassword}}",
+  "confirmPassword": "{{NewPassword}}"
+}
+
+###
+
+PUT {{SCEAMS.API_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{AccessToken}}
+
+{
+  "currentPassword": "{{CurrentPassword}}",
+  "newPassword": "weak",
+  "confirmPassword": "weak"
+}
+
+###
+
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json
 
