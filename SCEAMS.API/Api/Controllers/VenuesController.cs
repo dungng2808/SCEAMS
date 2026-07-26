@@ -95,6 +95,28 @@ public sealed class VenuesController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpGet("{id:int}/schedule")]
+    [AllowAnonymous]
+    [ProducesResponseType<VenueScheduleResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSchedule(
+        int id,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        var includeInternalStatuses = User.IsInRole("Admin") || User.IsInRole("Staff");
+        var result = await _venueService.GetScheduleAsync(
+            id,
+            from,
+            to,
+            includeInternalStatuses,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType<PagedResult<VenueResponseDto>>(StatusCodes.Status200OK)]

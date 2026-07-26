@@ -23,6 +23,13 @@ public interface IVenueService
         int id,
         CancellationToken cancellationToken = default);
 
+    Task<Result<VenueScheduleResponseDto>> GetScheduleAsync(
+        int id,
+        DateTime? from,
+        DateTime? to,
+        bool includeInternalStatuses,
+        CancellationToken cancellationToken = default);
+
     Task<Result<PagedResult<VenueResponseDto>>> GetVenuesAsync(
         string? search,
         bool? maintenance,

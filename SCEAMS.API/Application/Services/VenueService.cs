@@ -239,4 +239,65 @@ public sealed class VenueService : IVenueService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.NoContent("Địa điểm đã được xóa.");
     }
+
+    public async Task<Result<VenueScheduleResponseDto>> GetScheduleAsync(
+        int id,
+        DateTime? from,
+        DateTime? to,
+        bool includeInternalStatuses,
+        CancellationToken cancellationToken = default)
+    {
+        var venue = await _unitOfWork.Venues.GetByIdAsync(id, cancellationToken);
+        if (venue == null)
+        {
+            return Result<VenueScheduleResponseDto>.Fail(
+                $"Địa điểm với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var fromUtc = NormalizeUtc(from) ?? DateTime.UtcNow.Date;
+        var toUtc = NormalizeUtc(to) ?? fromUtc.AddDays(30);
+        if (toUtc <= fromUtc)
+        {
+            return Result<VenueScheduleResponseDto>.Fail(
+                "Khoảng thời gian không hợp lệ: to phải lớn hơn from.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var events = await _unitOfWork.Events.GetVenueScheduleAsync(
+            id,
+            fromUtc,
+            toUtc,
+            includeInternalStatuses,
+            cancellationToken);
+
+        return Result<VenueScheduleResponseDto>.Ok(new VenueScheduleResponseDto
+        {
+            VenueId = venue.Id,
+            VenueName = venue.Name,
+            Location = venue.Location,
+            FromUtc = fromUtc,
+            ToUtc = toUtc,
+            Events = events.Select(eventEntity => new VenueScheduleEventDto
+            {
+                EventId = eventEntity.Id,
+                Title = eventEntity.Title,
+                Status = eventEntity.Status.ToString(),
+                StartTime = eventEntity.StartTime,
+                EndTime = eventEntity.EndTime
+            }).ToList()
+        });
+    }
+
+    private static DateTime? NormalizeUtc(DateTime? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        return value.Value.Kind == DateTimeKind.Utc
+            ? value.Value
+            : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
+    }
 }

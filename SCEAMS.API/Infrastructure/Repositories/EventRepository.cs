@@ -89,4 +89,30 @@ public sealed class EventRepository
             .OrderBy(eventEntity => eventEntity.StartTime)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Event>> GetVenueScheduleAsync(
+        int venueId,
+        DateTime fromUtc,
+        DateTime toUtc,
+        bool includeInternalStatuses,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .AsNoTracking()
+            .Where(eventEntity =>
+                eventEntity.VenueId == venueId &&
+                eventEntity.StartTime < toUtc &&
+                fromUtc < eventEntity.EndTime);
+
+        if (!includeInternalStatuses)
+        {
+            query = query.Where(eventEntity =>
+                eventEntity.Status == EventStatus.Approved ||
+                eventEntity.Status == EventStatus.Ongoing);
+        }
+
+        return await query
+            .OrderBy(eventEntity => eventEntity.StartTime)
+            .ToListAsync(cancellationToken);
+    }
 }

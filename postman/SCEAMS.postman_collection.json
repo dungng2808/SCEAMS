@@ -5084,7 +5084,163 @@
             "1"
           ]
         },
-        "description": "Phase 67 dùng venueId đã được seed và Event tham chiếu để kiểm thử 409; API hướng dẫn bật maintenance."
+      "description": "Phase 67 dùng venueId đã được seed và Event tham chiếu để kiểm thử 409; API hướng dẫn bật maintenance."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 69 - Venue Schedule - Public",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Schedule contains safe public event fields\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.events).to.be.an(\"array\");",
+              "    body.events.forEach(function (event) {",
+              "        pm.expect(event.status).to.be.oneOf([\"Approved\", \"Ongoing\"]);",
+              "        pm.expect(event).to.not.have.property(\"registrations\");",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/1/schedule?from=2026-01-01T00:00:00Z&to=2027-01-01T00:00:00Z",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "1",
+            "schedule"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-01-01T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2027-01-01T00:00:00Z"
+            }
+          ]
+        },
+        "description": "Phase 69 public chỉ trả Event Approved/Ongoing trong khoảng from-to."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 69 - Venue Schedule - Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Admin receives the same schedule envelope\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.venueId).to.be.a(\"number\");",
+              "    pm.expect(body.fromUtc).to.be.a(\"string\");",
+              "    pm.expect(body.toUtc).to.be.a(\"string\");",
+              "    pm.expect(body.events).to.be.an(\"array\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/1/schedule?from=2026-01-01T00:00:00Z&to=2027-01-01T00:00:00Z",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "1",
+            "schedule"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-01-01T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2027-01-01T00:00:00Z"
+            }
+          ]
+        },
+        "description": "Phase 69 Admin/Staff được phép xem mọi trạng thái Event trong khoảng thời gian."
+      },
+      "response": []
+    },
+    {
+      "name": "Phase 69 - Venue Schedule - Invalid Range",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/venues/1/schedule?from=2026-12-31T00:00:00Z&to=2026-01-01T00:00:00Z",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "venues",
+            "1",
+            "schedule"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-12-31T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2026-01-01T00:00:00Z"
+            }
+          ]
+        },
+        "description": "Phase 69 kiểm thử validation khi to nhỏ hơn from."
       },
       "response": []
     }

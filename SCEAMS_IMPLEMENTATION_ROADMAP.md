@@ -614,9 +614,9 @@ Domain entity/enum
 
 ### Phase 69 - API: Lịch sử dụng địa điểm
 
-- [ ] Thêm `GET /api/venues/{id}/schedule`.
-- [ ] Hỗ trợ khoảng ngày; trả các Event liên quan theo thời gian.
-- [ ] Admin/Staff xem mọi status; role khác chỉ thấy Event public.
+- [x] Thêm `GET /api/venues/{id}/schedule`.
+- [x] Hỗ trợ khoảng ngày; trả các Event liên quan theo thời gian.
+- [x] Admin/Staff xem mọi status; role khác chỉ thấy Event public.
 
 ### Phase 70 - MVC: Lịch sử dụng địa điểm
 

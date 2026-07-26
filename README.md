@@ -908,6 +908,19 @@ Nếu venue đã xuất hiện trong bất kỳ Event nào, API không xóa dữ
 `409 Conflict` với hướng dẫn chuyển venue sang trạng thái bảo trì. Request kiểm
 thử hai trường hợp nằm trong Postman **Venues** folder.
 
+## API lịch sử sử dụng địa điểm
+
+Tra cứu lịch venue theo khoảng thời gian:
+
+```text
+GET http://localhost:5195/api/venues/{id}/schedule?from=2026-01-01T00:00:00Z&to=2027-01-01T00:00:00Z
+```
+
+API trả các Event có thời gian giao với khoảng `from` - `to`. Admin/Staff xem
+mọi trạng thái; request công khai hoặc role khác chỉ nhận Event `Approved` và
+`Ongoing`. Khoảng không hợp lệ (`to <= from`) trả `400`; venue không tồn tại
+trả `404`. Request mẫu nằm trong Postman **Venues** folder.
+
 ## MVC xóa địa điểm
 
 Chỉ Admin thấy nút **Xóa** trong bảng venue. MVC dùng form POST có anti-forgery

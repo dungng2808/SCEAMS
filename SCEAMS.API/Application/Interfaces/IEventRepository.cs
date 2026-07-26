@@ -28,4 +28,11 @@ public interface IEventRepository : IGenericRepository<Event>
         int venueId,
         DateTime fromUtc,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Event>> GetVenueScheduleAsync(
+        int venueId,
+        DateTime fromUtc,
+        DateTime toUtc,
+        bool includeInternalStatuses,
+        CancellationToken cancellationToken = default);
 }
