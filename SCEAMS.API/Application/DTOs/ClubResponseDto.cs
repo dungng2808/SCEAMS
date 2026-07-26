@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Application.DTOs;
@@ -9,8 +10,12 @@ public sealed class ClubResponseDto
     public string? Description { get; init; }
     public int CategoryId { get; init; }
     public string CategoryName { get; init; } = string.Empty;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ClubStatus Status { get; init; }
+
     public int CreatedByUserId { get; init; }
+
     public string CreatedByUserName { get; init; } = string.Empty;
     public int ActiveMemberCount { get; init; }
     public DateTime CreatedAt { get; init; }
