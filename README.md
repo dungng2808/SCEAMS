@@ -1233,6 +1233,20 @@ API lấy Student từ JWT, không nhận `studentId` từ query. Có thể lọ
 50 bản ghi/trang; response gồm Event, thời gian, registration status và thông
 tin điểm danh nếu đã có.
 
+## API danh sách người đăng ký của Event
+
+Admin hoặc Organizer sở hữu Event dùng:
+
+```text
+GET http://localhost:5195/api/events/{id}/registrations?status=Confirmed&search=SV001&page=1&pageSize=10
+Authorization: Bearer <admin-or-organizer-access-token>
+```
+
+API kiểm tra ownership của Organizer, hỗ trợ lọc status, tìm theo Student code/
+tên và phân trang tối đa 50 bản ghi/trang. Response chỉ trả Student code, tên,
+registration status và thông tin điểm danh cần thiết; không trả email, phone hay
+dữ liệu cá nhân nhạy cảm.
+
 ## MVC lịch sử đăng ký
 
 Student mở `/Registrations` để xem trang **My Registrations**. Trang có lọc

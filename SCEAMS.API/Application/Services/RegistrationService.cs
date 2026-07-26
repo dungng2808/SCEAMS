@@ -247,6 +247,88 @@ public sealed class RegistrationService : IRegistrationService
             new PagedResult<RegistrationHistoryItemDto>(items, result.TotalItems));
     }
 
+    public async Task<Result<PagedResult<EventRegistrationListItemDto>>> GetEventRegistrationsAsync(
+        int eventId,
+        string? status,
+        string? search,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var isAdmin = user.IsInRole(nameof(UserRole.Admin));
+        var isOrganizer = user.IsInRole(nameof(UserRole.Organizer));
+        if (!isAdmin && !isOrganizer)
+        {
+            return Result<PagedResult<EventRegistrationListItemDto>>.Fail(
+                "Chỉ Admin hoặc Organizer mới có thể xem danh sách registration.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var eventEntity = await _unitOfWork.Events.GetByIdWithDetailsAsync(
+            eventId,
+            cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<PagedResult<EventRegistrationListItemDto>>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (isOrganizer)
+        {
+            var organizerId = GetUserId(user);
+            var ownsEvent = organizerId.HasValue &&
+                            (eventEntity.CreatedByUserId == organizerId.Value ||
+                             eventEntity.Club.CreatedByUserId == organizerId.Value);
+            if (!ownsEvent)
+            {
+                return Result<PagedResult<EventRegistrationListItemDto>>.Fail(
+                    "Organizer chỉ được xem registration của Event thuộc quyền phụ trách.",
+                    StatusCodes.Status403Forbidden);
+            }
+        }
+
+        RegistrationStatus? parsedStatus = null;
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<RegistrationStatus>(status, true, out var statusValue))
+            {
+                return Result<PagedResult<EventRegistrationListItemDto>>.Fail(
+                    "Status registration không hợp lệ.",
+                    StatusCodes.Status400BadRequest);
+            }
+
+            parsedStatus = statusValue;
+        }
+
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var result = await _unitOfWork.Registrations.GetForEventAsync(
+            eventId,
+            parsedStatus,
+            search,
+            normalizedPage,
+            normalizedPageSize,
+            cancellationToken);
+        var items = result.Items.Select(registration =>
+            new EventRegistrationListItemDto
+            {
+                Id = registration.Id,
+                StudentCode = registration.Student.StudentCode ?? string.Empty,
+                StudentName = registration.Student.FullName,
+                Status = registration.Status,
+                RegisteredAt = registration.RegisteredAt,
+                CancelledAt = registration.CancelledAt,
+                IsAttended = registration.Attendance is not null ||
+                              registration.Status == RegistrationStatus.Attended,
+                CheckInTime = registration.Attendance?.CheckInTime
+            }).ToList();
+
+        return Result<PagedResult<EventRegistrationListItemDto>>.Ok(
+            new PagedResult<EventRegistrationListItemDto>(items, result.TotalItems));
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)

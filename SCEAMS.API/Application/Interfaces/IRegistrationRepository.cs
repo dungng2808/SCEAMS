@@ -25,4 +25,12 @@ public interface IRegistrationRepository
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<Registration> Items, int TotalItems)> GetForEventAsync(
+        int eventId,
+        RegistrationStatus? status,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

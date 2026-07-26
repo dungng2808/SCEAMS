@@ -78,4 +78,41 @@ public sealed class RegistrationRepository
             .ToListAsync(cancellationToken);
         return (items, totalItems);
     }
+
+    public async Task<(IReadOnlyList<Registration> Items, int TotalItems)> GetForEventAsync(
+        int eventId,
+        RegistrationStatus? status,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .AsNoTracking()
+            .Include(registration => registration.Student)
+            .Include(registration => registration.Attendance)
+            .Where(registration => registration.EventId == eventId);
+        if (status.HasValue)
+        {
+            query = query.Where(registration => registration.Status == status.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedSearch = search.Trim().ToLower();
+            query = query.Where(registration =>
+                (registration.Student.StudentCode ?? string.Empty).ToLower().Contains(normalizedSearch) ||
+                registration.Student.FullName.ToLower().Contains(normalizedSearch));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var items = await query
+            .OrderBy(registration => registration.RegisteredAt)
+            .Skip((normalizedPage - 1) * normalizedPageSize)
+            .Take(normalizedPageSize)
+            .ToListAsync(cancellationToken);
+        return (items, totalItems);
+    }
 }

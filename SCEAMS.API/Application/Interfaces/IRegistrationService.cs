@@ -22,4 +22,13 @@ public interface IRegistrationService
         int pageSize,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<PagedResult<EventRegistrationListItemDto>>> GetEventRegistrationsAsync(
+        int eventId,
+        string? status,
+        string? search,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

@@ -13,15 +13,18 @@ public sealed class EventsController : ApiControllerBase
 {
     private readonly IEventService _eventService;
     private readonly IEventStatusSyncService _eventStatusSyncService;
+    private readonly IRegistrationService _registrationService;
     private readonly IHostEnvironment _environment;
 
     public EventsController(
         IEventService eventService,
         IEventStatusSyncService eventStatusSyncService,
+        IRegistrationService registrationService,
         IHostEnvironment environment)
     {
         _eventService = eventService;
         _eventStatusSyncService = eventStatusSyncService;
+        _registrationService = registrationService;
         _environment = environment;
     }
 
@@ -232,5 +235,32 @@ public sealed class EventsController : ApiControllerBase
 
         var result = await _eventStatusSyncService.SynchronizeAsync(cancellationToken);
         return Ok(result);
+    }
+
+    [HttpGet("{id:int}/registrations")]
+    [Authorize(Roles = "Admin,Organizer")]
+    [ProducesResponseType<PagedResult<EventRegistrationListItemDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetEventRegistrations(
+        int id,
+        [FromQuery] string? status,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _registrationService.GetEventRegistrationsAsync(
+            id,
+            status,
+            search,
+            page,
+            pageSize,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
     }
 }

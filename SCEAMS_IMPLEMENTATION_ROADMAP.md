@@ -790,9 +790,9 @@ Domain entity/enum
 
 ### Phase 97 - API: Danh sách người đăng ký của Event
 
-- [ ] Thêm `GET /api/events/{id}/registrations`.
-- [ ] Admin hoặc Organizer sở hữu mới được xem.
-- [ ] Hỗ trợ status filter, search và phân trang.
+- [x] Thêm `GET /api/events/{id}/registrations`.
+- [x] Admin hoặc Organizer sở hữu mới được xem.
+- [x] Hỗ trợ status filter, search và phân trang.
 
 ### Phase 98 - MVC: Danh sách người đăng ký
 

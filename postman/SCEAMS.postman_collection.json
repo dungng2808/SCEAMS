@@ -5766,6 +5766,30 @@
             "description": "Phase 95 Student xem lịch sử của chính mình, không truyền StudentId tùy ý."
           },
           "response": []
+        },
+        {
+          "name": "Phase 97 - Event Registrations - Admin",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminAccessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/registrations?status=Confirmed&search=SV001&page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "registrations"],
+              "query": [
+                { "key": "status", "value": "Confirmed" },
+                { "key": "search", "value": "SV001" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Phase 97 Admin hoặc Organizer sở hữu Event xem registration với status/search/paging."
+          },
+          "response": []
         }
       ]
     }
