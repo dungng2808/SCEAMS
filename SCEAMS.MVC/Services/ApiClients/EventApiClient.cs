@@ -242,6 +242,58 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<ApproveEventApiResult> ApproveEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsync(
+            $"api/events/{eventId}/approve",
+            content: null,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new ApproveEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var error = DeserializeOrDefault<ApprovalErrorResponse>(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new ApproveEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new ApproveEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = error?.Message ?? "Bạn không có quyền duyệt Event."
+            },
+            HttpStatusCode.NotFound => new ApproveEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = error?.Message ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new ApproveEventApiResult
+            {
+                IsConflict = true,
+                Conflicts = error?.Conflicts ?? [],
+                ErrorMessage = error?.Message ?? "Event đang xung đột lịch."
+            },
+            _ => new ApproveEventApiResult
+            {
+                ErrorMessage = error?.Message ?? "Không thể duyệt Event."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)
@@ -431,4 +483,22 @@ public sealed class EventApiClient : IEventApiClient
     }
 
     private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);
+
+    private sealed record ApprovalErrorResponse(
+        string? Message,
+        List<EventApprovalConflictApiResponse>? Conflicts);
+
+    private static T? DeserializeOrDefault<T>(string content)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(
+                content,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+        catch (JsonException)
+        {
+            return default;
+        }
+    }
 }

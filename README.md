@@ -1091,8 +1091,13 @@ https://localhost:7034/Events/Pending
 ```
 
 Queue có filter Club, Venue, date range, phân trang và link tới chi tiết Event
-trước khi quyết định. Các filter và page được giữ lại khi chuyển qua lại queue;
-action Approve/Reject sẽ được bổ sung ở Phase 83–86.
+trước khi quyết định. Admin/Staff có thể bấm **Approve** ngay trên queue hoặc
+trang chi tiết; MVC dùng form POST có anti-forgery token và hộp xác nhận.
+
+Nếu lịch Venue bị overlap, API trả `409 Conflict` và MVC hiển thị từng Event
+xung đột cùng Venue, trạng thái và khung giờ ngay trên trang chi tiết. Khi duyệt
+thành công, Event chuyển sang `Approved`, vì vậy Student có thể nhìn thấy Event
+trong danh sách công khai và đăng ký.
 
 ## API Organizer tạo Event Draft
 

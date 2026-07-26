@@ -106,6 +106,13 @@
                         <button type="submit" class="btn-app btn-app--primary">Gửi để duyệt</button>
                     </form>
                 }
+                @if (Model.Permissions.CanApprove)
+                {
+                    <form asp-controller="Events" asp-action="Approve" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Duyệt Event này? API sẽ kiểm tra overlap Venue.');" style="margin-top: .75rem;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-app btn-app--primary">Approve Event</button>
+                    </form>
+                }
             </aside>
         </div>
     }

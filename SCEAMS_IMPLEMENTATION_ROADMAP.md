@@ -708,9 +708,9 @@ Domain entity/enum
 
 ### Phase 84 - MVC: Duyệt Event
 
-- [ ] Thêm action Approve trên queue/chi tiết.
-- [ ] Khi conflict, hiển thị rõ Event, Venue và khung giờ bị trùng.
-- [ ] Khi thành công, Event mở cho Student đăng ký.
+- [x] Thêm action Approve trên queue/chi tiết.
+- [x] Khi conflict, hiển thị rõ Event, Venue và khung giờ bị trùng.
+- [x] Khi thành công, Event mở cho Student đăng ký.
 
 ### Phase 85 - API: Từ chối Event
 

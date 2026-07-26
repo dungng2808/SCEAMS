@@ -432,6 +432,58 @@ public sealed class EventsController : Controller
         return RedirectToAction(nameof(Detail), new { id });
     }
 
+    [Authorize(Roles = "Admin,Staff")]
+    [HttpPost("{id:int}/Approve")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventApiClient.ApproveEventAsync(id, cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess && result.Event is not null)
+            {
+                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được Approved.";
+            }
+            else if (result.IsConflict)
+            {
+                var conflicts = result.Conflicts.Count == 0
+                    ? "API không cung cấp chi tiết conflict."
+                    : string.Join(
+                        " | ",
+                        result.Conflicts.Select(conflict =>
+                            $"#{conflict.EventId} {conflict.Title} · {conflict.VenueName} · {conflict.Status} · {conflict.StartTime:dd/MM/yyyy HH:mm}-{conflict.EndTime:HH:mm}"));
+                TempData["EventErrorMessage"] = $"{result.ErrorMessage} {conflicts}";
+            }
+            else
+            {
+                TempData["EventErrorMessage"] = result.ErrorMessage ?? "Không thể duyệt Event.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to approve event {EventId} from MVC.", id);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,

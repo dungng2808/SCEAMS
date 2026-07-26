@@ -63,7 +63,7 @@
                             <th style="padding: 1rem 1.5rem;">Event</th>
                             <th>Club / Venue</th>
                             <th>Bắt đầu</th>
-                            <th class="text-end">Chi tiết</th>
+                            <th class="text-end">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,7 +73,15 @@
                                 <td style="padding: 1rem 1.5rem;"><strong>@eventItem.Title</strong><small style="display:block;color:var(--sceams-text-soft);">#@eventItem.Id</small></td>
                                 <td><strong>@eventItem.ClubName</strong><small style="display:block;color:var(--sceams-text-soft);">@eventItem.VenueName</small></td>
                                 <td>@eventItem.StartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-end"><a class="btn-app btn-app--ghost btn-sm" asp-controller="Events" asp-action="Detail" asp-route-id="@eventItem.Id">Xem chi tiết</a></td>
+                                <td class="text-end">
+                                    <div style="display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap;">
+                                        <a class="btn-app btn-app--ghost btn-sm" asp-controller="Events" asp-action="Detail" asp-route-id="@eventItem.Id">Xem chi tiết</a>
+                                        <form asp-controller="Events" asp-action="Approve" asp-route-id="@eventItem.Id" method="post" onsubmit="return confirm('Duyệt Event này? API sẽ kiểm tra overlap Venue.');" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-app btn-app--primary btn-sm">Approve</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>

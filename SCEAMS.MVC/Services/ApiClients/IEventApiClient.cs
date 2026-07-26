@@ -26,6 +26,10 @@ public interface IEventApiClient
         int pageSize = 10,
         CancellationToken cancellationToken = default);
 
+    Task<ApproveEventApiResult> ApproveEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);
