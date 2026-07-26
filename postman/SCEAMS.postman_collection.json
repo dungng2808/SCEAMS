@@ -2996,8 +2996,177 @@
             "description": "Phase 33 verifies that non-Admin roles cannot update categories."
           },
           "response": []
+        },
+        {
+          "name": "Phase 35 - API: Xóa danh mục CLB - 204 NoContent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{deleteClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{deleteClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 35 verifies deleting an unused category by Admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 35 - API: Xóa danh mục CLB - 409 Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{usedClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{usedClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 35 verifies that deleting a category assigned to one or more clubs returns 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 35 - API: Xóa danh mục CLB - 404 Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "2147483647"
+              ]
+            },
+            "description": "Phase 35 verifies that deleting a non-existent category returns 404 Not Found."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 35 - API: Xóa danh mục CLB - 403 Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/club-categories/{{deleteClubCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "club-categories",
+                "{{deleteClubCategoryId}}"
+              ]
+            },
+            "description": "Phase 35 verifies that non-Admin roles receive 403 Forbidden when deleting categories."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
