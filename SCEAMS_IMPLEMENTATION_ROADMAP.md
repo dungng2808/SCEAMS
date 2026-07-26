@@ -244,9 +244,9 @@ Domain entity/enum
 
 ### Phase 14 - MVC: Sửa hồ sơ cá nhân
 
-- [ ] Tạo form edit hồ sơ, pre-fill dữ liệu từ API.
-- [ ] Gọi `PUT /api/users/me`, hiển thị validation và thông báo thành công.
-- [ ] Tải lại hồ sơ để xác nhận dữ liệu thực sự đã lưu.
+- [x] Tạo form edit hồ sơ, pre-fill dữ liệu từ API.
+- [x] Gọi `PUT /api/users/me`, hiển thị validation và thông báo thành công.
+- [x] Tải lại hồ sơ để xác nhận dữ liệu thực sự đã lưu.
 
 ### Phase 15 - API: Đổi mật khẩu
 

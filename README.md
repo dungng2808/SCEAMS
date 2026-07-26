@@ -254,5 +254,23 @@ name, converts a blank phone number to `null`, validates the phone format and
 returns the updated safe profile. Invalid input returns `400`; an invalid token
 returns `401`; a valid token whose user no longer exists returns `404`.
 
+## MVC profile editing
+
+After logging in, use the **Chỉnh sửa** action on `/Profile` or open:
+
+```text
+http://localhost:5206/Profile/Edit
+```
+
+MVC first calls `GET /api/users/me` to pre-fill the editable name and phone
+fields. The form does not render email, student code, role, active status,
+password or token fields. Client and server validation errors are displayed
+next to the corresponding input.
+
+On a successful `PUT /api/users/me`, MVC refreshes the display-name claim,
+redirects to `/Profile`, and calls `GET /api/users/me` again. The profile page
+therefore confirms the persisted API data and displays a success notification
+instead of relying on the submitted form values.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

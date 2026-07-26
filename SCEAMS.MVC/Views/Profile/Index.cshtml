@@ -13,15 +13,43 @@
                 Thông tin được tải trực tiếp từ SCEAMS API và chỉ thuộc về tài khoản đang đăng nhập.
             </p>
         </div>
-        <a class="btn-app btn-app--ghost"
-           asp-controller="Dashboard"
-           asp-action="Index">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="m15 18-6-6 6-6" />
-            </svg>
-            Dashboard
-        </a>
+        <div class="profile-heading__actions">
+            @if (Model.Profile is not null)
+            {
+                <a class="btn-app btn-app--primary"
+                   asp-controller="Profile"
+                   asp-action="Edit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="m4 16-.8 4 4-.8L18 8.4 15.6 6 4 16Z" />
+                        <path d="m13.8 7.8 2.4 2.4" />
+                    </svg>
+                    Chỉnh sửa
+                </a>
+            }
+            <a class="btn-app btn-app--ghost"
+               asp-controller="Dashboard"
+               asp-action="Index">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+                Dashboard
+            </a>
+        </div>
     </div>
+
+    @if (TempData["ProfileUpdateSuccess"] is string updateSuccess)
+    {
+        <div class="profile-success" role="status" aria-live="polite">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="m8 12 2.5 2.5L16 9" />
+            </svg>
+            <div>
+                <strong>Cập nhật thành công</strong>
+                <p>@updateSuccess</p>
+            </div>
+        </div>
+    }
 
     @if (Model.Profile is null)
     {
