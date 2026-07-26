@@ -363,6 +363,22 @@ short expiry.
 Ready-to-run Phase 25 requests are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Users** folder.
 
+## MVC account lock and unlock
+
+On the Admin user list, each account now has a separate lock or unlock action.
+The action opens a confirmation dialog that shows the target account and
+explains the effect before anything is submitted. MVC sends the confirmed
+request to `PUT /api/users/{id}/active-status` through the authenticated
+server-side API client; the browser never receives the access token.
+
+The confirmation form is protected by an anti-forgery token and preserves the
+current search, role, status and page filters. After a successful API response,
+MVC reloads the list and displays both a success notification and the persisted
+active-status badge. API errors remain on the same filtered list. In
+particular, an Admin who attempts to lock their own signed-in account sees the
+localized error `Bạn không thể khóa tài khoản Admin đang đăng nhập.` and their
+status remains active.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:

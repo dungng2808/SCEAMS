@@ -505,6 +505,81 @@ public sealed class AdminUsersController : Controller
         return View(model);
     }
 
+    [HttpPost("{id:int}/ActiveStatus")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateActiveStatus(
+        int id,
+        bool isActive,
+        string? search,
+        string? role,
+        bool? filterIsActive,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _userApiClient
+                .UpdateUserActiveStatusAsync(
+                    id,
+                    new UpdateUserActiveStatusApiRequest(
+                        isActive),
+                    cancellationToken);
+
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (result.IsSuccess && result.User is not null)
+            {
+                TempData["UserStatusSuccess"] = isActive
+                    ? $"Đã mở khóa tài khoản {result.User.Email}."
+                    : $"Đã khóa tài khoản {result.User.Email} " +
+                        "và thu hồi refresh token.";
+            }
+            else
+            {
+                TempData["UserStatusError"] =
+                    result.ErrorMessage ??
+                    "Không thể thay đổi trạng thái tài khoản.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to update active status for user {UserId}.",
+                id);
+
+            TempData["UserStatusError"] =
+                "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(
+            nameof(Index),
+            new
+            {
+                search,
+                role,
+                isActive = filterIsActive,
+                page,
+                pageSize
+            });
+    }
+
     private void AddApiValidationErrors(
         IReadOnlyDictionary<string, string[]> fieldErrors,
         HashSet<string> allowedFields)

@@ -297,6 +297,86 @@ public sealed class UserApiClient : IUserApiClient
         };
     }
 
+    public async Task<UpdateUserActiveStatusApiResult>
+        UpdateUserActiveStatusAsync(
+            int userId,
+            UpdateUserActiveStatusApiRequest request,
+            CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/users/{userId.ToString(CultureInfo.InvariantCulture)}" +
+            "/active-status",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var user = await response.Content
+                .ReadFromJsonAsync<UserActiveStatusApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateUserActiveStatusApiResult
+            {
+                IsSuccess = user is not null,
+                User = user,
+                ErrorMessage = user is null
+                    ? "API trả về trạng thái tài khoản không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+        var apiError = DeserializeOrDefault<ApiErrorResponse>(
+            content);
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest
+                when apiError?.Message ==
+                    "Administrators cannot lock their own account." =>
+                new UpdateUserActiveStatusApiResult
+                {
+                    IsSelfLock = true,
+                    ErrorMessage =
+                        "Bạn không thể khóa tài khoản Admin " +
+                        "đang đăng nhập."
+                },
+            HttpStatusCode.BadRequest =>
+                new UpdateUserActiveStatusApiResult
+                {
+                    ErrorMessage = apiError?.Message ??
+                        "Trạng thái tài khoản không hợp lệ."
+                },
+            HttpStatusCode.Unauthorized =>
+                new UpdateUserActiveStatusApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new UpdateUserActiveStatusApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền thay đổi trạng thái tài khoản."
+                },
+            HttpStatusCode.NotFound =>
+                new UpdateUserActiveStatusApiResult
+                {
+                    IsNotFound = true,
+                    ErrorMessage =
+                        "Tài khoản không còn tồn tại trong hệ thống."
+                },
+            _ => new UpdateUserActiveStatusApiResult
+            {
+                ErrorMessage =
+                    "Không thể thay đổi trạng thái tài khoản vào lúc này."
+            }
+        };
+    }
+
     public async Task<CurrentUserProfileApiResult> GetCurrentUserAsync(
         CancellationToken cancellationToken = default)
     {

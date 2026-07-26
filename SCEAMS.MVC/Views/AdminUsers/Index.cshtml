@@ -16,6 +16,14 @@
         successTitle = "Cập nhật tài khoản thành công";
         successMessage = updatedMessage;
     }
+    else if (TempData["UserStatusSuccess"] is string statusMessage)
+    {
+        successTitle = "Đã cập nhật trạng thái";
+        successMessage = statusMessage;
+    }
+
+    var statusError =
+        TempData["UserStatusError"] as string;
 
     var visiblePages = new SortedSet<int>();
 
@@ -71,6 +79,24 @@
             <div>
                 <strong>@successTitle</strong>
                 <p>@successMessage Tài khoản đang được hiển thị bên dưới.</p>
+            </div>
+        </div>
+    }
+
+    @if (statusError is not null)
+    {
+        <div class="users-alert users-alert--error"
+             role="alert"
+             aria-live="assertive">
+            <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <strong>Chưa thể cập nhật trạng thái</strong>
+                <p>@statusError</p>
             </div>
         </div>
     }
@@ -302,17 +328,44 @@
                                         </time>
                                     </td>
                                     <td>
-                                        <a class="users-row-action"
-                                           asp-controller="AdminUsers"
-                                           asp-action="Edit"
-                                           asp-route-id="@user.Id"
-                                           aria-label="Chỉnh sửa tài khoản @user.FullName">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                                                <path d="m4 16-.8 4 4-.8L18 8.4 15.6 6 4 16Z" />
-                                                <path d="m13.8 7.8 2.4 2.4" />
-                                            </svg>
-                                            Sửa
-                                        </a>
+                                        <div class="users-row-actions">
+                                            <a class="users-row-action"
+                                               asp-controller="AdminUsers"
+                                               asp-action="Edit"
+                                               asp-route-id="@user.Id"
+                                               aria-label="Chỉnh sửa tài khoản @user.FullName">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                                    <path d="m4 16-.8 4 4-.8L18 8.4 15.6 6 4 16Z" />
+                                                    <path d="m13.8 7.8 2.4 2.4" />
+                                                </svg>
+                                                Sửa
+                                            </a>
+                                            <button type="button"
+                                                    class="users-row-action @(user.IsActive ? "users-row-action--lock" : "users-row-action--unlock")"
+                                                    data-status-action
+                                                    data-user-id="@user.Id"
+                                                    data-user-name="@user.FullName"
+                                                    data-user-email="@user.Email"
+                                                    data-current-active="@user.IsActive.ToString().ToLowerInvariant()"
+                                                    aria-label="@(user.IsActive ? "Khóa" : "Mở khóa") tài khoản @user.FullName">
+                                                @if (user.IsActive)
+                                                {
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                                        <rect x="5" y="10" width="14" height="11" rx="2" />
+                                                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                                                    </svg>
+                                                    <span>Khóa</span>
+                                                }
+                                                else
+                                                {
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                                        <rect x="5" y="10" width="14" height="11" rx="2" />
+                                                        <path d="M16 10V7a4 4 0 0 0-7.6-1.8" />
+                                                    </svg>
+                                                    <span>Mở khóa</span>
+                                                }
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -411,5 +464,62 @@
                 }
             </section>
         }
+
+        <dialog class="users-confirm"
+                data-status-dialog
+                data-action-base="@Url.Action("Index", "AdminUsers")"
+                aria-labelledby="status-dialog-title"
+                aria-describedby="status-dialog-description">
+            <form method="post" data-status-form>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="isActive" data-status-value />
+                <input type="hidden" name="search" value="@Model.Search" />
+                <input type="hidden" name="role" value="@Model.Role" />
+                <input type="hidden"
+                       name="filterIsActive"
+                       value="@(Model.IsActive.HasValue ? Model.IsActive.Value.ToString().ToLowerInvariant() : string.Empty)" />
+                <input type="hidden" name="page" value="@Model.Page" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                <div class="users-confirm__icon" data-status-icon aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="5" y="10" width="14" height="11" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                </div>
+                <p class="users-confirm__eyebrow">Xác nhận thao tác</p>
+                <h2 id="status-dialog-title" data-status-title>
+                    Thay đổi trạng thái tài khoản?
+                </h2>
+                <p id="status-dialog-description"
+                   class="users-confirm__description"
+                   data-status-description></p>
+
+                <div class="users-confirm__account">
+                    <span data-status-avatar aria-hidden="true">SC</span>
+                    <div>
+                        <strong data-status-name></strong>
+                        <small data-status-email></small>
+                    </div>
+                </div>
+
+                <div class="users-confirm__actions">
+                    <button type="button"
+                            class="btn-app btn-app--ghost"
+                            data-status-cancel>
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="btn-app users-confirm__submit"
+                            data-status-confirm>
+                        <span data-status-confirm-label>Xác nhận</span>
+                    </button>
+                </div>
+            </form>
+        </dialog>
     }
 </section>
+
+@section Scripts {
+    <script src="~/js/admin-users.js" asp-append-version="true"></script>
+}

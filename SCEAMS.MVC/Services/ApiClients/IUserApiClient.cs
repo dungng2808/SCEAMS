@@ -17,6 +17,12 @@ public interface IUserApiClient
         UpdateUserProfileApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<UpdateUserActiveStatusApiResult>
+        UpdateUserActiveStatusAsync(
+            int userId,
+            UpdateUserActiveStatusApiRequest request,
+            CancellationToken cancellationToken = default);
+
     Task<UserListApiResult> GetUsersAsync(
         UserListApiQuery query,
         CancellationToken cancellationToken = default);

@@ -320,9 +320,9 @@ Domain entity/enum
 
 ### Phase 26 - MVC: Nút khóa/mở khóa
 
-- [ ] Thêm action có hộp xác nhận trên danh sách user.
-- [ ] Cập nhật badge trạng thái sau khi API thành công.
-- [ ] Hiển thị đúng lỗi khi Admin cố tự khóa chính mình.
+- [x] Thêm action có hộp xác nhận trên danh sách user.
+- [x] Cập nhật badge trạng thái sau khi API thành công.
+- [x] Hiển thị đúng lỗi khi Admin cố tự khóa chính mình.
 
 ### Phase 27 - API: Gán vai trò
 
