@@ -11,6 +11,7 @@ public sealed class VenuesViewModel
     public bool HasPreviousPage { get; init; }
     public bool HasNextPage { get; init; }
     public bool CanManage { get; init; }
+    public bool CanDelete { get; init; }
     public string? ErrorMessage { get; init; }
     public IReadOnlyList<VenueListItemViewModel> Venues { get; init; } = [];
 }

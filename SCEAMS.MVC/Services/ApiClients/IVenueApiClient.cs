@@ -4,6 +4,10 @@ namespace SCEAMS.MVC.Services.ApiClients;
 
 public interface IVenueApiClient
 {
+    Task<DeleteVenueApiResult> DeleteVenueAsync(
+        int venueId,
+        CancellationToken cancellationToken = default);
+
     Task<VenueApiResult> GetVenueAsync(
         int venueId,
         CancellationToken cancellationToken = default);

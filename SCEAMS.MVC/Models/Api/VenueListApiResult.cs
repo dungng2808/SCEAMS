@@ -5,6 +5,7 @@ public sealed class VenueListApiResult
     public bool IsSuccess { get; init; }
     public bool IsUnauthorized { get; init; }
     public bool IsForbidden { get; init; }
+    public bool IsNotFound { get; init; }
     public string? ErrorMessage { get; init; }
     public IReadOnlyList<VenueApiResponse> Venues { get; init; } = [];
     public int TotalItems { get; init; }

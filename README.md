@@ -908,6 +908,13 @@ Nếu venue đã xuất hiện trong bất kỳ Event nào, API không xóa dữ
 `409 Conflict` với hướng dẫn chuyển venue sang trạng thái bảo trì. Request kiểm
 thử hai trường hợp nằm trong Postman **Venues** folder.
 
+## MVC xóa địa điểm
+
+Chỉ Admin thấy nút **Xóa** trong bảng venue. MVC dùng form POST có anti-forgery
+token và hộp xác nhận; sau mọi kết quả đều redirect tải lại danh sách. Nếu API
+trả `409` vì venue đã được Event tham chiếu, giao diện hiển thị hướng dẫn bật
+maintenance và không loại bỏ dòng venue khỏi danh sách.
+
 ## API bật/tắt bảo trì địa điểm
 
 Admin và Staff dùng endpoint riêng để thay đổi trạng thái bảo trì:

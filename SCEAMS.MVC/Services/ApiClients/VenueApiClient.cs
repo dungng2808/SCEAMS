@@ -14,6 +14,52 @@ public sealed class VenueApiClient : IVenueApiClient
         _httpClient = httpClient;
     }
 
+    public async Task<DeleteVenueApiResult> DeleteVenueAsync(
+        int venueId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.DeleteAsync(
+            $"api/venues/{venueId}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            return new DeleteVenueApiResult { IsSuccess = true };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractApiMessage(content);
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new DeleteVenueApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new DeleteVenueApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Chỉ Admin mới có thể xóa địa điểm."
+            },
+            HttpStatusCode.NotFound => new DeleteVenueApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Địa điểm không tồn tại."
+            },
+            HttpStatusCode.Conflict => new DeleteVenueApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ??
+                    "Không thể xóa địa điểm đã được Event tham chiếu; hãy bật maintenance."
+            },
+            _ => new DeleteVenueApiResult
+            {
+                ErrorMessage = message ?? "Không thể xóa địa điểm vào lúc này."
+            }
+        };
+    }
+
     public async Task<VenueApiResult> GetVenueAsync(
         int venueId,
         CancellationToken cancellationToken = default)

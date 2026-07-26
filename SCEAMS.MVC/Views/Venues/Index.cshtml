@@ -76,6 +76,14 @@
         </div>
     }
 
+    @if (TempData["VenueDeleteError"] is string deleteError)
+    {
+        <div class="alert alert-danger" role="alert">
+            <strong>Không thể xóa địa điểm.</strong>
+            <span>@deleteError</span>
+        </div>
+    }
+
     @if (Model.CanManage)
     {
         <aside class="category-admin surface-card" aria-label="Quyền quản trị địa điểm">
@@ -182,6 +190,18 @@
                                                     @(venue.IsUnderMaintenance ? "Tắt bảo trì" : "Bảo trì")
                                                 </button>
                                             </form>
+                                            @if (Model.CanDelete)
+                                            {
+                                                <form asp-controller="Venues"
+                                                      asp-action="Delete"
+                                                      asp-route-id="@venue.Id"
+                                                      method="post"
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Xóa cứng địa điểm này? Nếu đã được Event sử dụng, API sẽ từ chối và giữ nguyên dữ liệu.');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn-app btn-app--ghost btn-sm">Xóa</button>
+                                                </form>
+                                            }
                                         </div>
                                     </td>
                                 }

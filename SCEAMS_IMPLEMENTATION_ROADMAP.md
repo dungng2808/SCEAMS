@@ -608,9 +608,9 @@ Domain entity/enum
 
 ### Phase 68 - MVC: Xóa địa điểm
 
-- [ ] Thêm action Delete chỉ cho Admin.
-- [ ] Hiển thị đúng lý do không thể xóa.
-- [ ] Không ẩn venue khỏi UI khi API thất bại.
+- [x] Thêm action Delete chỉ cho Admin.
+- [x] Hiển thị đúng lý do không thể xóa.
+- [x] Không ẩn venue khỏi UI khi API thất bại.
 
 ### Phase 69 - API: Lịch sử dụng địa điểm
 

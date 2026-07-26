@@ -31,6 +31,7 @@ public sealed class VenuesController : Controller
         CancellationToken cancellationToken = default)
     {
         var canManage = User.IsInRole("Admin") || User.IsInRole("Staff");
+        var canDelete = User.IsInRole("Admin");
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
 
@@ -58,6 +59,7 @@ public sealed class VenuesController : Controller
                     Page = normalizedPage,
                     PageSize = normalizedPageSize,
                     CanManage = canManage,
+                    CanDelete = canDelete,
                     ErrorMessage = result.ErrorMessage ?? "Không thể tải danh sách địa điểm."
                 });
             }
@@ -72,7 +74,8 @@ public sealed class VenuesController : Controller
                 TotalPages = result.TotalPages,
                 HasPreviousPage = result.HasPreviousPage,
                 HasNextPage = result.HasNextPage,
-                CanManage = canManage,
+                    CanManage = canManage,
+                    CanDelete = canDelete,
                 Venues = result.Venues.Select(MapVenue).ToList()
             });
         }
@@ -90,6 +93,7 @@ public sealed class VenuesController : Controller
                 Page = normalizedPage,
                 PageSize = normalizedPageSize,
                 CanManage = canManage,
+                CanDelete = canDelete,
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
@@ -359,6 +363,51 @@ public sealed class VenuesController : Controller
             _logger.LogWarning(exception, "Unable to update maintenance for venue {VenueId}.", id);
             TempData["VenueMaintenanceError"] =
                 "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [HttpPost("{id:int}/Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _venueApiClient.DeleteVenueAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = $"Đã xóa địa điểm #{id} thành công.";
+            }
+            else
+            {
+                TempData["VenueDeleteError"] = result.ErrorMessage ??
+                    "Không thể xóa địa điểm. Venue vẫn được giữ trong danh sách.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to delete venue {VenueId} from MVC.", id);
+            TempData["VenueDeleteError"] =
+                "Không thể kết nối tới API. Venue vẫn được giữ trong danh sách.";
         }
 
         return RedirectToAction(nameof(Index));
