@@ -353,6 +353,65 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<CancelEventApiResult> CancelEventAsync(
+        int eventId,
+        CancelEventApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/events/{eventId}/cancel",
+            request,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new CancelEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về Event đã hủy không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.BadRequest => new CancelEventApiResult
+            {
+                ErrorMessage = message ?? "Lý do hủy không hợp lệ."
+            },
+            HttpStatusCode.Unauthorized => new CancelEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new CancelEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền hủy Event."
+            },
+            HttpStatusCode.NotFound => new CancelEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new CancelEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Event không thể hủy ở trạng thái hiện tại."
+            },
+            _ => new CancelEventApiResult
+            {
+                ErrorMessage = message ?? "Không thể hủy Event."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

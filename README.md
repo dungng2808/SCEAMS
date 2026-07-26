@@ -1131,6 +1131,14 @@ thiệp theo quyền nội bộ. Event `Completed`/`Cancelled` không thể hủ
 lưu `CancellationReason`, giữ nguyên Event và Registration, không hard-delete.
 Request mẫu nằm trong Postman **Events** folder.
 
+## MVC hủy Event
+
+Trên trang chi tiết, Organizer sở hữu hoặc Admin/Staff thấy nút **Hủy Event**.
+Modal hiển thị số người đăng ký hợp lệ, yêu cầu nhập lý do và xác nhận trước
+khi gửi form anti-forgery. Sau khi hủy, trang hiển thị trạng thái `Cancelled`
+và lý do hủy; Organizer gọi sau `StartTime` sẽ nhận thông báo lỗi từ API và
+Event không đổi trạng thái.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

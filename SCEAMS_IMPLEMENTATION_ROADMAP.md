@@ -732,9 +732,9 @@ Domain entity/enum
 
 ### Phase 88 - MVC: Hủy Event
 
-- [ ] Tạo action Cancel có lý do và cảnh báo số người đã đăng ký.
-- [ ] Hiển thị status/lý do hủy cho người liên quan.
-- [ ] Kiểm thử Organizer hủy sau StartTime bị từ chối.
+- [x] Tạo action Cancel có lý do và cảnh báo số người đã đăng ký.
+- [x] Hiển thị status/lý do hủy cho người liên quan.
+- [x] Kiểm thử Organizer hủy sau StartTime bị từ chối.
 
 ### Phase 89 - API: Đồng bộ trạng thái theo thời gian
 

@@ -536,6 +536,58 @@ public sealed class EventsController : Controller
         return RedirectToAction(nameof(Detail), new { id });
     }
 
+    [Authorize(Roles = "Organizer,Admin,Staff")]
+    [HttpPost("{id:int}/Cancel")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cancel(
+        int id,
+        CancelEventViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(model.Reason))
+        {
+            TempData["EventErrorMessage"] = "Lý do hủy Event không được để rỗng.";
+            return RedirectToAction(nameof(Detail), new { id });
+        }
+
+        try
+        {
+            var result = await _eventApiClient.CancelEventAsync(
+                id,
+                new CancelEventApiRequest { Reason = model.Reason.Trim() },
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsSuccess && result.Event is not null)
+            {
+                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được hủy.";
+            }
+            else
+            {
+                TempData["EventErrorMessage"] = result.ErrorMessage ?? "Không thể hủy Event.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to cancel event {EventId} from MVC.", id);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,
