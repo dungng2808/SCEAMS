@@ -480,9 +480,10 @@ Domain entity/enum
 
 ### Phase 49 - API: Giải thể CLB
 
-- [ ] Thêm `PUT /api/clubs/{id}/dissolve` cho Admin.
-- [ ] Chuyển status sang `Dissolved`; không hard-delete lịch sử.
-- [ ] Chặn tạo Event mới và đơn gia nhập mới cho Club đã giải thể.
+- [x] Thêm `PUT /api/clubs/{id}/dissolve` cho Admin.
+- [x] Chuyển status sang `Dissolved`; không hard-delete lịch sử.
+- [x] Chặn tạo Event mới và đơn gia nhập mới cho Club đã giải thể.
+
 
 ### Phase 50 - MVC: Giải thể CLB
 

@@ -111,4 +111,19 @@ public sealed class ClubsController : ApiControllerBase
         var result = await _clubService.RejectClubAsync(id, request, User, cancellationToken);
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/dissolve")]
+    [Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
+    [ProducesResponseType<ClubDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DissolveClub(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _clubService.DissolveClubAsync(id, User, cancellationToken);
+        return ToActionResult(result);
+    }
 }

@@ -3800,11 +3800,96 @@
             "description": "Phase 47 returns 403 Forbidden when an Organizer tries to edit a club they do not own."
           },
           "response": []
+        },
+        {
+          "name": "Phase 49 - Dissolve Club - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1/dissolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1",
+                "dissolve"
+              ]
+            },
+            "description": "Phase 49 allows Admin/Staff to dissolve an Approved club without hard-deleting record history."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 49 - Dissolve Club - Conflict Non-Approved",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/3/dissolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "3",
+                "dissolve"
+              ]
+            },
+            "description": "Phase 49 returns 409 Conflict when attempting to dissolve a club that is not in Approved status."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 

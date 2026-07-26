@@ -34,4 +34,9 @@ public interface IClubService
         UpdateClubRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ClubDetailResponseDto>> DissolveClubAsync(
+        int id,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

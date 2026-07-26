@@ -611,6 +611,22 @@ Authorization: Bearer {{OrganizerAccessToken}}
 
 ###
 
+# Phase 49 - PUT /api/clubs/{id}/dissolve (Admin dissolves an Approved club)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/1/dissolve
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+# Phase 49 - PUT /api/clubs/{id}/dissolve (Conflict when dissolving a non-Approved club)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/3/dissolve
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+
+
 
 
 
