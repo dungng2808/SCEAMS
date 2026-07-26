@@ -19,4 +19,9 @@ public interface IClubCategoryService
             int categoryId,
             UpdateClubCategoryRequestDto request,
             CancellationToken cancellationToken = default);
+
+    Task<Result> DeleteClubCategoryAsync(
+        int categoryId,
+        CancellationToken cancellationToken = default);
 }
+

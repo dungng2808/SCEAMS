@@ -378,9 +378,10 @@ Domain entity/enum
 
 ### Phase 35 - API: Xóa danh mục CLB
 
-- [ ] Thêm `DELETE /api/club-categories/{id}` cho Admin.
-- [ ] Trả `409 Conflict` nếu category đang được Club sử dụng.
-- [ ] Test xóa category rỗng và category đang được tham chiếu.
+- [x] Thêm `DELETE /api/club-categories/{id}` cho Admin.
+- [x] Trả `409 Conflict` nếu category đang được Club sử dụng.
+- [x] Test xóa category rỗng và category đang được tham chiếu.
+
 
 ### Phase 36 - MVC: Xóa danh mục CLB
 

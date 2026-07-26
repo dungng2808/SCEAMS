@@ -61,6 +61,25 @@ public sealed class ClubCategoriesController : ApiControllerBase
         return ToActionResult(result);
     }
 
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DeleteClubCategory(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _clubCategoryService
+            .DeleteClubCategoryAsync(
+                id,
+                cancellationToken);
+
+        return ToActionResult(result);
+    }
+
     [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType<
@@ -75,3 +94,4 @@ public sealed class ClubCategoriesController : ApiControllerBase
         return ToActionResult(result);
     }
 }
+

@@ -18,4 +18,9 @@ public interface IClubCategoryRepository
         string normalizedName,
         int categoryId,
         CancellationToken cancellationToken = default);
+
+    Task<bool> IsUsedByAnyClubAsync(
+        int categoryId,
+        CancellationToken cancellationToken = default);
 }
+

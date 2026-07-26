@@ -125,7 +125,40 @@ public sealed class ClubCategoryService : IClubCategoryService
             "Club category updated successfully.");
     }
 
+    public async Task<Result> DeleteClubCategoryAsync(
+        int categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        var category = await _unitOfWork.ClubCategories
+            .GetByIdAsync(
+                categoryId,
+                cancellationToken);
+
+        if (category is null)
+        {
+            return Result.Fail(
+                "Club category does not exist.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (await _unitOfWork.ClubCategories
+                .IsUsedByAnyClubAsync(
+                    categoryId,
+                    cancellationToken))
+        {
+            return Result.Fail(
+                "Club category is currently in use by one or more clubs.",
+                StatusCodes.Status409Conflict);
+        }
+
+        _unitOfWork.ClubCategories.Delete(category);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.NoContent("Club category deleted successfully.");
+    }
+
     private static string NormalizeRequiredValue(string value)
+
     {
         return string.Join(
             ' ',
