@@ -19,6 +19,8 @@
 - [ ] Mọi danh sách phải có trạng thái loading, empty, success và error.
 - [ ] Mọi phase phải cập nhật Swagger/Postman request tương ứng trước khi được đánh dấu hoàn thành.
 - [ ] Không đưa `PasswordHash`, refresh token thô hoặc dữ liệu nhạy cảm vào response DTO.
+- [ ] Sau khi hoàn thành toàn bộ checkbox và kiểm thử của một phase, tự động tạo một Git commit riêng cho phase đó trước khi bắt đầu phase tiếp theo.
+- [ ] Commit chỉ chứa các file thuộc phạm vi phase đang hoàn thành, không đưa thay đổi không liên quan của người dùng vào commit; message phải viết bằng tiếng Việt theo mẫu `phase NN: <mô tả ngắn bằng tiếng Việt>`.
 
 ## 2. Kiến trúc đích
 
@@ -133,6 +135,7 @@ Domain entity/enum
 - [ ] Quyền đúng trả `2xx`; thiếu đăng nhập trả `401`; sai role/sai ownership trả `403`.
 - [ ] Validation sai trả `400`; không tìm thấy trả `404`; xung đột nghiệp vụ trả `409` khi phù hợp.
 - [ ] Không còn exception chưa xử lý trong log.
+- [ ] Phase đã được lưu thành một Git commit riêng sau khi tất cả kiểm thử đạt.
 
 ---
 
@@ -140,57 +143,57 @@ Domain entity/enum
 
 ### Phase 00 - Chốt phạm vi và công nghệ
 
-- [ ] Dùng .NET 8 để đồng nhất với `LibraryApi_4Layers`, trừ khi giảng viên yêu cầu phiên bản khác.
-- [ ] Chốt SQL Server, EF Core Code First, ASP.NET Core Identity hoặc `PasswordHasher`.
-- [ ] Chốt MVC server-rendered, Bootstrap và typed `HttpClient`.
-- [ ] Chốt giờ nghiệp vụ theo `Asia/Ho_Chi_Minh`, lưu thời gian trong database theo UTC.
-- [ ] Tạo `SCEAMS.sln` chứa đúng ba project: API, MVC và NotificationService.
-- [ ] Xác nhận API là một `.csproj` với bốn folder `Api/Application/Domain/Infrastructure`, không tạo bốn class library.
-- [ ] Tạo Git repository, `.gitignore`, `README.md` tối thiểu và nhánh làm việc.
-- [ ] Done khi `dotnet sln list` hiện đúng ba project và `dotnet build SCEAMS.sln` thành công.
+- [x] Dùng .NET 8 để đồng nhất với `LibraryApi_4Layers`, trừ khi giảng viên yêu cầu phiên bản khác.
+- [x] Chốt SQL Server, EF Core Code First, ASP.NET Core Identity hoặc `PasswordHasher`.
+- [x] Chốt MVC server-rendered, Bootstrap và typed `HttpClient`.
+- [x] Chốt giờ nghiệp vụ theo `Asia/Ho_Chi_Minh`, lưu thời gian trong database theo UTC.
+- [x] Tạo `SCEAMS.sln` chứa đúng ba project: API, MVC và NotificationService.
+- [x] Xác nhận API là một `.csproj` với bốn folder `Api/Application/Domain/Infrastructure`, không tạo bốn class library.
+- [x] Tạo Git repository, `.gitignore`, `README.md` tối thiểu và nhánh làm việc.
+- [x] Done khi `dotnet sln list` hiện đúng ba project và `dotnet build SCEAMS.sln` thành công.
 
 ### Phase 01 - API: Health check
 
-- [ ] Tạo `SCEAMS.API` và bốn folder layer giống `LibraryApi_4Layers`.
-- [ ] Tạo `Application/Common/Result.cs` và `Api/Controllers/ApiControllerBase.cs`.
-- [ ] Thêm `GET /api/health` trả tên service, version và trạng thái `Healthy`.
-- [ ] Đăng ký Swagger trong `Program.cs` và lưu request Postman kiểm tra `200 OK`.
+- [x] Tạo `SCEAMS.API` và bốn folder layer giống `LibraryApi_4Layers`.
+- [x] Tạo `Application/Common/Result.cs` và `Api/Controllers/ApiControllerBase.cs`.
+- [x] Thêm `GET /api/health` trả tên service, version và trạng thái `Healthy`.
+- [x] Đăng ký Swagger trong `Program.cs` và lưu request Postman kiểm tra `200 OK`.
 
 ### Phase 02 - MVC: Trang kiểm tra API
 
-- [ ] Tạo `SCEAMS.MVC`, cấu hình base URL của API bằng options.
-- [ ] Tạo trang `/System/Health` gọi `GET /api/health`.
-- [ ] Hiển thị rõ API online/offline và thông báo khi API không kết nối được.
+- [x] Tạo `SCEAMS.MVC`, cấu hình base URL của API bằng options.
+- [x] Tạo trang `/System/Health` gọi `GET /api/health`.
+- [x] Hiển thị rõ API online/offline và thông báo khi API không kết nối được.
 
 ### Phase 03 - API: Database migration đầu tiên
 
-- [ ] Tạo entity/enum trong `Domain`; không đặt Data Annotation phụ thuộc EF nếu có thể cấu hình bằng Fluent API.
-- [ ] Tạo `Infrastructure/Data/SceamsDbContext.cs` và EF configurations.
-- [ ] Tạo `Application/Interfaces/IGenericRepository.cs`, các repository interface đặc thù và `IUnitOfWork.cs`.
-- [ ] Tạo repository/Unit of Work implementation trong `Infrastructure`.
-- [ ] Tạo migration đầu tiên cho 10 entity: `User`, `ClubCategory`, `Club`, `ClubMembership`, `Venue`, `Event`, `Registration`, `Attendance`, `Feedback`, `ChatLog`.
-- [ ] Thêm `GET /api/health/database` kiểm tra kết nối SQL Server.
-- [ ] Đăng ký DbContext, repositories và Unit of Work trong `Program.cs`.
-- [ ] Done khi database được tạo bằng `dotnet ef database update`.
+- [x] Tạo entity/enum trong `Domain`; không đặt Data Annotation phụ thuộc EF nếu có thể cấu hình bằng Fluent API.
+- [x] Tạo `Infrastructure/Data/SceamsDbContext.cs` và EF configurations.
+- [x] Tạo `Application/Interfaces/IGenericRepository.cs`, các repository interface đặc thù và `IUnitOfWork.cs`.
+- [x] Tạo repository/Unit of Work implementation trong `Infrastructure`.
+- [x] Tạo migration đầu tiên cho 10 entity: `User`, `ClubCategory`, `Club`, `ClubMembership`, `Venue`, `Event`, `Registration`, `Attendance`, `Feedback`, `ChatLog`.
+- [x] Thêm `GET /api/health/database` kiểm tra kết nối SQL Server.
+- [x] Đăng ký DbContext, repositories và Unit of Work trong `Program.cs`.
+- [x] Done khi database được tạo bằng `dotnet ef database update`.
 
 ### Phase 04 - MVC: Trang kiểm tra database
 
-- [ ] Trang `/System/Health` gọi thêm `GET /api/health/database`.
-- [ ] Hiển thị riêng trạng thái API và database.
-- [ ] Kiểm thử một lần khi database chạy và một lần khi connection string sai.
+- [x] Trang `/System/Health` gọi thêm `GET /api/health/database`.
+- [x] Hiển thị riêng trạng thái API và database.
+- [x] Kiểm thử một lần khi database chạy và một lần khi connection string sai.
 
 ### Phase 05 - API: Seed dữ liệu demo
 
-- [ ] Đặt seed code trong `Infrastructure/Data/Seed`.
-- [ ] Seed 4 tài khoản mẫu, category, club, venue, event và registration đủ để demo.
-- [ ] Hash mật khẩu; không ghi mật khẩu thô vào migration/log.
-- [ ] Seed phải idempotent và chạy lại không tạo dữ liệu trùng.
+- [x] Đặt seed code trong `Infrastructure/Data/Seed`.
+- [x] Seed 4 tài khoản mẫu, category, club, venue, event và registration đủ để demo.
+- [x] Hash mật khẩu; không ghi mật khẩu thô vào migration/log.
+- [x] Seed phải idempotent và chạy lại không tạo dữ liệu trùng.
 
 ### Phase 06 - MVC: Kiểm tra tài khoản demo
 
-- [ ] Tạo trang development-only hiển thị email mẫu theo role, không hiển thị mật khẩu ở production.
-- [ ] Dùng trang health để xác nhận seed đã tồn tại.
-- [ ] Done khi có thể chuẩn bị dữ liệu demo từ database mới trong một lệnh.
+- [x] Tạo trang development-only hiển thị email mẫu theo role, không hiển thị mật khẩu ở production.
+- [x] Dùng trang health để xác nhận seed đã tồn tại.
+- [x] Done khi có thể chuẩn bị dữ liệu demo từ database mới trong một lệnh.
 
 ---
 
@@ -198,39 +201,39 @@ Domain entity/enum
 
 ### Phase 07 - API: Student đăng ký tài khoản
 
-- [ ] Thêm `POST /api/auth/register`.
-- [ ] Kiểm tra email và `StudentCode` không trùng; hash password; role mặc định là `Student`.
-- [ ] Trả `201 Created` với DTO an toàn; test email trùng và password không hợp lệ.
+- [x] Thêm `POST /api/auth/register`.
+- [x] Kiểm tra email và `StudentCode` không trùng; hash password; role mặc định là `Student`.
+- [x] Trả `201 Created` với DTO an toàn; test email trùng và password không hợp lệ.
 
 ### Phase 08 - MVC: Màn hình đăng ký
 
-- [ ] Tạo form đăng ký Student với validation phía client và server.
-- [ ] Gọi API, hiển thị lỗi từng field và chuyển sang trang login khi thành công.
-- [ ] Kiểm thử đăng ký mới và đăng ký email trùng.
+- [x] Tạo form đăng ký Student với validation phía client và server.
+- [x] Gọi API, hiển thị lỗi từng field và chuyển sang trang login khi thành công.
+- [x] Kiểm thử đăng ký mới và đăng ký email trùng.
 
 ### Phase 09 - API: Đăng nhập và phát JWT
 
-- [ ] Thêm `POST /api/auth/login`.
-- [ ] Kiểm tra password hash và `IsActive`; trả access token, expiry và thông tin role.
-- [ ] JWT có claim `sub`, email, role; test sai password và tài khoản bị khóa.
+- [x] Thêm `POST /api/auth/login`.
+- [x] Kiểm tra password hash và `IsActive`; trả access token, expiry và thông tin role.
+- [x] JWT có claim `sub`, email, role; test sai password và tài khoản bị khóa.
 
 ### Phase 10 - MVC: Đăng nhập và lưu token
 
-- [ ] Tạo trang login gọi API và lưu token an toàn ở server-side Session/encrypted cookie.
-- [ ] Tạo `DelegatingHandler` tự gắn Bearer token vào mọi request API.
-- [ ] Điều hướng theo role và kiểm thử login bằng đủ 4 tài khoản mẫu.
+- [x] Tạo trang login gọi API và lưu token an toàn ở server-side Session/encrypted cookie.
+- [x] Tạo `DelegatingHandler` tự gắn Bearer token vào mọi request API.
+- [x] Điều hướng theo role và kiểm thử login bằng đủ 4 tài khoản mẫu.
 
 ### Phase 11 - API: Xem hồ sơ hiện tại
 
-- [ ] Thêm `GET /api/users/me`.
-- [ ] Lấy user ID từ JWT, chỉ trả hồ sơ của chính người đăng nhập.
-- [ ] Test token hợp lệ, thiếu token và user không còn tồn tại.
+- [x] Thêm `GET /api/users/me`.
+- [x] Lấy user ID từ JWT, chỉ trả hồ sơ của chính người đăng nhập.
+- [x] Test token hợp lệ, thiếu token và user không còn tồn tại.
 
 ### Phase 12 - MVC: Trang hồ sơ cá nhân
 
-- [ ] Tạo `/Profile` gọi `GET /api/users/me`.
-- [ ] Hiển thị tên, email, student code, phone, role và trạng thái tài khoản.
-- [ ] Không cho người dùng thay đổi role hoặc trạng thái tài khoản từ trang này.
+- [x] Tạo `/Profile` gọi `GET /api/users/me`.
+- [x] Hiển thị tên, email, student code, phone, role và trạng thái tài khoản.
+- [x] Không cho người dùng thay đổi role hoặc trạng thái tài khoản từ trang này.
 
 ### Phase 13 - API: Cập nhật hồ sơ cá nhân
 

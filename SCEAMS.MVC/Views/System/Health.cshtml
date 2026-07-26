@@ -1,0 +1,179 @@
+@model SCEAMS.MVC.ViewModels.SystemHealthViewModel
+@inject IWebHostEnvironment HostEnvironment
+
+@{
+    ViewData["Title"] = "Trạng thái hệ thống";
+    var apiCardClass = Model.Api.IsOnline ? "is-online" : "is-offline";
+    var databaseCardClass = Model.Database.IsOnline ? "is-online" : "is-offline";
+}
+
+<header class="page-heading">
+    <div>
+        <p class="eyebrow">System observability</p>
+        <h1>Trạng thái SCEAMS</h1>
+        <p class="page-heading__copy">
+            Theo dõi hai mắt xích chính: kết nối từ MVC đến API và từ API đến SQL Server.
+        </p>
+    </div>
+    <a class="btn-app btn-app--ghost" asp-controller="System" asp-action="Health">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M20 7v5h-5M4 17v-5h5" />
+            <path d="M6.1 9A7 7 0 0 1 18 6l2 2M17.9 15A7 7 0 0 1 6 18l-2-2" />
+        </svg>
+        Kiểm tra lại
+    </a>
+</header>
+
+<div class="health-overview">
+    <section class="health-card @apiCardClass" aria-labelledby="api-health-title">
+        <div class="health-card__top">
+            <span class="health-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <path d="M7 9h2M7 13h5M16 9h1M16 13h1" />
+                </svg>
+            </span>
+            <div class="health-card__heading">
+                <span>Application layer</span>
+                <h2 id="api-health-title">SCEAMS API</h2>
+            </div>
+            <span class="state-pill @(Model.Api.IsOnline ? "state-pill--online" : "state-pill--offline")">
+                @(Model.Api.IsOnline ? "Online" : "Offline")
+            </span>
+        </div>
+
+        <div class="health-card__body">
+            @if (Model.Api.IsOnline)
+            {
+                <dl class="health-data">
+                    <div>
+                        <dt>Service</dt>
+                        <dd>@Model.Api.Service</dd>
+                    </div>
+                    <div>
+                        <dt>Version</dt>
+                        <dd>@Model.Api.Version</dd>
+                    </div>
+                    <div>
+                        <dt>Protocol</dt>
+                        <dd>HTTP REST</dd>
+                    </div>
+                    <div>
+                        <dt>Trạng thái</dt>
+                        <dd>@Model.Api.Status</dd>
+                    </div>
+                </dl>
+            }
+            else
+            {
+                <div class="recovery-message" role="alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 8v5M12 16h.01" />
+                    </svg>
+                    <div>
+                        <strong>Không thể kết nối API</strong>
+                        <p>@Model.Api.ErrorMessage</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="health-card @databaseCardClass" aria-labelledby="database-health-title">
+        <div class="health-card__top">
+            <span class="health-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <ellipse cx="12" cy="5" rx="8" ry="3" />
+                    <path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" />
+                </svg>
+            </span>
+            <div class="health-card__heading">
+                <span>Data layer</span>
+                <h2 id="database-health-title">SQL Server</h2>
+            </div>
+            <span class="state-pill @(Model.Database.IsOnline ? "state-pill--online" : "state-pill--offline")">
+                @(Model.Database.IsOnline ? "Online" : "Offline")
+            </span>
+        </div>
+
+        <div class="health-card__body">
+            @if (Model.Database.IsOnline)
+            {
+                <dl class="health-data">
+                    <div>
+                        <dt>Database</dt>
+                        <dd>@Model.Database.DatabaseName</dd>
+                    </div>
+                    <div>
+                        <dt>Provider</dt>
+                        <dd>SQL Server</dd>
+                    </div>
+                    <div>
+                        <dt>Kết nối</dt>
+                        <dd>Sẵn sàng</dd>
+                    </div>
+                    <div>
+                        <dt>Trạng thái</dt>
+                        <dd>@Model.Database.Status</dd>
+                    </div>
+                </dl>
+            }
+            else
+            {
+                <div class="recovery-message" role="alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 8v5M12 16h.01" />
+                    </svg>
+                    <div>
+                        <strong>Không thể kết nối database</strong>
+                        <p>@Model.Database.ErrorMessage</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@if (HostEnvironment.IsDevelopment())
+{
+    <section class="seed-card" aria-labelledby="seed-health-title">
+        <div class="seed-card__content">
+            <span class="seed-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M4 7h16v13H4zM8 4h8v3H8z" />
+                    <path d="M8 11h8M8 15h5" />
+                </svg>
+            </span>
+            <div>
+                <h2 id="seed-health-title">Development demo seed</h2>
+                @if (!Model.Database.IsOnline)
+                {
+                    <p>Chưa thể xác nhận seed vì database đang offline.</p>
+                }
+                else if (Model.Database.DemoSeedReady)
+                {
+                    <p>Seed đã sẵn sàng, đủ @Model.Database.DemoAccountCount/4 tài khoản và dữ liệu demo liên quan.</p>
+                }
+                else
+                {
+                    <p>Seed chưa đầy đủ, hiện có @Model.Database.DemoAccountCount/4 tài khoản demo.</p>
+                }
+            </div>
+        </div>
+        <a class="btn-app btn-app--ghost"
+           asp-controller="System"
+           asp-action="DemoAccounts">
+            Xem tài khoản demo
+        </a>
+    </section>
+}
+
+<p class="checked-time">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+    </svg>
+    Cập nhật lúc @Model.CheckedAt.ToString("dd/MM/yyyy HH:mm:ss zzz")
+</p>

@@ -1,0 +1,59 @@
+@SCEAMS.API_HostAddress = http://localhost:5195
+
+GET {{SCEAMS.API_HostAddress}}/api/health
+Accept: application/json
+
+###
+
+# Define LoginEmail and LoginPassword in your local HTTP client environment.
+POST {{SCEAMS.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{LoginEmail}}",
+  "password": "{{LoginPassword}}"
+}
+
+###
+
+POST {{SCEAMS.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{LoginEmail}}",
+  "password": "DefinitelyWrong1!"
+}
+
+###
+
+# Define AccessToken from a successful login in your local HTTP client environment.
+GET {{SCEAMS.API_HostAddress}}/api/users/me
+Accept: application/json
+Authorization: Bearer {{AccessToken}}
+
+###
+
+GET {{SCEAMS.API_HostAddress}}/api/users/me
+Accept: application/json
+
+###
+
+GET {{SCEAMS.API_HostAddress}}/api/health/database
+Accept: application/json
+
+###
+
+# Define RegisterPassword in your local HTTP client environment.
+POST {{SCEAMS.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "New Student",
+  "email": "new.student@sceams.edu.vn",
+  "studentCode": "SE999999",
+  "phoneNumber": "0900000000",
+  "password": "{{RegisterPassword}}",
+  "confirmPassword": "{{RegisterPassword}}"
+}
+
+###

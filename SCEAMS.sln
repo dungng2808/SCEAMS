@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCEAMS.API", "SCEAMS.API\SCEAMS.API.csproj", "{8892DF8C-2A5E-4A14-9C85-7D2C652932D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCEAMS.MVC", "SCEAMS.MVC\SCEAMS.MVC.csproj", "{F89DC223-03B9-46D6-B92E-2448C8517AFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCEAMS.NotificationService", "SCEAMS.NotificationService\SCEAMS.NotificationService.csproj", "{8624FA27-DAB1-4B0D-BE06-0F42C560F4E2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8892DF8C-2A5E-4A14-9C85-7D2C652932D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8892DF8C-2A5E-4A14-9C85-7D2C652932D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8892DF8C-2A5E-4A14-9C85-7D2C652932D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8892DF8C-2A5E-4A14-9C85-7D2C652932D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F89DC223-03B9-46D6-B92E-2448C8517AFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F89DC223-03B9-46D6-B92E-2448C8517AFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F89DC223-03B9-46D6-B92E-2448C8517AFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F89DC223-03B9-46D6-B92E-2448C8517AFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8624FA27-DAB1-4B0D-BE06-0F42C560F4E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8624FA27-DAB1-4B0D-BE06-0F42C560F4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8624FA27-DAB1-4B0D-BE06-0F42C560F4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8624FA27-DAB1-4B0D-BE06-0F42C560F4E2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

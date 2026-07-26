@@ -1,0 +1,171 @@
+﻿@inject IWebHostEnvironment HostEnvironment
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isFullWidth = ViewData["FullWidth"] as bool? == true;
+
+    string ActiveClass(string controller, string? action = null)
+    {
+        var isActive =
+            string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+            (action is null ||
+             string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase));
+
+        return isActive ? "is-active" : string.Empty;
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#102a4c" />
+    <title>@ViewData["Title"] - SCEAMS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="app-body">
+    <a class="skip-link" href="#main-content">Chuyển đến nội dung chính</a>
+
+    <header class="app-header">
+        <nav class="navbar navbar-expand-lg app-nav" aria-label="Điều hướng chính">
+            <div class="app-container">
+                <a class="app-brand" asp-controller="Home" asp-action="Index" aria-label="SCEAMS - Trang chủ">
+                    <span class="app-brand__mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                            <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                            <path d="M20 8v6" />
+                        </svg>
+                    </span>
+                    <span>
+                        <strong>SCEAMS</strong>
+                        <small>Student Experience</small>
+                    </span>
+                </a>
+
+                <button class="navbar-toggler app-nav__toggle"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavigation"
+                        aria-controls="mainNavigation"
+                        aria-expanded="false"
+                        aria-label="Mở menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavigation">
+                    <ul class="navbar-nav app-nav__links">
+                        <li class="nav-item">
+                            <a class="app-nav__link @ActiveClass("Home", "Index")"
+                               asp-controller="Home"
+                               asp-action="Index"
+                               aria-current="@(currentController == "Home" && currentAction == "Index" ? "page" : null)">
+                                Trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="app-nav__link @ActiveClass("System", "Health")"
+                               asp-controller="System"
+                               asp-action="Health"
+                               aria-current="@(currentController == "System" && currentAction == "Health" ? "page" : null)">
+                                Trạng thái
+                            </a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("Profile", "Index")"
+                                   asp-controller="Profile"
+                                   asp-action="Index"
+                                   aria-current="@(currentController == "Profile" ? "page" : null)">
+                                    Hồ sơ
+                                </a>
+                            </li>
+                        }
+                        @if (HostEnvironment.IsDevelopment())
+                        {
+                            <li class="nav-item">
+                                <a class="app-nav__link @ActiveClass("System", "DemoAccounts")"
+                                   asp-controller="System"
+                                   asp-action="DemoAccounts"
+                                   aria-current="@(currentController == "System" && currentAction == "DemoAccounts" ? "page" : null)">
+                                    Demo
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="app-nav__actions">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="app-nav__user"
+                               asp-controller="Dashboard"
+                               asp-action="Index">
+                                <span>@User.Identity.Name</span>
+                                <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</small>
+                            </a>
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  class="app-nav__logout">
+                                <button class="btn-app btn-app--ghost" type="submit">
+                                    Đăng xuất
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="btn-app btn-app--ghost"
+                               asp-controller="Account"
+                               asp-action="Login">
+                                Đăng nhập
+                            </a>
+                            <a class="btn-app btn-app--primary"
+                               asp-controller="Account"
+                               asp-action="Register">
+                                Bắt đầu ngay
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="app-main @(isFullWidth ? string.Empty : "app-container")">
+        @RenderBody()
+    </main>
+
+    <footer class="app-footer">
+        <div class="app-container app-footer__inner">
+            <div class="app-footer__brand">
+                <span class="app-brand__mark app-brand__mark--small" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                        <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                    </svg>
+                </span>
+                <div>
+                    <strong>SCEAMS</strong>
+                    <p>Quản lý câu lạc bộ và hoạt động ngoại khóa sinh viên.</p>
+                </div>
+            </div>
+            <div class="app-footer__links">
+                <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
+                <a asp-controller="System" asp-action="Health">Trạng thái hệ thống</a>
+                <span>© 2026 SCEAMS</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,232 @@
+# SCEAMS
+
+Student Club & Extracurricular Activity Management System for PRN232.
+
+## Technology baseline
+
+- .NET SDK 8.0.423
+- ASP.NET Core Web API
+- ASP.NET Core MVC
+- ASP.NET Core gRPC
+- Entity Framework Core 8 with SQL Server
+- JWT authentication
+
+The repository is pinned to .NET 8 through `global.json`.
+
+## Solution structure
+
+The solution contains exactly three runnable projects:
+
+```text
+SCEAMS.sln
+├── SCEAMS.API/
+├── SCEAMS.MVC/
+└── SCEAMS.NotificationService/
+```
+
+`SCEAMS.API` will follow the four-layer folder structure used by
+`LibraryApi_4Layers`:
+
+```text
+SCEAMS.API/
+├── Api/
+├── Application/
+├── Domain/
+└── Infrastructure/
+```
+
+These layers remain folders and namespaces inside one API project. They are not
+separate class-library projects.
+
+## Time handling
+
+- Business timezone: `Asia/Ho_Chi_Minh`
+- Persist timestamps in UTC.
+- Convert timestamps for display at the MVC boundary.
+
+## Initial commands
+
+```bash
+dotnet --version
+dotnet restore SCEAMS.sln
+dotnet build SCEAMS.sln
+dotnet sln SCEAMS.sln list
+```
+
+## SQL Server configuration
+
+The API reads `ConnectionStrings:DefaultConnection` from configuration. Keep
+the database password outside the repository by using .NET User Secrets or the
+`ConnectionStrings__DefaultConnection` environment variable.
+
+Example User Secrets command:
+
+```bash
+dotnet user-secrets set \
+  "ConnectionStrings:DefaultConnection" \
+  "Server=localhost,1433;Database=SCEAMS;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=False" \
+  --project SCEAMS.API/SCEAMS.API.csproj
+```
+
+Apply the database migration:
+
+```bash
+ASPNETCORE_ENVIRONMENT=Development \
+  dotnet ef database update \
+  --project SCEAMS.API/SCEAMS.API.csproj \
+  --startup-project SCEAMS.API/SCEAMS.API.csproj
+```
+
+## Development seed
+
+The seed command requires four password values from User Secrets or environment
+variables. Passwords are hashed before being stored and are never written to a
+migration or application log.
+
+```bash
+ASPNETCORE_ENVIRONMENT=Development \
+SeedData__AdminPassword="<admin-password>" \
+SeedData__StaffPassword="<staff-password>" \
+SeedData__OrganizerPassword="<organizer-password>" \
+SeedData__StudentPassword="<student-password>" \
+dotnet run --project SCEAMS.API/SCEAMS.API.csproj -- --seed
+```
+
+This single command migrates a new database and prepares all demo data. It is
+idempotent and can be executed more than once.
+
+After starting the API and MVC projects in Development, open:
+
+- `http://localhost:5206/System/Health` to verify the demo seed status.
+- `http://localhost:5206/System/DemoAccounts` to view the demo emails by role.
+
+The demo-account page is unavailable outside Development and never displays
+passwords.
+
+## Student registration API
+
+Create a Student account with:
+
+```text
+POST http://localhost:5195/api/auth/register
+```
+
+The request accepts `fullName`, `email`, `studentCode`, optional `phoneNumber`,
+`password` and `confirmPassword`. Passwords must have at least eight characters
+and include uppercase, lowercase, numeric and special characters.
+
+The API normalizes email and student code, rejects duplicate values, hashes the
+password and always assigns the `Student` role. A successful `201 Created`
+response never contains the password or password hash. A ready-to-run request
+template is available in `SCEAMS.API/SCEAMS.API.http`; define
+`RegisterPassword` only in your local HTTP-client environment.
+
+## MVC Student registration
+
+With the API and MVC projects running, open:
+
+```text
+http://localhost:5206/Account/Register
+```
+
+The MVC form applies client-side and server-side validation, maps API conflicts
+back to the corresponding email or student-code field, and redirects successful
+registrations to `/Account/Login`. The login page is currently a handoff page;
+the JWT API is available from Phase 09 and the MVC token flow is implemented in
+Phase 10.
+
+## JWT login API
+
+The API requires a signing key with at least 32 characters. Keep it outside the
+repository:
+
+```bash
+dotnet user-secrets set \
+  "Jwt:SigningKey" \
+  "<a-random-secret-with-at-least-32-characters>" \
+  --project SCEAMS.API/SCEAMS.API.csproj
+```
+
+Login with:
+
+```text
+POST http://localhost:5195/api/auth/login
+```
+
+The request accepts `email` and `password`. A successful response contains a
+Bearer access token, its UTC expiry and safe user information. The JWT is signed
+with HMAC SHA-256 and contains `sub`, `email`, `role` and `jti` claims. Invalid
+credentials return `401`; an inactive account returns `403`.
+
+Use the Swagger **Authorize** action or the Phase 09 requests in
+`postman/SCEAMS.postman_collection.json`. Password variables and the captured
+access token are marked secret and have no committed values.
+
+## MVC login and server-side token session
+
+Open the MVC login page:
+
+```text
+http://localhost:5206/Account/Login
+```
+
+After a successful API login, MVC stores the JWT only in server-side Session.
+The browser receives an opaque HttpOnly session cookie and an encrypted,
+HttpOnly ASP.NET authentication cookie containing safe identity claims. The raw
+JWT is not written to JavaScript, localStorage or a browser cookie.
+
+`BearerTokenHandler` reads the non-expired token from Session and automatically
+adds `Authorization: Bearer <token>` to typed API-client requests. Logout clears
+both Session and the MVC authentication cookie.
+
+Each demo role has a separate authenticated landing URL:
+
+- `/Dashboard/Admin`
+- `/Dashboard/Staff`
+- `/Dashboard/Organizer`
+- `/Dashboard/Student`
+
+The current development Session store is in memory, so active sessions are
+intentionally cleared when the MVC process restarts. A distributed cache can
+replace it later without changing the controller or handler flow.
+
+## Current-user profile API
+
+An authenticated user can retrieve only their own profile:
+
+```text
+GET http://localhost:5195/api/users/me
+Authorization: Bearer <access-token>
+```
+
+The API derives the user ID exclusively from the JWT `sub` claim; it does not
+accept a user ID from route, query string or request body. The response contains
+the safe profile fields needed by MVC: ID, full name, email, optional student
+code and phone number, role, active status and UTC creation time. Password and
+refresh-token data are never returned.
+
+Missing or invalid authentication returns `401`. A valid token whose user has
+been deleted returns `404`. The Postman **Users** folder contains ready-to-run
+requests; execute **Login - Success** first to populate `accessToken`.
+
+## MVC current-user profile
+
+After logging in, open:
+
+```text
+http://localhost:5206/Profile
+```
+
+The page always loads the current profile through `GET /api/users/me` using the
+server-side JWT flow. It displays the user's name, email, optional student code
+and phone number, role, account status, and creation time converted from UTC to
+Vietnam time (UTC+7).
+
+The page is read-only: it has no controls for changing the role or account
+status. If the API reports that the token or user is no longer valid, MVC clears
+the Session and authentication cookie before returning to Login. Temporary API
+or network failures keep the user on a safe error state with retry and system
+health actions.
+
+Implementation progress is tracked in
+`SCEAMS_IMPLEMENTATION_ROADMAP.md`.

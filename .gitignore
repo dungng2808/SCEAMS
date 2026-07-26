@@ -1,1 +1,35 @@
 .DS_Store
+
+# .NET build output
+**/bin/
+**/obj/
+
+# User-specific IDE files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+.idea/
+
+# Local configuration and secrets
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Local database files and logs
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Generated packages
+*.nupkg
+*.snupkg

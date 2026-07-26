@@ -1,0 +1,21 @@
+using SCEAMS.Domain.Entities;
+
+namespace SCEAMS.Application.Interfaces;
+
+public interface IEventRepository : IGenericRepository<Event>
+{
+    Task<Event?> GetByIdWithDetailsAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> HasVenueConflictAsync(
+        int venueId,
+        DateTime startTime,
+        DateTime endTime,
+        int? excludedEventId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<int> GetConfirmedRegistrationCountAsync(
+        int eventId,
+        CancellationToken cancellationToken = default);
+}

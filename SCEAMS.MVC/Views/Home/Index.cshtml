@@ -1,0 +1,199 @@
+﻿@{
+    ViewData["Title"] = "Trải nghiệm sinh viên";
+    ViewData["FullWidth"] = true;
+}
+
+<div class="home-page">
+    <section class="home-hero" aria-labelledby="home-title">
+        <div class="app-container home-hero__inner">
+            <div>
+                <p class="eyebrow">Student experience platform</p>
+                <h1 id="home-title">
+                    Biến năm tháng đại học thành một <em>hành trình đáng nhớ.</em>
+                </h1>
+                <p class="home-hero__lead">
+                    Khám phá câu lạc bộ phù hợp, đăng ký sự kiện yêu thích và theo dõi toàn bộ hoạt động ngoại khóa của bạn tại một nơi.
+                </p>
+
+                <div class="home-hero__actions">
+                    <a class="btn-app btn-app--light"
+                       asp-controller="Account"
+                       asp-action="Register">
+                        Tạo tài khoản Student
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <a class="btn-app btn-app--ghost"
+                       asp-controller="System"
+                       asp-action="Health">
+                        Kiểm tra hệ thống
+                    </a>
+                </div>
+
+                <div class="home-hero__trust" aria-label="Điểm nổi bật">
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="m5 12 4 4L19 6" />
+                        </svg>
+                        Một tài khoản cho mọi hoạt động
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                        </svg>
+                        Dữ liệu được quản lý an toàn
+                    </span>
+                </div>
+            </div>
+
+            <div class="hero-preview" aria-label="Xem trước giao diện sự kiện">
+                <div class="hero-preview__window">
+                    <div class="hero-preview__bar" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="hero-preview__body">
+                        <div class="hero-preview__title">
+                            <strong>Sự kiện sắp tới</strong>
+                            <span>Đang mở đăng ký</span>
+                        </div>
+
+                        <article class="preview-event">
+                            <div class="preview-event__date">
+                                THG 8
+                                <strong>12</strong>
+                            </div>
+                            <div>
+                                <h3>AI for Students Workshop</h3>
+                                <p>FPT AI Club · Innovation Hall</p>
+                            </div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </article>
+
+                        <article class="preview-event">
+                            <div class="preview-event__date">
+                                THG 8
+                                <strong>18</strong>
+                            </div>
+                            <div>
+                                <h3>Club Networking Day</h3>
+                                <p>Student Affairs · Main Hall</p>
+                            </div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </article>
+
+                        <article class="preview-event">
+                            <div class="preview-event__date">
+                                THG 9
+                                <strong>03</strong>
+                            </div>
+                            <div>
+                                <h3>Leadership Essentials</h3>
+                                <p>Skills Club · Alpha Building</p>
+                            </div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section" aria-labelledby="features-title">
+        <div class="app-container">
+            <div class="section-heading">
+                <p class="eyebrow">Mọi thứ trong một nền tảng</p>
+                <h2 id="features-title">Ít thủ tục hơn. Nhiều trải nghiệm hơn.</h2>
+                <p>SCEAMS kết nối sinh viên, câu lạc bộ và nhà trường trong một quy trình rõ ràng, dễ theo dõi.</p>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span class="feature-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M19 8v6M22 11h-6" />
+                        </svg>
+                    </span>
+                    <h3>Tìm đúng cộng đồng</h3>
+                    <p>Khám phá câu lạc bộ theo sở thích, lĩnh vực học tập và mục tiêu phát triển cá nhân.</p>
+                </article>
+
+                <article class="feature-card">
+                    <span class="feature-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="5" width="18" height="16" rx="2" />
+                            <path d="M16 3v4M8 3v4M3 11h18M8 16l2 2 5-5" />
+                        </svg>
+                    </span>
+                    <h3>Không bỏ lỡ sự kiện</h3>
+                    <p>Đăng ký, nhận thông tin và theo dõi trạng thái tham gia trong một hành trình liền mạch.</p>
+                </article>
+
+                <article class="feature-card">
+                    <span class="feature-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+                        </svg>
+                    </span>
+                    <h3>Ghi nhận nỗ lực</h3>
+                    <p>Lưu lại lịch sử tham gia và xây dựng bức tranh rõ ràng về hành trình ngoại khóa.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section home-section--soft" aria-labelledby="journey-title">
+        <div class="app-container">
+            <div class="section-heading">
+                <p class="eyebrow">Bắt đầu thật đơn giản</p>
+                <h2 id="journey-title">Ba bước để mở rộng hành trình của bạn.</h2>
+            </div>
+
+            <div class="journey-grid">
+                <article class="journey-step">
+                    <span class="journey-step__number">BƯỚC 01</span>
+                    <h3>Tạo hồ sơ Student</h3>
+                    <p>Dùng email và mã sinh viên để tạo tài khoản cá nhân.</p>
+                </article>
+                <article class="journey-step">
+                    <span class="journey-step__number">BƯỚC 02</span>
+                    <h3>Khám phá cơ hội</h3>
+                    <p>Tìm câu lạc bộ, sự kiện phù hợp với sở thích và lịch học.</p>
+                </article>
+                <article class="journey-step">
+                    <span class="journey-step__number">BƯỚC 03</span>
+                    <h3>Tham gia và phát triển</h3>
+                    <p>Đăng ký hoạt động, điểm danh và theo dõi thành tích.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="app-container">
+            <div class="home-cta">
+                <div>
+                    <h2>Sẵn sàng bắt đầu hành trình SCEAMS?</h2>
+                    <p>Tạo tài khoản sinh viên để chuẩn bị cho những tính năng câu lạc bộ và sự kiện sắp tới.</p>
+                </div>
+                <div class="home-cta__actions">
+                    <a class="btn-app btn-app--light"
+                       asp-controller="Account"
+                       asp-action="Register">
+                        Đăng ký miễn phí
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

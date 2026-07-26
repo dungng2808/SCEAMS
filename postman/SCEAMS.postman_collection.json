@@ -1,0 +1,459 @@
+{
+  "info": {
+    "_postman_id": "b152518d-a6f0-4ba6-920a-a18ef867917c",
+    "name": "SCEAMS API",
+    "description": "Requests used to verify SCEAMS implementation phases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5195",
+      "type": "string"
+    },
+    {
+      "key": "loginEmail",
+      "value": "student@sceams.edu.vn",
+      "type": "string"
+    },
+    {
+      "key": "loginPassword",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "lockedUserEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lockedUserPassword",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "registerPassword",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "secret"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Phase 01 health endpoint."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Service is healthy\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.service).to.eql(\"SCEAMS.API\");",
+                  "    pm.expect(body.status).to.eql(\"Healthy\");",
+                  "    pm.expect(body.version).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Database health check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/health/database",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health",
+                "database"
+              ]
+            },
+            "description": "Phase 03 SQL Server health endpoint."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Database is healthy\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.database).to.eql(\"SCEAMS\");",
+                  "    pm.expect(body.status).to.eql(\"Healthy\");",
+                  "    pm.expect(body.canConnect).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"New Student\",\n  \"email\": \"new.student@sceams.edu.vn\",\n  \"studentCode\": \"SE999999\",\n  \"phoneNumber\": \"0900000000\",\n  \"password\": \"{{registerPassword}}\",\n  \"confirmPassword\": \"{{registerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Phase 07 Student registration. Define registerPassword only in the local Postman environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains a safe JWT result\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.tokenType).to.eql(\"Bearer\");",
+                  "    pm.expect(body.accessToken).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(body.expiresAtUtc).to.be.a(\"string\");",
+                  "    pm.expect(body.user.role).to.be.oneOf([\"Admin\", \"Staff\", \"Organizer\", \"Student\"]);",
+                  "    pm.expect(body.user).not.to.have.property(\"passwordHash\");",
+                  "    pm.collectionVariables.set(\"accessToken\", body.accessToken);",
+                  "});",
+                  "",
+                  "pm.test(\"JWT contains sub, email and role\", function () {",
+                  "    const token = pm.response.json().accessToken;",
+                  "    const payload = JSON.parse(Buffer.from(token.split(\".\")[1], \"base64\").toString());",
+                  "    pm.expect(payload.sub).to.be.a(\"string\");",
+                  "    pm.expect(payload.email).to.eql(pm.collectionVariables.get(\"loginEmail\").toLowerCase());",
+                  "    pm.expect(payload.role).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Phase 09 successful login. Saves the returned access token as a secret collection variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Wrong Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error does not reveal which credential failed\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Email or password is incorrect.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"DefinitelyWrong1!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Phase 09 invalid-credentials path."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Locked Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test(\"Inactive account is rejected\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Account is inactive. Contact an administrator.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{lockedUserEmail}}\",\n  \"password\": \"{{lockedUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Phase 09 inactive-account path. Configure an inactive test user in the local Postman environment."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Only the authenticated user's safe profile is returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.be.a(\"number\");",
+                  "    pm.expect(body.email).to.eql(pm.collectionVariables.get(\"loginEmail\").toLowerCase());",
+                  "    pm.expect(body.role).to.be.oneOf([\"Admin\", \"Staff\", \"Organizer\", \"Student\"]);",
+                  "    pm.expect(body.isActive).to.be.a(\"boolean\");",
+                  "    pm.expect(body).not.to.have.property(\"passwordHash\");",
+                  "    pm.expect(body).not.to.have.property(\"refreshTokenHash\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Phase 11 current-user profile. Run Login - Success first to populate accessToken."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile - Missing Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Phase 11 authentication-required path."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

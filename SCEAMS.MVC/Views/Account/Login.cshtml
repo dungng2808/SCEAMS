@@ -1,0 +1,203 @@
+@model SCEAMS.MVC.ViewModels.LoginViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="auth-shell">
+    <section class="auth-story" aria-labelledby="auth-story-title">
+        <a class="auth-brand" asp-controller="Home" asp-action="Index" aria-label="SCEAMS - Về trang chủ">
+            <span class="auth-brand__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                    <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                    <path d="M20 8v6" />
+                </svg>
+            </span>
+            SCEAMS
+        </a>
+
+        <div class="auth-story__content">
+            <p class="auth-story__eyebrow">Student experience platform</p>
+            <h1 id="auth-story-title">
+                Hành trình sinh viên, <em>bắt đầu tại đây.</em>
+            </h1>
+            <p class="auth-story__lead">
+                Một nơi để khám phá câu lạc bộ, tham gia sự kiện và lưu lại những trải nghiệm đáng giá tại trường.
+            </p>
+
+            <ul class="auth-benefits" aria-label="Lợi ích của SCEAMS">
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Kết nối cộng đồng sinh viên
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M16 3v4M8 3v4M3 11h18" />
+                    </svg>
+                    Theo dõi sự kiện dễ dàng
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="m12 2 3 6 6.5 1-4.75 4.6 1.1 6.4L12 17l-5.85 3 1.1-6.4L2.5 9 9 8l3-6Z" />
+                    </svg>
+                    Ghi nhận hành trình ngoại khóa
+                </li>
+            </ul>
+        </div>
+
+        <p class="auth-story__footer">
+            Student Club &amp; Extracurricular Activity Management System
+        </p>
+    </section>
+
+    <section class="auth-panel" aria-labelledby="login-title">
+        <div class="auth-panel__top">
+            <span>Chưa có tài khoản?</span>
+            <a asp-controller="Account" asp-action="Register">Tạo tài khoản</a>
+        </div>
+
+        <div class="login-card">
+            <span class="login-card__badge">
+                <span class="login-card__badge-dot" aria-hidden="true"></span>
+                Cổng sinh viên SCEAMS
+            </span>
+
+            <h2 id="login-title">Chào mừng trở lại</h2>
+            <p class="login-card__intro">
+                Đăng nhập để tiếp tục quản lý hoạt động và trải nghiệm sinh viên của bạn.
+            </p>
+
+            @if (TempData["RegistrationSuccess"] is string successMessage)
+            {
+                <div class="auth-success" role="status" aria-live="polite">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    <span>@successMessage</span>
+                </div>
+            }
+
+            @if (TempData["LogoutSuccess"] is string logoutMessage)
+            {
+                <div class="auth-success" role="status" aria-live="polite">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    <span>@logoutMessage</span>
+                </div>
+            }
+
+            @if (TempData["AuthenticationError"] is string authenticationError)
+            {
+                <div class="login-summary" role="alert" aria-live="assertive">
+                    @authenticationError
+                </div>
+            }
+
+            <form asp-controller="Account"
+                  asp-action="Login"
+                  method="post"
+                  novalidate
+                  data-auth-form
+                  data-loading-label="Đang đăng nhập...">
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="login-summary"
+                     role="alert"
+                     aria-live="polite"></div>
+
+                <div class="login-field">
+                    <label for="login-email">Email</label>
+                    <div class="login-field__control">
+                        <svg class="login-field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="m3 7 9 6 9-6" />
+                        </svg>
+                        <input asp-for="Email"
+                               id="login-email"
+                               class="form-control"
+                               autocomplete="email"
+                               placeholder="student@sceams.edu.vn" />
+                    </div>
+                    <span asp-validation-for="Email"
+                          class="field-error"
+                          role="alert"></span>
+                </div>
+
+                <div class="login-field">
+                    <label for="login-password">Mật khẩu</label>
+                    <div class="login-field__control">
+                        <svg class="login-field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <rect x="4" y="10" width="16" height="11" rx="2" />
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        </svg>
+                        <input asp-for="Password"
+                               id="login-password"
+                               class="form-control"
+                               autocomplete="current-password"
+                               placeholder="Nhập mật khẩu" />
+                        <button class="password-toggle"
+                                type="button"
+                                aria-label="Hiện mật khẩu"
+                                aria-pressed="false"
+                                data-password-toggle
+                                data-password-target="login-password">
+                            <svg data-eye-open viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <svg data-eye-closed viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 4.2A10.8 10.8 0 0 1 12 4c6.5 0 10 8 10 8a18.5 18.5 0 0 1-2.1 3.2M6.6 6.6C3.6 8.5 2 12 2 12s3.5 8 10 8c1.6 0 3-.5 4.2-1.2" />
+                            </svg>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password"
+                          class="field-error"
+                          role="alert"></span>
+                </div>
+
+                <div class="login-options">
+                    <p class="login-session-note">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                        </svg>
+                        Token được giữ trong Session phía server
+                    </p>
+                    <p class="login-coming-soon">Quên mật khẩu · Sắp có</p>
+                </div>
+
+                <button class="login-submit"
+                        type="submit"
+                        data-submit-button>
+                    <span data-submit-label>Đăng nhập</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                </button>
+            </form>
+
+            <p class="login-card__register">
+                Bạn là sinh viên mới?
+                <a asp-controller="Account" asp-action="Register">Đăng ký ngay</a>
+            </p>
+        </div>
+
+        <footer class="auth-panel__footer">
+            <span>© 2026 SCEAMS</span>
+            <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
+        </footer>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}
