@@ -329,6 +329,106 @@ public sealed class RegistrationService : IRegistrationService
             new PagedResult<EventRegistrationListItemDto>(items, result.TotalItems));
     }
 
+    public async Task<Result<CheckInResponseDto>> CheckInAsync(
+        int registrationId,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        if (!user.IsInRole(nameof(UserRole.Organizer)))
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Chỉ Organizer mới có thể điểm danh.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var organizerId = GetUserId(user);
+        if (!organizerId.HasValue)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Không xác định được Organizer từ token.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+        var registration = await _unitOfWork.Registrations.GetByIdAsync(
+            registrationId,
+            cancellationToken);
+        if (registration == null)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Registration không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var eventEntity = await _unitOfWork.Events.GetByIdWithDetailsAsync(
+            registration.EventId,
+            cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Event của registration không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var ownsEvent = eventEntity.CreatedByUserId == organizerId.Value ||
+                        eventEntity.Club.CreatedByUserId == organizerId.Value;
+        if (!ownsEvent)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Organizer chỉ được điểm danh Event thuộc quyền phụ trách.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var now = DateTime.UtcNow;
+        if (eventEntity.Status != EventStatus.Ongoing ||
+            now < eventEntity.StartTime ||
+            now > eventEntity.EndTime)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Chỉ có thể điểm danh khi Event đang diễn ra.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (registration.Status != RegistrationStatus.Confirmed)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Chỉ registration Confirmed mới có thể điểm danh.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var alreadyCheckedIn = await _unitOfWork.Attendances.AnyAsync(
+            attendance => attendance.RegistrationId == registrationId,
+            cancellationToken);
+        if (alreadyCheckedIn)
+        {
+            return Result<CheckInResponseDto>.Fail(
+                "Registration này đã được điểm danh.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var attendance = new Domain.Entities.Attendance
+        {
+            RegistrationId = registrationId,
+            CheckInTime = now,
+            CheckedInByUserId = organizerId.Value
+        };
+        registration.Status = RegistrationStatus.Attended;
+        await _unitOfWork.Attendances.AddAsync(attendance, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return Result<CheckInResponseDto>.Ok(new CheckInResponseDto
+        {
+            RegistrationId = registrationId,
+            EventId = registration.EventId,
+            Status = registration.Status,
+            CheckInTime = attendance.CheckInTime,
+            CheckedInByUserId = attendance.CheckedInByUserId
+        });
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)

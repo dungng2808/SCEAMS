@@ -31,4 +31,9 @@ public interface IRegistrationService
         int pageSize,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<CheckInResponseDto>> CheckInAsync(
+        int registrationId,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

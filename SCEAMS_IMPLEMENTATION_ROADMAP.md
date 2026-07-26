@@ -802,9 +802,9 @@ Domain entity/enum
 
 ### Phase 99 - API: Điểm danh
 
-- [ ] Thêm `PUT /api/registrations/{id}/check-in`.
-- [ ] Organizer chỉ check-in Event mình phụ trách trong trạng thái/thời gian cho phép.
-- [ ] Tạo tối đa một Attendance và chuyển Registration sang `Attended`.
+- [x] Thêm `PUT /api/registrations/{id}/check-in`.
+- [x] Organizer chỉ check-in Event mình phụ trách trong trạng thái/thời gian cho phép.
+- [x] Tạo tối đa một Attendance và chuyển Registration sang `Attended`.
 
 ### Phase 100 - MVC: Điểm danh
 

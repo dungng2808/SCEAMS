@@ -5790,6 +5790,24 @@
             "description": "Phase 97 Admin hoặc Organizer sở hữu Event xem registration với status/search/paging."
           },
           "response": []
+        },
+        {
+          "name": "Phase 99 - Check-in Registration - Organizer",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/registrations/{{registrationId}}/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registrations", "{{registrationId}}", "check-in"]
+            },
+            "description": "Phase 99 Organizer điểm danh registration Confirmed trong Event Ongoing; không tạo Attendance trùng."
+          },
+          "response": []
         }
       ]
     }

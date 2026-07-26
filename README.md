@@ -1261,6 +1261,20 @@ filter status/search, phân trang và chỉ hiển thị Student code, tên, sta
 thông tin điểm danh cần thiết. Organizer không sở hữu Event sẽ nhận lỗi `403`
 và không xem được danh sách.
 
+## API Organizer điểm danh
+
+Organizer phụ trách Event dùng:
+
+```text
+PUT http://localhost:5195/api/registrations/{registrationId}/check-in
+Authorization: Bearer <organizer-access-token>
+```
+
+API chỉ cho điểm danh registration `Confirmed` của Event đang `Ongoing` và
+đúng khung `StartTime`–`EndTime`. Luồng dùng transaction Serializable, tạo tối
+đa một Attendance và chuyển registration sang `Attended`; điểm danh trùng hoặc
+ngoài thời gian cho phép trả `409`.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

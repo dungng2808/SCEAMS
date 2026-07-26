@@ -82,4 +82,23 @@ public sealed class RegistrationsController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/check-in")]
+    [Authorize(Roles = "Organizer")]
+    [ProducesResponseType<CheckInResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CheckIn(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _registrationService.CheckInAsync(
+            id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }
