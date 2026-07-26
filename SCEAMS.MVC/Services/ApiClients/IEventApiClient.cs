@@ -17,6 +17,15 @@ public interface IEventApiClient
         int eventId,
         CancellationToken cancellationToken = default);
 
+    Task<EventListApiResult> GetPendingApprovalEventsAsync(
+        int? clubId,
+        int? venueId,
+        DateTime? from,
+        DateTime? to,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

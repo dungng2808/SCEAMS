@@ -696,9 +696,9 @@ Domain entity/enum
 
 ### Phase 82 - MVC: Queue duyệt Event
 
-- [ ] Tạo trang pending approval.
-- [ ] Có link xem chi tiết trước khi quyết định.
-- [ ] Giữ filter và page sau khi quay lại queue.
+- [x] Tạo trang pending approval.
+- [x] Có link xem chi tiết trước khi quyết định.
+- [x] Giữ filter và page sau khi quay lại queue.
 
 ### Phase 83 - API: Duyệt Event và kiểm tra trùng lịch
 

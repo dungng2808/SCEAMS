@@ -1,0 +1,100 @@
+@model SCEAMS.MVC.ViewModels.PendingEventsViewModel
+
+@{
+    ViewData["Title"] = "Queue duyệt Event";
+}
+
+<section class="clubs-page" aria-labelledby="pending-events-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone H · Admin / Staff</p>
+            <h1 id="pending-events-title">Event chờ duyệt</h1>
+            <p>Kiểm tra thông tin trước khi chuyển sang bước duyệt hoặc từ chối.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Index">Danh sách Event</a>
+    </header>
+
+    <form class="users-filters surface-card" asp-controller="Events" asp-action="Pending" method="get" aria-label="Bộ lọc Event chờ duyệt">
+        <div class="users-filter">
+            <label for="ClubId">Mã Club</label>
+            <input id="ClubId" name="clubId" type="number" min="1" value="@Model.ClubId" />
+        </div>
+        <div class="users-filter">
+            <label for="VenueId">Mã Venue</label>
+            <input id="VenueId" name="venueId" type="number" min="1" value="@Model.VenueId" />
+        </div>
+        <div class="users-filter">
+            <label for="From">Từ ngày</label>
+            <input id="From" name="from" type="date" value="@(Model.From?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="users-filter">
+            <label for="To">Đến ngày</label>
+            <input id="To" name="to" type="date" value="@(Model.To?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">Lọc queue</button>
+            <a class="btn-app btn-app--ghost" asp-action="Pending">Xóa lọc</a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <p class="eyebrow">Kết nối gián đoạn</p>
+            <h2>Chưa thể tải queue</h2>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+    else if (Model.Events.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card">
+            <p class="eyebrow">Queue trống</p>
+            <h2>Không có Event PendingApproval</h2>
+            <p>Thử thay đổi filter hoặc quay lại sau khi Organizer gửi Event.</p>
+        </div>
+    }
+    else
+    {
+        <div class="surface-card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table align-middle style-table mb-0" style="width: 100%;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 1px solid var(--sceams-border);">
+                            <th style="padding: 1rem 1.5rem;">Event</th>
+                            <th>Club / Venue</th>
+                            <th>Bắt đầu</th>
+                            <th class="text-end">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var eventItem in Model.Events)
+                        {
+                            <tr style="border-bottom: 1px solid var(--sceams-border);">
+                                <td style="padding: 1rem 1.5rem;"><strong>@eventItem.Title</strong><small style="display:block;color:var(--sceams-text-soft);">#@eventItem.Id</small></td>
+                                <td><strong>@eventItem.ClubName</strong><small style="display:block;color:var(--sceams-text-soft);">@eventItem.VenueName</small></td>
+                                <td>@eventItem.StartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-end"><a class="btn-app btn-app--ghost btn-sm" asp-controller="Events" asp-action="Detail" asp-route-id="@eventItem.Id">Xem chi tiết</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--sceams-border);">
+                    <small>Trang @Model.Page / @Model.TotalPages · @Model.TotalItems Event</small>
+                    <div style="display:flex;gap:.5rem;">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Pending" asp-route-clubId="@Model.ClubId" asp-route-venueId="@Model.VenueId" asp-route-from="@Model.From?.ToString("yyyy-MM-dd")" asp-route-to="@Model.To?.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">&larr; Trước</a>
+                        }
+                        @if (Model.HasNextPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Pending" asp-route-clubId="@Model.ClubId" asp-route-venueId="@Model.VenueId" asp-route-from="@Model.From?.ToString("yyyy-MM-dd")" asp-route-to="@Model.To?.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Sau &rarr;</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>

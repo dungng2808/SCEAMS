@@ -1071,6 +1071,18 @@ GET http://localhost:5195/api/events/pending-approval?clubId=1&venueId=1&page=1&
 Endpoint chỉ trả Event `PendingApproval`, hỗ trợ lọc Club/Venue/ngày và phân
 trang. Request mẫu nằm trong Postman **Events** folder.
 
+## MVC queue duyệt Event
+
+Admin/Staff mở trang:
+
+```text
+https://localhost:7034/Events/Pending
+```
+
+Queue có filter Club, Venue, date range, phân trang và link tới chi tiết Event
+trước khi quyết định. Các filter và page được giữ lại khi chuyển qua lại queue;
+action Approve/Reject sẽ được bổ sung ở Phase 83–86.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

@@ -107,6 +107,70 @@ public sealed class EventsController : Controller
         }
     }
 
+    [Authorize(Roles = "Admin,Staff")]
+    [HttpGet("Pending")]
+    public async Task<IActionResult> Pending(
+        int? clubId,
+        int? venueId,
+        DateTime? from,
+        DateTime? to,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        try
+        {
+            var result = await _eventApiClient.GetPendingApprovalEventsAsync(
+                clubId,
+                venueId,
+                from,
+                to,
+                normalizedPage,
+                normalizedPageSize,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            return View(new PendingEventsViewModel
+            {
+                ClubId = clubId,
+                VenueId = venueId,
+                From = from,
+                To = to,
+                Page = result.IsSuccess ? result.Page : normalizedPage,
+                PageSize = result.IsSuccess ? result.PageSize : normalizedPageSize,
+                TotalItems = result.TotalItems,
+                TotalPages = result.TotalPages,
+                HasPreviousPage = result.HasPreviousPage,
+                HasNextPage = result.HasNextPage,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Events = result.Events.Select(MapEvent).ToList()
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load pending event queue.");
+            return View(new PendingEventsViewModel
+            {
+                ClubId = clubId,
+                VenueId = venueId,
+                From = from,
+                To = to,
+                Page = normalizedPage,
+                PageSize = normalizedPageSize,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     [Authorize(Roles = "Organizer")]
     [HttpGet("Create")]
     public async Task<IActionResult> Create(CancellationToken cancellationToken = default)

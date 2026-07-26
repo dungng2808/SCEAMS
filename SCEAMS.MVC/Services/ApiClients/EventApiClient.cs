@@ -181,6 +181,67 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<EventListApiResult> GetPendingApprovalEventsAsync(
+        int? clubId,
+        int? venueId,
+        DateTime? from,
+        DateTime? to,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var query = new List<string>();
+        if (clubId is > 0) query.Add($"clubId={clubId.Value}");
+        if (venueId is > 0) query.Add($"venueId={venueId.Value}");
+        if (from.HasValue) query.Add($"from={Uri.EscapeDataString(FormatDate(from.Value))}");
+        if (to.HasValue) query.Add($"to={Uri.EscapeDataString(FormatDate(to.Value))}");
+        query.Add($"page={normalizedPage}");
+        query.Add($"pageSize={normalizedPageSize}");
+
+        using var response = await _httpClient.GetAsync(
+            $"api/events/pending-approval?{string.Join("&", query)}",
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var payload = await response.Content
+                .ReadFromJsonAsync<PagedApiResponse<EventApiResponse>>(
+                    cancellationToken: cancellationToken);
+            return new EventListApiResult
+            {
+                IsSuccess = true,
+                Events = payload?.Items ?? [],
+                TotalItems = payload?.TotalItems ?? 0,
+                Page = normalizedPage,
+                PageSize = normalizedPageSize
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new EventListApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new EventListApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Chỉ Admin hoặc Staff mới có thể xem queue duyệt Event."
+            };
+        }
+
+        return new EventListApiResult
+        {
+            ErrorMessage = "Không thể tải queue Event chờ duyệt."
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)
@@ -368,4 +429,6 @@ public sealed class EventApiClient : IEventApiClient
             return null;
         }
     }
+
+    private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);
 }
