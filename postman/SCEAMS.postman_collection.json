@@ -5435,6 +5435,78 @@
             "description": "Phase 71 Organizer chỉ xem Event thuộc scope Club/Event của mình."
           },
           "response": []
+        },
+        {
+          "name": "Phase 73 - Event Detail - Public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Detail includes capacity and permissions\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.clubName).to.be.a(\"string\");",
+                  "    pm.expect(body.venueName).to.be.a(\"string\");",
+                  "    pm.expect(body.slotsRemaining).to.be.at.least(0);",
+                  "    pm.expect(body.permissions).to.be.an(\"object\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "1"
+              ]
+            },
+            "description": "Phase 73 public xem chi tiết Event Approved gồm Club, Venue, deadline, capacity và quyền thao tác."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 73 - Event Detail - Missing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "999999"
+              ]
+            },
+            "description": "Phase 73 kiểm thử Event không tồn tại hoặc không thuộc quyền xem trả 404."
+          },
+          "response": []
         }
       ]
     }

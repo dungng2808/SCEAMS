@@ -642,9 +642,9 @@ Domain entity/enum
 
 ### Phase 73 - API: Chi tiết sự kiện
 
-- [ ] Thêm `GET /api/events/{id}`.
-- [ ] Trả Club, Venue, deadline, capacity, slots remaining và quyền thao tác hiện tại.
-- [ ] Không public Event Draft/Pending của Organizer khác.
+- [x] Thêm `GET /api/events/{id}`.
+- [x] Trả Club, Venue, deadline, capacity, slots remaining và quyền thao tác hiện tại.
+- [x] Không public Event Draft/Pending của Organizer khác.
 
 ### Phase 74 - MVC: Trang chi tiết sự kiện
 

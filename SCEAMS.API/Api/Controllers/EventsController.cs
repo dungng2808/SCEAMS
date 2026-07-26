@@ -34,4 +34,20 @@ public sealed class EventsController : ApiControllerBase
     {
         return Ok(_eventService.GetEventsQuery(User));
     }
+
+    [HttpGet("{id:int}")]
+    [AllowAnonymous]
+    [ProducesResponseType<EventDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetEventById(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _eventService.GetEventByIdAsync(
+            id,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

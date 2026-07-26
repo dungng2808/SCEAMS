@@ -1000,3 +1000,15 @@ https://localhost:7034/Events
 Trang MVC gửi OData query đã encode tới API và hỗ trợ lọc theo từ khóa (Event,
 Club, venue), mã Club, khoảng ngày, status và số chỗ còn lại. Kết quả được sắp
 xếp `StartTime asc`, có phân trang và hiển thị capacity/slots remaining.
+
+## API chi tiết sự kiện
+
+```text
+GET http://localhost:5195/api/events/{id}
+```
+
+Response gồm Club, Venue, thời gian, deadline đăng ký, capacity, số đã đăng ký,
+`slotsRemaining` và object `permissions` cho biết action hiện tại theo role,
+ownership, status và deadline. Event Draft/Pending của Organizer khác không bị
+public; API trả `404` cho URL không có quyền xem. Request mẫu nằm trong Postman
+**Events** folder.
