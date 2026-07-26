@@ -107,6 +107,73 @@ public sealed class FeedbackService : IFeedbackService
         });
     }
 
+    public async Task<Result<FeedbackSummaryResponseDto>> GetSummaryAsync(
+        int eventId,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var eventEntity = await _unitOfWork.Events.GetByIdWithDetailsAsync(
+            eventId,
+            cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<FeedbackSummaryResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isInternal = user.IsInRole(nameof(UserRole.Admin)) ||
+                         user.IsInRole(nameof(UserRole.Staff));
+        var currentUserId = GetUserId(user);
+        var isOwner = currentUserId.HasValue &&
+                      (eventEntity.CreatedByUserId == currentUserId.Value ||
+                       eventEntity.Club.CreatedByUserId == currentUserId.Value);
+        var isPublic = eventEntity.Status is
+            EventStatus.Approved or EventStatus.Ongoing or EventStatus.Completed;
+        if (!isInternal && !isOwner && !isPublic)
+        {
+            return Result<FeedbackSummaryResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var feedbacks = await _unitOfWork.Feedbacks.FindAsync(
+            feedback => feedback.EventId == eventId,
+            cancellationToken);
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var totalFeedback = feedbacks.Count;
+        var items = feedbacks
+            .OrderByDescending(feedback => feedback.CreatedAt)
+            .Skip((normalizedPage - 1) * normalizedPageSize)
+            .Take(normalizedPageSize)
+            .Select(feedback => new FeedbackListItemDto
+            {
+                Id = feedback.Id,
+                Rating = feedback.Rating,
+                Comment = feedback.Comment,
+                CreatedAt = feedback.CreatedAt
+            })
+            .ToList();
+
+        return Result<FeedbackSummaryResponseDto>.Ok(new FeedbackSummaryResponseDto
+        {
+            EventId = eventId,
+            AverageRating = totalFeedback == 0
+                ? 0
+                : Math.Round((decimal)feedbacks.Average(feedback => feedback.Rating), 2),
+            TotalFeedback = totalFeedback,
+            Items = items,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize,
+            TotalPages = totalFeedback == 0
+                ? 0
+                : (int)Math.Ceiling(totalFeedback / (double)normalizedPageSize)
+        });
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)

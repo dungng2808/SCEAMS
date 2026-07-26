@@ -5831,6 +5831,24 @@
             "description": "Phase 101 Student đã Attended gửi feedback một lần cho Event; rating 1-5, comment tối đa 2000 ký tự."
           },
           "response": []
+        },
+        {
+          "name": "Phase 103 - Feedback Summary - Public",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/feedback?page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}", "feedback"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Phase 103 trả averageRating, totalFeedback và feedback list không lộ Student data nhạy cảm."
+          },
+          "response": []
         }
       ]
     }

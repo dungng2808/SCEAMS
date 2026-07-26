@@ -11,4 +11,11 @@ public interface IFeedbackService
         CreateFeedbackRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<FeedbackSummaryResponseDto>> GetSummaryAsync(
+        int eventId,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

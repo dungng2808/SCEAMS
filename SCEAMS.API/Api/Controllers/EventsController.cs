@@ -292,4 +292,24 @@ public sealed class EventsController : ApiControllerBase
 
         return StatusCode(StatusCodes.Status201Created, result.Data);
     }
+
+    [HttpGet("{id:int}/feedback")]
+    [AllowAnonymous]
+    [ProducesResponseType<FeedbackSummaryResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetFeedback(
+        int id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _feedbackService.GetSummaryAsync(
+            id,
+            page,
+            pageSize,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

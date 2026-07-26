@@ -1310,6 +1310,18 @@ Event detail chỉ hiển thị form Feedback khi API trả `canFeedback = true`
 ký tự và anti-forgery token. Sau khi gửi thành công, form bị thay bằng feedback
 đã lưu; lỗi chưa điểm danh hoặc gửi trùng được hiển thị trên trang.
 
+## API tổng hợp Feedback
+
+Public hoặc user có quyền xem Event dùng:
+
+```text
+GET http://localhost:5195/api/events/{id}/feedback?page=1&pageSize=10
+```
+
+API trả `averageRating`, `totalFeedback` và danh sách feedback phân trang. Chỉ
+rating, comment và thời gian tạo được trả về; không lộ StudentId, email hay
+thông tin cá nhân. Event Draft/Pending của Organizer khác không được public.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

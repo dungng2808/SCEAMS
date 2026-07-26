@@ -826,9 +826,9 @@ Domain entity/enum
 
 ### Phase 103 - API: Xem tổng hợp Feedback
 
-- [ ] Thêm `GET /api/events/{id}/feedback`.
-- [ ] Trả average rating, total feedback và danh sách phân trang.
-- [ ] Không trả dữ liệu Student nhạy cảm.
+- [x] Thêm `GET /api/events/{id}/feedback`.
+- [x] Trả average rating, total feedback và danh sách phân trang.
+- [x] Không trả dữ liệu Student nhạy cảm.
 
 ### Phase 104 - MVC: Hiển thị đánh giá Event
 
