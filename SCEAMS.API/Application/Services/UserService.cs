@@ -17,6 +17,40 @@ public sealed class UserService : IUserService
         _passwordService = passwordService;
     }
 
+    public async Task<Result<PagedUsersResponseDto>> GetUsersAsync(
+        UserListQueryDto query,
+        CancellationToken cancellationToken = default)
+    {
+        if (query.Role.HasValue &&
+            !Enum.IsDefined(query.Role.Value))
+        {
+            return Result<PagedUsersResponseDto>.Fail(
+                "Role filter is invalid.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var search = NormalizeOptionalValue(query.Search);
+        var page = await _unitOfWork.Users.GetPagedAsync(
+            search,
+            query.Role,
+            query.IsActive,
+            query.Page,
+            query.PageSize,
+            cancellationToken);
+        var totalPages = page.TotalItems / query.PageSize +
+            (page.TotalItems % query.PageSize == 0 ? 0 : 1);
+        var response = new PagedUsersResponseDto(
+            Items: page.Items,
+            Page: query.Page,
+            PageSize: query.PageSize,
+            TotalItems: page.TotalItems,
+            TotalPages: totalPages,
+            HasPreviousPage: query.Page > 1,
+            HasNextPage: query.Page < totalPages);
+
+        return Result<PagedUsersResponseDto>.Ok(response);
+    }
+
     public async Task<Result<CurrentUserProfileResponseDto>>
         GetCurrentUserAsync(
             int userId,

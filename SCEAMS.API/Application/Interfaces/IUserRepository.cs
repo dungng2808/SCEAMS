@@ -1,9 +1,20 @@
+using SCEAMS.Application.Common;
+using SCEAMS.Application.DTOs;
 using SCEAMS.Domain.Entities;
+using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Application.Interfaces;
 
 public interface IUserRepository : IGenericRepository<User>
 {
+    Task<PagedResult<UserListItemResponseDto>> GetPagedAsync(
+        string? search,
+        UserRole? role,
+        bool? isActive,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
     Task<User?> GetByEmailAsync(
         string email,
         CancellationToken cancellationToken = default);

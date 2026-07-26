@@ -278,9 +278,9 @@ Domain entity/enum
 
 ### Phase 19 - API: Danh sách người dùng
 
-- [ ] Thêm `GET /api/users` cho `Admin`.
-- [ ] Hỗ trợ search, role filter, active filter, page và page size.
-- [ ] Test Admin được xem, Staff/Organizer/Student nhận `403`.
+- [x] Thêm `GET /api/users` cho `Admin`.
+- [x] Hỗ trợ search, role filter, active filter, page và page size.
+- [x] Test Admin được xem, Staff/Organizer/Student nhận `403`.
 
 ### Phase 20 - MVC: Danh sách người dùng
 

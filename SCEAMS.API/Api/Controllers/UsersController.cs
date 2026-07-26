@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
+using SCEAMS.Domain.Enums;
 
 namespace SCEAMS.Api.Controllers;
 
@@ -17,6 +18,24 @@ public sealed class UsersController : ApiControllerBase
     public UsersController(IUserService userService)
     {
         _userService = userService;
+    }
+
+    [HttpGet]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType<PagedUsersResponseDto>(
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] UserListQueryDto query,
+        CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetUsersAsync(
+            query,
+            cancellationToken);
+
+        return ToActionResult(result);
     }
 
     [HttpGet("me")]

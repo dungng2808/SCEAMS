@@ -55,6 +55,26 @@
       "key": "usedRefreshToken",
       "value": "",
       "type": "secret"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "staffAccessToken",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "organizerAccessToken",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "studentAccessToken",
+      "value": "",
+      "type": "secret"
     }
   ],
   "item": [
@@ -215,6 +235,13 @@
                   "    pm.expect(body.user).not.to.have.property(\"passwordHash\");",
                   "    pm.collectionVariables.set(\"accessToken\", body.accessToken);",
                   "    pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
+                  "    const roleTokenVariables = {",
+                  "        Admin: \"adminAccessToken\",",
+                  "        Staff: \"staffAccessToken\",",
+                  "        Organizer: \"organizerAccessToken\",",
+                  "        Student: \"studentAccessToken\"",
+                  "    };",
+                  "    pm.collectionVariables.set(roleTokenVariables[body.user.role], body.accessToken);",
                   "});",
                   "",
                   "pm.test(\"JWT contains sub, email and role\", function () {",
@@ -257,7 +284,7 @@
                 "login"
               ]
             },
-            "description": "Phase 09/17 successful login. Saves the returned access and refresh tokens as secret collection variables."
+            "description": "Phase 09/17/19 successful login. Saves the returned access and refresh tokens, including the role-specific access-token variable."
           },
           "response": []
         },
@@ -637,6 +664,281 @@
     {
       "name": "Users",
       "item": [
+        {
+          "name": "List Users - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination metadata and safe user fields are returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.page).to.eql(1);",
+                  "    pm.expect(body.pageSize).to.eql(10);",
+                  "    pm.expect(body.totalItems).to.be.a(\"number\");",
+                  "    pm.expect(body.totalPages).to.be.a(\"number\");",
+                  "    pm.expect(body.items).to.be.an(\"array\");",
+                  "    body.items.forEach(function (user) {",
+                  "        pm.expect(user).not.to.have.property(\"passwordHash\");",
+                  "        pm.expect(user).not.to.have.property(\"refreshTokenHash\");",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Phase 19 Admin-only paged user list."
+          },
+          "response": []
+        },
+        {
+          "name": "List Users - Search and Filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Role and active filters are applied\", function () {",
+                  "    const body = pm.response.json();",
+                  "    body.items.forEach(function (user) {",
+                  "        pm.expect(user.role).to.eql(\"Student\");",
+                  "        pm.expect(user.isActive).to.eql(true);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?search=student&role=Student&isActive=true&page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "student"
+                },
+                {
+                  "key": "role",
+                  "value": "Student"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Phase 19 search, role and active filters."
+          },
+          "response": []
+        },
+        {
+          "name": "List Users - Staff Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 19 verifies that Staff receives 403."
+          },
+          "response": []
+        },
+        {
+          "name": "List Users - Organizer Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 19 verifies that Organizer receives 403."
+          },
+          "response": []
+        },
+        {
+          "name": "List Users - Student Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Phase 19 verifies that Student receives 403."
+          },
+          "response": []
+        },
         {
           "name": "Get My Profile",
           "event": [

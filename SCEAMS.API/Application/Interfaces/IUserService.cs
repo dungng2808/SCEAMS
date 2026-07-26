@@ -5,6 +5,10 @@ namespace SCEAMS.Application.Interfaces;
 
 public interface IUserService
 {
+    Task<Result<PagedUsersResponseDto>> GetUsersAsync(
+        UserListQueryDto query,
+        CancellationToken cancellationToken = default);
+
     Task<Result<CurrentUserProfileResponseDto>> GetCurrentUserAsync(
         int userId,
         CancellationToken cancellationToken = default);

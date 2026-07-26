@@ -57,6 +57,23 @@ Content-Type: application/json
 ###
 
 # Define AccessToken from a successful login in your local HTTP client environment.
+#
+# Admin-only user list. Supported role values:
+# Admin, Staff, Organizer and Student.
+GET {{SCEAMS.API_HostAddress}}/api/users?search=student&role=Student&isActive=true&page=1&pageSize=10
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+# A valid token for any non-Admin role must return 403.
+GET {{SCEAMS.API_HostAddress}}/api/users
+Accept: application/json
+Authorization: Bearer {{NonAdminAccessToken}}
+
+###
+
+# Define AccessToken from a successful login in your local HTTP client environment.
 GET {{SCEAMS.API_HostAddress}}/api/users/me
 Accept: application/json
 Authorization: Bearer {{AccessToken}}

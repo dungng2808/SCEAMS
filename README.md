@@ -214,6 +214,25 @@ process restart, the encrypted authentication ticket provides the token
 fallback while it remains valid. A distributed cache can replace the in-memory
 store later without changing the controller or handler flow.
 
+## Admin user-list API
+
+Only an authenticated `Admin` can retrieve the user list:
+
+```text
+GET http://localhost:5195/api/users
+Authorization: Bearer <admin-access-token>
+```
+
+The endpoint accepts optional `search`, `role` and `isActive` filters plus
+`page` and `pageSize`. Search covers full name, email, student code and phone
+number. Valid roles are `Admin`, `Staff`, `Organizer` and `Student`; page size
+is limited to 100.
+
+The response contains `items`, `page`, `pageSize`, `totalItems`, `totalPages`,
+`hasPreviousPage` and `hasNextPage`. Each item contains only safe profile data;
+password and refresh-token hashes are neither queried nor returned. A valid
+Staff, Organizer or Student token receives `403 Forbidden`.
+
 ## Current-user profile API
 
 An authenticated user can retrieve only their own profile:
