@@ -718,5 +718,42 @@ to Login with a success message. A copied pre-change browser cookie cannot
 reuse the cleared server-side token and is redirected to Login. The user must
 authenticate again with the new password.
 
+## Club membership decisions API
+
+An Admin, Staff member or the Organizer who owns a Club can approve or reject
+one pending membership application:
+
+```text
+PUT http://localhost:5195/api/clubs/{clubId}/members/{userId}/decision
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+Approve an application with:
+
+```json
+{
+  "approve": true
+}
+```
+
+Reject it with an optional reason:
+
+```json
+{
+  "approve": false,
+  "rejectionReason": "Không phù hợp với tiêu chí thành viên hiện tại."
+}
+```
+
+The API only finds the membership belonging to the supplied `userId` inside
+the supplied Club, and only a `Pending` membership can be processed. Approval
+changes the status to `Active`; rejection changes it to `Rejected` and records
+the decision user/time. A missing Club or membership returns `404`, a user
+without ownership/permission returns `403`, and an already processed
+membership returns `409`. Phase 55 requests are in the Postman **Clubs**
+folder; set `decisionClubId` and `decisionUserId` to a pending application
+before running the approve or reject request.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.

@@ -115,6 +115,16 @@
       "key": "existingClubCategoryName",
       "value": "Academic and Technology",
       "type": "string"
+    },
+    {
+      "key": "decisionClubId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "decisionUserId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -4064,13 +4074,199 @@
             "description": "Phase 53 returns 403 Forbidden when an Organizer attempts to view pending applications for a club they do not own."
           },
           "response": []
+        },
+        {
+          "name": "Phase 55 - Decide Membership - Approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Membership is Active\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/{{decisionClubId}}/members/{{decisionUserId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "{{decisionClubId}}",
+                "members",
+                "{{decisionUserId}}",
+                "decision"
+              ]
+            },
+            "description": "Phase 55 chuyển đơn Pending của user trong Club sang Active. Đặt decisionClubId và decisionUserId vào environment trước khi chạy."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 55 - Decide Membership - Reject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Membership is Rejected\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql(3);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": false,\n  \"rejectionReason\": \"Không phù hợp với tiêu chí thành viên hiện tại.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/{{decisionClubId}}/members/{{decisionUserId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "{{decisionClubId}}",
+                "members",
+                "{{decisionUserId}}",
+                "decision"
+              ]
+            },
+            "description": "Phase 55 chuyển đơn Pending của user trong Club sang Rejected. Dùng một đơn Pending khác hoặc đặt lại dữ liệu trước khi chạy."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 55 - Decide Membership - Non-Pending Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/{{decisionClubId}}/members/{{decisionUserId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "{{decisionClubId}}",
+                "members",
+                "{{decisionUserId}}",
+                "decision"
+              ]
+            },
+            "description": "Phase 55 từ chối xử lý lại membership đã Active hoặc Rejected; chạy sau một request Approve/Reject thành công."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
-
-
 
 
 

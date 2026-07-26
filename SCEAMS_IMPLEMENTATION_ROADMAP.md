@@ -526,9 +526,9 @@ Domain entity/enum
 
 ### Phase 55 - API: Duyệt hoặc từ chối đơn gia nhập
 
-- [ ] Thêm `PUT /api/clubs/{id}/members/{userId}/decision`.
-- [ ] Quyết định `Approve` chuyển sang `Active`; `Reject` chuyển sang `Rejected`.
-- [ ] Chỉ xử lý membership đang `Pending`.
+- [x] Thêm `PUT /api/clubs/{id}/members/{userId}/decision`.
+- [x] Quyết định `Approve` chuyển sang `Active`; `Reject` chuyển sang `Rejected`.
+- [x] Chỉ xử lý membership đang `Pending`.
 
 ### Phase 56 - MVC: Duyệt/từ chối đơn gia nhập
 

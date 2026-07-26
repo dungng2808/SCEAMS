@@ -170,4 +170,28 @@ public sealed class ClubsController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPut("{id:int}/members/{userId:int}/decision")]
+    [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
+    [ProducesResponseType<ClubMembershipResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DecideMembership(
+        int id,
+        int userId,
+        [FromBody] DecideClubMembershipRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _membershipService.DecideMembershipAsync(
+            id,
+            userId,
+            request,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }
