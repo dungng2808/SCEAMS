@@ -660,9 +660,9 @@ Domain entity/enum
 
 ### Phase 76 - MVC: Form tạo Event Draft
 
-- [ ] Chỉ liệt kê Club Organizer phụ trách và Venue khả dụng.
-- [ ] Tạo form ngày giờ/capacity/deadline.
-- [ ] Sau khi thành công, chuyển tới chi tiết Event Draft.
+- [x] Chỉ liệt kê Club Organizer phụ trách và Venue khả dụng.
+- [x] Tạo form ngày giờ/capacity/deadline.
+- [x] Sau khi thành công, chuyển tới chi tiết Event Draft.
 
 ### Phase 77 - API: Cập nhật Event
 

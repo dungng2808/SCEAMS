@@ -4,6 +4,10 @@ namespace SCEAMS.MVC.Services.ApiClients;
 
 public interface IEventApiClient
 {
+    Task<CreateEventApiResult> CreateEventAsync(
+        CreateEventApiRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

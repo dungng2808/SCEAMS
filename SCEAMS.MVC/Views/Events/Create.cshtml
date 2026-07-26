@@ -1,0 +1,99 @@
+@model SCEAMS.MVC.ViewModels.CreateEventViewModel
+
+@{
+    ViewData["Title"] = "Tạo Event Draft";
+}
+
+<section class="profile-page" aria-labelledby="create-event-title">
+    <div class="profile-page__header">
+        <div>
+            <p class="eyebrow">Milestone H · Organizer</p>
+            <h1 id="create-event-title">Tạo Event Draft</h1>
+            <p>Chọn Club mình phụ trách, Venue khả dụng và lịch hoạt động dự kiến.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-action="Index">&larr; Danh sách sự kiện</a>
+    </div>
+
+    <div class="profile-layout">
+        <form asp-action="Create" method="post" class="surface-card profile-form">
+            @Html.AntiForgeryToken()
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="profile-form__field">
+                <label asp-for="Title">Tiêu đề Event</label>
+                <input asp-for="Title" maxlength="250" autofocus placeholder="Ví dụ: Workshop kỹ năng lãnh đạo" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="Description">Mô tả</label>
+                <textarea asp-for="Description" rows="4" maxlength="4000" placeholder="Mục tiêu và nội dung chính của Event..."></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="ClubId">Club phụ trách</label>
+                <select asp-for="ClubId">
+                    <option value="0">-- Chọn Club Approved --</option>
+                    @foreach (var club in Model.Clubs)
+                    {
+                        <option value="@club.Id">@club.Name (#@club.Id)</option>
+                    }
+                </select>
+                <span asp-validation-for="ClubId" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="VenueId">Venue khả dụng</label>
+                <select asp-for="VenueId">
+                    <option value="0">-- Chọn Venue --</option>
+                    @foreach (var venue in Model.Venues)
+                    {
+                        <option value="@venue.Id">@venue.Name · @venue.Location (tối đa @venue.Capacity)</option>
+                    }
+                </select>
+                <span asp-validation-for="VenueId" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="StartTime">Bắt đầu</label>
+                <input asp-for="StartTime" type="datetime-local" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="EndTime">Kết thúc</label>
+                <input asp-for="EndTime" type="datetime-local" />
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="RegistrationDeadline">Hạn đăng ký</label>
+                <input asp-for="RegistrationDeadline" type="datetime-local" />
+                <span asp-validation-for="RegistrationDeadline" class="text-danger"></span>
+            </div>
+            <div class="profile-form__field">
+                <label asp-for="Capacity">Capacity</label>
+                <input asp-for="Capacity" type="number" min="1" />
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+            <div class="profile-form__actions">
+                <a class="btn-app btn-app--ghost" asp-action="Index">Hủy</a>
+                <button type="submit" class="btn-app btn-app--primary">Tạo Event Draft</button>
+            </div>
+        </form>
+
+        <aside class="surface-card profile-aside">
+            <p class="eyebrow">Quy tắc tạo Event</p>
+            <h2>Draft trước khi gửi duyệt</h2>
+            <ul>
+                <li>Club phải Approved và thuộc Organizer hiện tại.</li>
+                <li>Venue trong danh sách đã được lọc bỏ trạng thái bảo trì.</li>
+                <li>Capacity không vượt sức chứa Venue.</li>
+                <li>Event mới luôn bắt đầu ở Draft.</li>
+            </ul>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

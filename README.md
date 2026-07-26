@@ -1013,6 +1013,18 @@ ownership, status và deadline. Event Draft/Pending của Organizer khác không
 public; API trả `404` cho URL không có quyền xem. Request mẫu nằm trong Postman
 **Events** folder.
 
+## MVC tạo Event Draft
+
+Organizer mở form tại:
+
+```text
+https://localhost:7034/Events/Create
+```
+
+Form chỉ nạp Club Approved do Organizer hiện tại phụ trách và Venue không bảo
+trì, đồng thời nhập thời gian, deadline và capacity. Tạo thành công sẽ chuyển
+thẳng tới trang chi tiết Event Draft.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

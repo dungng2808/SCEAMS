@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using SCEAMS.MVC.Models.Api;
 using SCEAMS.MVC.Services.ApiClients;
 using SCEAMS.MVC.ViewModels;
@@ -12,13 +14,19 @@ namespace SCEAMS.MVC.Controllers;
 public sealed class EventsController : Controller
 {
     private readonly IEventApiClient _eventApiClient;
+    private readonly IClubApiClient _clubApiClient;
+    private readonly IVenueApiClient _venueApiClient;
     private readonly ILogger<EventsController> _logger;
 
     public EventsController(
         IEventApiClient eventApiClient,
+        IClubApiClient clubApiClient,
+        IVenueApiClient venueApiClient,
         ILogger<EventsController> logger)
     {
         _eventApiClient = eventApiClient;
+        _clubApiClient = clubApiClient;
+        _venueApiClient = venueApiClient;
         _logger = logger;
     }
 
@@ -99,6 +107,97 @@ public sealed class EventsController : Controller
         }
     }
 
+    [Authorize(Roles = "Organizer")]
+    [HttpGet("Create")]
+    public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
+    {
+        var model = new CreateEventViewModel
+        {
+            StartTime = DateTime.Now.AddDays(7).AddHours(1),
+            EndTime = DateTime.Now.AddDays(7).AddHours(3),
+            RegistrationDeadline = DateTime.Now.AddDays(5)
+        };
+
+        var optionsResult = await LoadCreateOptionsAsync(model, cancellationToken);
+        if (optionsResult.IsUnauthorized)
+        {
+            return await EndInvalidSessionAsync(
+                optionsResult.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+        }
+
+        if (!optionsResult.IsSuccess)
+        {
+            model.ErrorMessage = optionsResult.ErrorMessage;
+        }
+
+        return View(model);
+    }
+
+    [Authorize(Roles = "Organizer")]
+    [HttpPost("Create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        CreateEventViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            await LoadCreateOptionsAsync(model, cancellationToken);
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _eventApiClient.CreateEventAsync(
+                new CreateEventApiRequest(
+                    model.Title.Trim(),
+                    string.IsNullOrWhiteSpace(model.Description)
+                        ? null
+                        : model.Description.Trim(),
+                    model.ClubId,
+                    model.VenueId,
+                    model.StartTime,
+                    model.EndTime,
+                    model.RegistrationDeadline,
+                    model.Capacity),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(nameof(AccountController.AccessDenied), "Account");
+            }
+
+            if (result.IsConflict || result.IsNotFound || !result.IsSuccess || result.Event is null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage ?? "Không thể tạo Event Draft.");
+                model.ErrorMessage = result.ErrorMessage;
+                await LoadCreateOptionsAsync(model, cancellationToken);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Đã tạo Event Draft '{result.Event.Title}'.";
+            return RedirectToAction(nameof(Detail), new { id = result.Event.Id });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to create event from MVC.");
+            model.ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            await LoadCreateOptionsAsync(model, cancellationToken);
+            return View(model);
+        }
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(
         int id,
@@ -168,6 +267,62 @@ public sealed class EventsController : Controller
             SlotsRemaining = eventItem.SlotsRemaining
         };
     }
+
+    private async Task<CreateOptionsResult> LoadCreateOptionsAsync(
+        CreateEventViewModel model,
+        CancellationToken cancellationToken)
+    {
+        var clubsResult = await _clubApiClient.GetClubsAsync(
+            new ClubListApiQuery(
+                Status: "Approved",
+                OrderBy: "Name asc",
+                Page: 1,
+                PageSize: 50),
+            cancellationToken);
+        if (clubsResult.IsUnauthorized)
+        {
+            return new CreateOptionsResult(false, true, clubsResult.ErrorMessage);
+        }
+
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var hasUserId = int.TryParse(userIdValue, out var userId);
+        model.Clubs = clubsResult.IsSuccess
+            ? clubsResult.Clubs
+                .Where(club => !hasUserId || club.CreatedByUserId == userId)
+                .ToList()
+            : [];
+
+        var venuesResult = await _venueApiClient.GetVenuesAsync(
+            search: null,
+            maintenance: false,
+            page: 1,
+            pageSize: 50,
+            cancellationToken);
+        if (venuesResult.IsUnauthorized)
+        {
+            return new CreateOptionsResult(false, true, venuesResult.ErrorMessage);
+        }
+
+        model.Venues = venuesResult.IsSuccess
+            ? venuesResult.Venues
+            : [];
+
+        if (!clubsResult.IsSuccess || !venuesResult.IsSuccess)
+        {
+            return new CreateOptionsResult(
+                false,
+                false,
+                clubsResult.ErrorMessage ?? venuesResult.ErrorMessage ??
+                    "Không thể tải danh sách Club/Venue.");
+        }
+
+        return new CreateOptionsResult(true, false, null);
+    }
+
+    private sealed record CreateOptionsResult(
+        bool IsSuccess,
+        bool IsUnauthorized,
+        string? ErrorMessage);
 
     private static EventDetailViewModel MapDetail(EventDetailApiResponse eventItem)
     {

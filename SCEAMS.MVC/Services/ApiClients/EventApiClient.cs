@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using SCEAMS.MVC.Models.Api;
 
 namespace SCEAMS.MVC.Services.ApiClients;
@@ -12,6 +13,61 @@ public sealed class EventApiClient : IEventApiClient
     public EventApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
+    }
+
+    public async Task<CreateEventApiResult> CreateEventAsync(
+        CreateEventApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/events",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var eventItem = await response.Content
+                .ReadFromJsonAsync<EventDetailApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new CreateEventApiResult
+            {
+                IsSuccess = eventItem is not null,
+                Event = eventItem,
+                ErrorMessage = eventItem is null
+                    ? "API trả về Event vừa tạo không hợp lệ."
+                    : null
+            };
+        }
+
+        var message = await response.Content.ReadAsStringAsync(cancellationToken);
+        var error = ExtractMessage(message);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new CreateEventApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new CreateEventApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = error ?? "Bạn không có quyền tạo Event Draft."
+            },
+            HttpStatusCode.NotFound => new CreateEventApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = error ?? "Club hoặc Venue không tồn tại."
+            },
+            HttpStatusCode.Conflict => new CreateEventApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = error ?? "Dữ liệu Club/Venue/Event đang xung đột."
+            },
+            _ => new CreateEventApiResult
+            {
+                ErrorMessage = error ?? "Thông tin Event chưa hợp lệ."
+            }
+        };
     }
 
     public async Task<EventDetailApiResult> GetEventByIdAsync(
@@ -185,5 +241,20 @@ public sealed class EventApiClient : IEventApiClient
     {
         return dateTime.ToUniversalTime()
             .ToString("O", CultureInfo.InvariantCulture);
+    }
+
+    private static string? ExtractMessage(string content)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            return document.RootElement.TryGetProperty("message", out var message)
+                ? message.GetString()
+                : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }

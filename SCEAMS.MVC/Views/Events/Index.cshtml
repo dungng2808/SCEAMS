@@ -12,6 +12,10 @@
             <h1 id="events-title">Lịch hoạt động của câu lạc bộ</h1>
             <p>Tìm kiếm Event theo Club, thời gian, trạng thái và số chỗ còn lại.</p>
         </div>
+        @if (User.IsInRole("Organizer"))
+        {
+            <a class="btn-app btn-app--primary" asp-controller="Events" asp-action="Create">Tạo Event Draft</a>
+        }
         <div class="category-hero__summary" aria-label="Tổng quan sự kiện">
             <span>Event phù hợp</span>
             <strong>@Model.TotalItems</strong>
