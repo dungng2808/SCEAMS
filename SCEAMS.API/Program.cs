@@ -17,11 +17,22 @@ using SCEAMS.Infrastructure.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration
+        .AddJsonFile(
+            "appsettings.Local.json",
+            optional: true,
+            reloadOnChange: true)
+        .AddEnvironmentVariables()
+        .AddCommandLine(args);
+}
+
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
         "ConnectionStrings:DefaultConnection is not configured. " +
-        "Use .NET User Secrets or an environment variable.");
+        "Use appsettings.Local.json, .NET User Secrets, or an environment variable.");
 
 var jwtOptions = builder.Configuration
     .GetSection(JwtOptions.SectionName)

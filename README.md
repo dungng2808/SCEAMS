@@ -55,9 +55,14 @@ dotnet sln SCEAMS.sln list
 
 ## SQL Server configuration
 
-The API reads `ConnectionStrings:DefaultConnection` from configuration. Keep
-the database password outside the repository by using .NET User Secrets or the
-`ConnectionStrings__DefaultConnection` environment variable.
+The API reads `ConnectionStrings:DefaultConnection` from configuration. In
+Development, copy `SCEAMS.API/appsettings.Local.example.json` to
+`SCEAMS.API/appsettings.Local.json` and replace the placeholder values. The
+local file is ignored by Git and is loaded automatically by the API.
+
+You can also use .NET User Secrets or the
+`ConnectionStrings__DefaultConnection` environment variable. Environment
+variables take precedence over the local JSON file.
 
 Example User Secrets command:
 
