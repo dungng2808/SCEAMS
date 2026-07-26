@@ -144,6 +144,7 @@ builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddHostedService<EventStatusSyncBackgroundService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
 

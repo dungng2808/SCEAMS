@@ -1165,6 +1165,29 @@ Check-in cho người đã đăng ký; với Event `Completed`, giao diện hi�
 Feedback sau khi hệ thống xác nhận điểm danh. Các endpoint thao tác thật sẽ được
 kết nối ở các phase đăng ký/điểm danh/feedback tiếp theo.
 
+## API Student đăng ký Event
+
+Student đăng ký Event bằng:
+
+```text
+POST http://localhost:5195/api/registrations
+Authorization: Bearer <student-access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "eventId": 1
+}
+```
+
+API chỉ nhận Event `Approved`, chưa quá `RegistrationDeadline`, còn chỗ và
+không có registration trước đó của Student. Luồng tạo registration chạy trong
+transaction `Serializable`, đếm `Confirmed`/`Attended` trước khi thêm để tránh
+vượt capacity khi có nhiều request đồng thời. Thành công trả `201` với mã
+registration, status `Confirmed` và số slots còn lại; lỗi hết chỗ, quá hạn hoặc
+đăng ký trùng trả `409`.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

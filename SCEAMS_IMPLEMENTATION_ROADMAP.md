@@ -754,9 +754,9 @@ Domain entity/enum
 
 ### Phase 91 - API: Student đăng ký Event
 
-- [ ] Thêm `POST /api/registrations`.
-- [ ] Áp dụng BR1-BR3: Event Approved, chưa quá deadline, còn chỗ, không đăng ký trùng.
-- [ ] Dùng transaction/concurrency control để không vượt capacity.
+- [x] Thêm `POST /api/registrations`.
+- [x] Áp dụng BR1-BR3: Event Approved, chưa quá deadline, còn chỗ, không đăng ký trùng.
+- [x] Dùng transaction/concurrency control để không vượt capacity.
 
 ### Phase 92 - MVC: Nút đăng ký Event
 

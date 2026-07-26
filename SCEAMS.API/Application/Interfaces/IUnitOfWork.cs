@@ -1,3 +1,4 @@
+using System.Data;
 using SCEAMS.Domain.Entities;
 
 namespace SCEAMS.Application.Interfaces;
@@ -19,5 +20,6 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     Task<IUnitOfWorkTransaction> BeginTransactionAsync(
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default);
 }

@@ -13,4 +13,8 @@ public interface IRegistrationRepository
         int studentId,
         int eventId,
         CancellationToken cancellationToken = default);
+
+    Task<int> CountActiveForEventAsync(
+        int eventId,
+        CancellationToken cancellationToken = default);
 }

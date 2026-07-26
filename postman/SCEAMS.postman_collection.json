@@ -5699,6 +5699,34 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        {
+          "name": "Phase 91 - Register Event - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/registrations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registrations"]
+            },
+            "description": "Phase 91 Student đăng ký Event Approved; API kiểm tra deadline, capacity và registration trùng."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

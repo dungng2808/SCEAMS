@@ -1,3 +1,5 @@
+using System.Data;
+using Microsoft.EntityFrameworkCore;
 using SCEAMS.Application.Interfaces;
 using SCEAMS.Domain.Entities;
 using SCEAMS.Infrastructure.Data;
@@ -64,13 +66,14 @@ public sealed class UnitOfWork : IUnitOfWork
         return _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IUnitOfWorkTransaction> BeginTransactionAsync(
+    public Task<IUnitOfWorkTransaction> BeginTransactionAsync(
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
     {
-        var transaction = await _context.Database
-            .BeginTransactionAsync(cancellationToken);
-
-        return new UnitOfWorkTransaction(transaction);
+        cancellationToken.ThrowIfCancellationRequested();
+        var transaction = _context.Database.BeginTransaction(isolationLevel);
+        return Task.FromResult<IUnitOfWorkTransaction>(
+            new UnitOfWorkTransaction(transaction));
     }
 
     public void Dispose()
