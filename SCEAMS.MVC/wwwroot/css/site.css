@@ -3651,6 +3651,18 @@ svg {
   color: var(--sceams-text-faint);
 }
 
+.category-card__edit {
+  color: var(--category-accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.category-card__edit:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
 .category-footnote {
   align-items: center;
   color: var(--sceams-text-faint);
@@ -3715,6 +3727,38 @@ svg {
   border-top: 1px solid var(--sceams-border);
   margin-top: 1.5rem;
   padding-top: 1.5rem;
+}
+
+.category-edit-error {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  margin-inline: auto;
+  max-width: 52rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
+}
+
+.category-edit-error .category-state__icon {
+  background: var(--sceams-danger-soft);
+  color: var(--sceams-danger);
+}
+
+.category-edit-error .eyebrow {
+  color: var(--sceams-danger);
+  margin-bottom: 0.35rem;
+}
+
+.category-edit-error h2 {
+  color: var(--sceams-navy-900);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.category-edit-error p {
+  color: var(--sceams-text-soft);
+  margin: 0.5rem 0 1.25rem;
 }
 
 @media (max-width: 991.98px) {
@@ -3956,6 +4000,10 @@ svg {
   }
 
   .category-state {
+    flex-direction: column;
+  }
+
+  .category-edit-error {
     flex-direction: column;
   }
 

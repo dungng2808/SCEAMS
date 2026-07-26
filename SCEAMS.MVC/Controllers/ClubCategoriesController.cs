@@ -70,6 +70,7 @@ public sealed class ClubCategoriesController : Controller
             {
                 highlightedCategoryId = null;
                 TempData.Remove("CategoryCreatedSuccess");
+                TempData.Remove("CategoryUpdatedSuccess");
             }
 
             return View(new ClubCategoriesViewModel
@@ -179,6 +180,152 @@ public sealed class ClubCategoriesController : Controller
         return View(model);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("{id:int}/Edit")]
+    public async Task<IActionResult> Edit(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _clubCategoryApiClient
+                .GetClubCategoryAsync(id, cancellationToken);
+
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (!result.IsSuccess || result.Category is null)
+            {
+                if (result.IsNotFound)
+                {
+                    Response.StatusCode =
+                        StatusCodes.Status404NotFound;
+                }
+
+                return View(new EditClubCategoryViewModel
+                {
+                    Id = id,
+                    IsNotFound = result.IsNotFound,
+                    LoadErrorMessage = result.ErrorMessage ??
+                        "Không thể tải danh mục câu lạc bộ."
+                });
+            }
+
+            return View(MapEditCategory(result.Category));
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to load club category {CategoryId} for editing.",
+                id);
+
+            return View(new EditClubCategoryViewModel
+            {
+                Id = id,
+                LoadErrorMessage =
+                    "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id:int}/Edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        int id,
+        EditClubCategoryViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var result = await _clubCategoryApiClient
+                .UpdateClubCategoryAsync(
+                    id,
+                    new UpdateClubCategoryApiRequest(
+                        model.Name,
+                        model.Description),
+                    cancellationToken);
+
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ??
+                    "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (result.IsNotFound)
+            {
+                Response.StatusCode =
+                    StatusCodes.Status404NotFound;
+                return View(new EditClubCategoryViewModel
+                {
+                    Id = id,
+                    Name = model.Name,
+                    Description = model.Description,
+                    IsNotFound = true,
+                    LoadErrorMessage = result.ErrorMessage ??
+                        "Danh mục câu lạc bộ không tồn tại."
+                });
+            }
+
+            if (result.IsSuccess && result.Category is not null)
+            {
+                TempData["CategoryUpdatedSuccess"] =
+                    $"Đã cập nhật danh mục “{result.Category.Name}” thành công.";
+                TempData["CategoryUpdatedId"] =
+                    result.Category.Id.ToString();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            AddApiValidationErrors(result.FieldErrors);
+
+            if (result.FieldErrors.Count == 0)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage ??
+                    "Không thể cập nhật danh mục vào lúc này.");
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to update club category {CategoryId}.",
+                id);
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Không thể kết nối tới API. Vui lòng thử lại sau.");
+        }
+
+        return View(model);
+    }
+
     private static ClubCategoryListItemViewModel MapCategory(
         ClubCategoryApiResponse category,
         int index)
@@ -213,13 +360,34 @@ public sealed class ClubCategoriesController : Controller
         };
     }
 
+    private static EditClubCategoryViewModel MapEditCategory(
+        ClubCategoryApiResponse category)
+    {
+        return new EditClubCategoryViewModel
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description
+        };
+    }
+
     private int? GetHighlightedCategoryId()
     {
-        return int.TryParse(
-            TempData["CategoryCreatedId"] as string,
-            out var categoryId)
-            ? categoryId
-            : null;
+        foreach (var key in new[]
+        {
+            "CategoryUpdatedId",
+            "CategoryCreatedId"
+        })
+        {
+            if (int.TryParse(
+                    TempData[key] as string,
+                    out var categoryId))
+            {
+                return categoryId;
+            }
+        }
+
+        return null;
     }
 
     private void AddApiValidationErrors(

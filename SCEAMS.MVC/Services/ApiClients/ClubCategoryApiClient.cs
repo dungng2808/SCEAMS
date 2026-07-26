@@ -112,6 +112,143 @@ public sealed class ClubCategoryApiClient
         };
     }
 
+    public async Task<ClubCategoryApiResult> GetClubCategoryAsync(
+        int categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await GetClubCategoriesAsync(cancellationToken);
+
+        if (result.IsUnauthorized)
+        {
+            return new ClubCategoryApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = result.ErrorMessage
+            };
+        }
+
+        if (!result.IsSuccess)
+        {
+            return new ClubCategoryApiResult
+            {
+                ErrorMessage = result.ErrorMessage
+            };
+        }
+
+        var category = result.Categories.FirstOrDefault(
+            item => item.Id == categoryId);
+
+        return category is null
+            ? new ClubCategoryApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage =
+                    "Danh mục câu lạc bộ không tồn tại."
+            }
+            : new ClubCategoryApiResult
+            {
+                IsSuccess = true,
+                Category = category
+            };
+    }
+
+    public async Task<UpdateClubCategoryApiResult>
+        UpdateClubCategoryAsync(
+            int categoryId,
+            UpdateClubCategoryApiRequest request,
+            CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/club-categories/{categoryId}",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var category = await response.Content
+                .ReadFromJsonAsync<ClubCategoryApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new UpdateClubCategoryApiResult
+            {
+                IsSuccess = category is not null,
+                Category = category,
+                ErrorMessage = category is null
+                    ? "API trả về danh mục vừa cập nhật không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var validationProblem =
+                DeserializeOrDefault<ValidationProblemApiResponse>(
+                    content);
+
+            if (validationProblem?.Errors is { Count: > 0 })
+            {
+                return new UpdateClubCategoryApiResult
+                {
+                    FieldErrors = validationProblem.Errors
+                };
+            }
+
+            return new UpdateClubCategoryApiResult
+            {
+                ErrorMessage =
+                    "Thông tin danh mục không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            return new UpdateClubCategoryApiResult
+            {
+                FieldErrors = new Dictionary<string, string[]>
+                {
+                    ["Name"] =
+                    ["Tên danh mục này đã tồn tại."]
+                }
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new UpdateClubCategoryApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage =
+                    "Danh mục câu lạc bộ không tồn tại."
+            };
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized =>
+                new UpdateClubCategoryApiResult
+                {
+                    IsUnauthorized = true,
+                    ErrorMessage =
+                        "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+                },
+            HttpStatusCode.Forbidden =>
+                new UpdateClubCategoryApiResult
+                {
+                    IsForbidden = true,
+                    ErrorMessage =
+                        "Bạn không có quyền sửa danh mục câu lạc bộ."
+                },
+            _ => new UpdateClubCategoryApiResult
+            {
+                ErrorMessage =
+                    "Không thể cập nhật danh mục vào lúc này."
+            }
+        };
+    }
+
     public async Task<ClubCategoryListApiResult>
         GetClubCategoriesAsync(
             CancellationToken cancellationToken = default)

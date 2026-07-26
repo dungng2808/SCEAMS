@@ -372,9 +372,9 @@ Domain entity/enum
 
 ### Phase 34 - MVC: Sửa danh mục CLB
 
-- [ ] Tạo form edit category.
-- [ ] Hiển thị lỗi `404` và `409` rõ ràng.
-- [ ] Tải lại danh sách sau khi lưu.
+- [x] Tạo form edit category.
+- [x] Hiển thị lỗi `404` và `409` rõ ràng.
+- [x] Tải lại danh sách sau khi lưu.
 
 ### Phase 35 - API: Xóa danh mục CLB
 

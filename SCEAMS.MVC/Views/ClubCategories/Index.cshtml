@@ -2,6 +2,14 @@
 
 @{
     ViewData["Title"] = "Danh mục câu lạc bộ";
+    var isCategoryUpdate =
+        TempData.Peek("CategoryUpdatedSuccess") is string;
+    var categorySuccessMessage =
+        Model.HighlightedCategoryId is not null
+            ? (isCategoryUpdate
+                ? TempData["CategoryUpdatedSuccess"] as string
+                : TempData["CategoryCreatedSuccess"] as string)
+            : null;
 }
 
 <section class="category-page" aria-labelledby="category-title">
@@ -20,13 +28,12 @@
         </div>
     </header>
 
-    @if (Model.HighlightedCategoryId is not null &&
-         TempData["CategoryCreatedSuccess"] is string createdMessage)
+    @if (categorySuccessMessage is not null)
     {
         <div class="category-success"
              role="status"
              aria-live="polite"
-             data-category-created-success>
+             data-category-success>
             <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="9" />
@@ -34,8 +41,10 @@
                 </svg>
             </span>
             <div>
-                <strong>Tạo danh mục thành công</strong>
-                <p>@createdMessage Danh mục đã được tải lại từ API và hiển thị bên dưới.</p>
+                <strong>@(isCategoryUpdate
+                    ? "Cập nhật danh mục thành công"
+                    : "Tạo danh mục thành công")</strong>
+                <p>@categorySuccessMessage Danh mục đã được tải lại từ API và hiển thị bên dưới.</p>
             </div>
         </div>
     }
@@ -54,7 +63,7 @@
             <div>
                 <p class="category-admin__eyebrow">Quyền Admin</p>
                 <strong>Công cụ quản trị danh mục</strong>
-                <small>Tạo lĩnh vực mới; chỉnh sửa sẽ được mở trong phase tiếp theo.</small>
+                <small>Tạo và cập nhật lĩnh vực dùng chung cho các câu lạc bộ.</small>
             </div>
             <a class="btn-app btn-app--primary category-admin__action"
                asp-controller="ClubCategories"
@@ -145,8 +154,8 @@
                         @if (Model.HighlightedCategoryId == category.Id)
                         {
                             <small class="category-card__new-badge"
-                                   data-created-category>
-                                Vừa tạo
+                                   data-category-highlight>
+                                @(isCategoryUpdate ? "Vừa cập nhật" : "Vừa tạo")
                             </small>
                         }
                         else
@@ -169,7 +178,20 @@
                             </svg>
                             Khám phá lĩnh vực
                         </span>
-                        <small>#@category.Id</small>
+                        @if (Model.CanManage)
+                        {
+                            <a class="category-card__edit"
+                               asp-controller="ClubCategories"
+                               asp-action="Edit"
+                               asp-route-id="@category.Id"
+                               data-category-edit>
+                                Chỉnh sửa
+                            </a>
+                        }
+                        else
+                        {
+                            <small>#@category.Id</small>
+                        }
                     </footer>
                 </article>
             }

@@ -555,6 +555,25 @@ navigation, so every existing Club keeps the same `CategoryId` relationship.
 Ready-to-run Phase 33 requests are available in
 `SCEAMS.API/SCEAMS.API.http` and the Postman **Club Categories** folder.
 
+## MVC edit club category
+
+Admins can select **Chỉnh sửa** on any category card or open:
+
+```text
+https://localhost:7034/ClubCategories/{id}/Edit
+```
+
+MVC first loads the current category from the shared API client and renders a
+pre-filled, anti-forgery-protected form. Public visitors are redirected to
+Login and authenticated non-Admin roles are sent to Access Denied. A missing
+category renders a clear `404 · Không tìm thấy` state; API duplicate-name
+conflicts stay on the form and are attached to the `Name` field.
+
+After a successful update, MVC redirects to `/ClubCategories`, reloads the
+categories from the API, shows a success notification and marks the updated
+card with **Vừa cập nhật**. The edit form changes only the category's display
+name and description; Club relationships remain untouched.
+
 ## MVC account lock and unlock
 
 On the Admin user list, each account now has a separate lock or unlock action.

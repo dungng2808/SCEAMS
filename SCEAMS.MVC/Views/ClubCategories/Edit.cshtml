@@ -1,0 +1,187 @@
+@model SCEAMS.MVC.ViewModels.EditClubCategoryViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa danh mục câu lạc bộ";
+}
+
+<section class="profile-edit-page category-create-page category-edit-page"
+         aria-labelledby="category-edit-title">
+    <div class="page-heading profile-heading">
+        <div>
+            <p class="eyebrow">Milestone D · Admin</p>
+            <h1 id="category-edit-title">Chỉnh sửa danh mục</h1>
+            <p class="page-heading__copy">
+                Cập nhật tên và mô tả lĩnh vực mà các câu lạc bộ đang sử dụng.
+            </p>
+        </div>
+        <a class="btn-app btn-app--ghost"
+           asp-controller="ClubCategories"
+           asp-action="Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+            </svg>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    @if (Model.IsNotFound || !string.IsNullOrWhiteSpace(Model.LoadErrorMessage))
+    {
+        <section class="category-edit-error surface-card"
+                 role="alert"
+                 aria-labelledby="category-edit-error-title">
+            <span class="category-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v6M12 17h.01" />
+                </svg>
+            </span>
+            <div>
+                <p class="eyebrow">@(Model.IsNotFound ? "404 · Không tìm thấy" : "Kết nối gián đoạn")</p>
+                <h2 id="category-edit-error-title">
+                    @(Model.IsNotFound
+                        ? "Danh mục không tồn tại"
+                        : "Chưa thể tải danh mục")
+                </h2>
+                <p>@Model.LoadErrorMessage</p>
+                <a class="btn-app btn-app--primary"
+                   asp-controller="ClubCategories"
+                   asp-action="Index">
+                    Quay lại danh sách
+                </a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="profile-edit-layout category-create-layout">
+            <section class="profile-edit-card surface-card"
+                     aria-labelledby="category-edit-form-title">
+                <div class="profile-card__heading">
+                    <span class="profile-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z" />
+                            <path d="m13.5 6.5 4 4M14 20h6" />
+                        </svg>
+                    </span>
+                    <div>
+                        <p>Thông tin danh mục #@Model.Id</p>
+                        <h2 id="category-edit-form-title">Nội dung hiển thị</h2>
+                    </div>
+                </div>
+
+                <form asp-controller="ClubCategories"
+                      asp-action="Edit"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      novalidate
+                      data-auth-form
+                      data-category-edit-form
+                      data-loading-label="Đang lưu thay đổi...">
+                    <div asp-validation-summary="ModelOnly"
+                         class="profile-edit-summary"
+                         role="alert"
+                         aria-live="polite"></div>
+
+                    <div class="profile-edit-fields">
+                        <div class="profile-edit-field">
+                            <label asp-for="Name">
+                                Tên danh mục
+                                <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                            <div class="profile-edit-input">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <path d="M4 6h16M4 12h10M4 18h7" />
+                                </svg>
+                                <input asp-for="Name"
+                                       class="form-control"
+                                       autocomplete="off"
+                                       maxlength="150"
+                                       autofocus />
+                            </div>
+                            <span asp-validation-for="Name"
+                                  class="field-error"
+                                  role="alert"></span>
+                            <p class="profile-edit-field__hint">
+                                Tên phải duy nhất; chữ hoa và chữ thường được xem như nhau.
+                            </p>
+                        </div>
+
+                        <div class="profile-edit-field">
+                            <label asp-for="Description">
+                                Mô tả
+                                <small>Tùy chọn</small>
+                            </label>
+                            <div class="profile-edit-input category-create-textarea">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                    <path d="M4 5h16M4 10h16M4 15h10M4 20h7" />
+                                </svg>
+                                <textarea asp-for="Description"
+                                          class="form-control"
+                                          rows="6"
+                                          maxlength="1000"
+                                          placeholder="Mô tả ngắn về lĩnh vực hoạt động..."></textarea>
+                            </div>
+                            <div class="category-create-field-meta">
+                                <span asp-validation-for="Description"
+                                      class="field-error"
+                                      role="alert"></span>
+                                <small>Tối đa 1.000 ký tự</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-edit-actions category-create-actions">
+                        <a class="btn-app btn-app--ghost"
+                           asp-controller="ClubCategories"
+                           asp-action="Index">
+                            Hủy
+                        </a>
+                        <button type="submit"
+                                class="btn-app btn-app--primary profile-save-button"
+                                data-submit-button>
+                            <span data-submit-label>Lưu thay đổi</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M5 12h14M13 6l6 6-6 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="profile-edit-side" aria-label="Lưu ý khi chỉnh sửa">
+                <section class="profile-edit-security surface-card">
+                    <span class="profile-edit-security__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </span>
+                    <h2>Giữ nguyên câu lạc bộ</h2>
+                    <p>
+                        Chỉnh sửa chỉ thay đổi thông tin hiển thị của danh mục.
+                    </p>
+                    <ul>
+                        <li>Các Club đang sử dụng danh mục vẫn được giữ nguyên.</li>
+                        <li>Tên mới không được trùng với danh mục khác.</li>
+                        <li>Dữ liệu được tải lại sau khi lưu thành công.</li>
+                    </ul>
+                </section>
+
+                <div class="profile-edit-tip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11v5M12 8h.01" />
+                    </svg>
+                    <p>
+                        Nếu tên đã được dùng, lỗi sẽ xuất hiện ngay dưới trường tên để bạn chỉnh lại.
+                    </p>
+                </div>
+            </aside>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}

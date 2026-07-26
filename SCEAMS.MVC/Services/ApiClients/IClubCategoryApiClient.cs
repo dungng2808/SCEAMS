@@ -10,4 +10,13 @@ public interface IClubCategoryApiClient
 
     Task<ClubCategoryListApiResult> GetClubCategoriesAsync(
         CancellationToken cancellationToken = default);
+
+    Task<ClubCategoryApiResult> GetClubCategoryAsync(
+        int categoryId,
+        CancellationToken cancellationToken = default);
+
+    Task<UpdateClubCategoryApiResult> UpdateClubCategoryAsync(
+        int categoryId,
+        UpdateClubCategoryApiRequest request,
+        CancellationToken cancellationToken = default);
 }
