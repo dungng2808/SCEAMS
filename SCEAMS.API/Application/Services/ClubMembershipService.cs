@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
@@ -136,5 +137,87 @@ public sealed class ClubMembershipService : IClubMembershipService
         };
 
         return Result<ClubMembershipResponseDto>.Created(dto);
+    }
+
+    public async Task<Result<PagedResult<ClubMembershipResponseDto>>> GetPendingMembershipsAsync(
+        int clubId,
+        string? search,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (!int.TryParse(userIdClaim, out var currentUserId) || currentUserId <= 0)
+        {
+            return Result<PagedResult<ClubMembershipResponseDto>>.Fail(
+                "Không xác định được danh tính người dùng từ token xác thực.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var club = await _unitOfWork.Clubs.GetByIdAsync(clubId, cancellationToken);
+        if (club == null)
+        {
+            return Result<PagedResult<ClubMembershipResponseDto>>.Fail(
+                $"Câu lạc bộ với ID {clubId} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isAdminOrStaff = user.IsInRole(nameof(UserRole.Admin)) ||
+                             user.IsInRole(nameof(UserRole.Staff));
+        var isOwner = club.CreatedByUserId == currentUserId;
+
+        if (!isAdminOrStaff && !isOwner)
+        {
+            return Result<PagedResult<ClubMembershipResponseDto>>.Fail(
+                "Bạn không có quyền xem danh sách đơn xin gia nhập của câu lạc bộ này.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var queryable = _unitOfWork.Clubs.GetQueryable()
+            .Where(c => c.Id == clubId)
+            .SelectMany(c => c.Memberships)
+            .Where(m => m.Status == ClubMembershipStatus.Pending);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchTrimmed = search.Trim().ToLower();
+            queryable = queryable.Where(m =>
+                m.Student.FullName.ToLower().Contains(searchTrimmed) ||
+                m.Student.Email.ToLower().Contains(searchTrimmed));
+        }
+
+        var totalItems = await queryable.CountAsync(cancellationToken);
+
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        var skip = (normalizedPage - 1) * normalizedPageSize;
+
+        var items = await queryable
+            .OrderByDescending(m => m.JoinDate)
+            .Skip(skip)
+            .Take(normalizedPageSize)
+            .Select(m => new ClubMembershipResponseDto
+            {
+                Id = m.Id,
+                StudentId = m.StudentId,
+                StudentName = m.Student.FullName,
+                StudentEmail = m.Student.Email,
+                ClubId = m.ClubId,
+                ClubName = m.Club.Name,
+                RoleInClub = m.RoleInClub,
+                JoinDate = m.JoinDate,
+                Status = m.Status,
+                DecidedByUserId = m.DecidedByUserId,
+                DecisionAt = m.DecisionAt,
+                RemovalReason = m.RemovalReason
+            })
+            .ToListAsync(cancellationToken);
+
+        var pagedResult = new PagedResult<ClubMembershipResponseDto>(items, totalItems);
+
+        return Result<PagedResult<ClubMembershipResponseDto>>.Ok(pagedResult);
     }
 }

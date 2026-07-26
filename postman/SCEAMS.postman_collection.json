@@ -3968,11 +3968,108 @@
             "description": "Phase 51 returns 409 Conflict when a Student attempts to submit a duplicate application while one is already Pending or Active."
           },
           "response": []
+        },
+        {
+          "name": "Phase 53 - Pending Memberships - Owner/Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1/members/pending?page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1",
+                "members",
+                "pending"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Phase 53 allows Admin/Staff or the Organizer owner to view pending membership applications."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 53 - Pending Memberships - Non-Owner Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/2/members/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "2",
+                "members",
+                "pending"
+              ]
+            },
+            "description": "Phase 53 returns 403 Forbidden when an Organizer attempts to view pending applications for a club they do not own."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 

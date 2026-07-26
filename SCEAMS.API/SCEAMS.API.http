@@ -639,6 +639,22 @@ Authorization: Bearer {{StudentAccessToken}}
 
 ###
 
+# Phase 53 - GET /api/clubs/{id}/members/pending (Organizer/Admin views pending applications)
+GET {{SCEAMS.API_HostAddress}}/api/clubs/1/members/pending?page=1&pageSize=10
+Accept: application/json
+Authorization: Bearer {{OrganizerAccessToken}}
+
+###
+
+# Phase 53 - GET /api/clubs/{id}/members/pending (Forbidden when non-owner Organizer tries to view)
+GET {{SCEAMS.API_HostAddress}}/api/clubs/2/members/pending
+Accept: application/json
+Authorization: Bearer {{OrganizerAccessToken}}
+
+###
+
+
+
 
 
 

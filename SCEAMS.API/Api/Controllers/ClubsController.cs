@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
 using SCEAMS.Domain.Enums;
@@ -143,6 +144,30 @@ public sealed class ClubsController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _membershipService.RequestJoinClubAsync(id, User, cancellationToken);
+        return ToActionResult(result);
+    }
+
+    [HttpGet("{id:int}/members/pending")]
+    [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
+    [ProducesResponseType<PagedResult<ClubMembershipResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPendingMemberships(
+        int id,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _membershipService.GetPendingMembershipsAsync(
+            id,
+            search,
+            page,
+            pageSize,
+            User,
+            cancellationToken);
+
         return ToActionResult(result);
     }
 }

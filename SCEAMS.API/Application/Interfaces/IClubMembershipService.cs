@@ -10,4 +10,12 @@ public interface IClubMembershipService
         int clubId,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<PagedResult<ClubMembershipResponseDto>>> GetPendingMembershipsAsync(
+        int clubId,
+        string? search,
+        int page,
+        int pageSize,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

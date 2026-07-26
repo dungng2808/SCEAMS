@@ -512,9 +512,10 @@ Domain entity/enum
 
 ### Phase 53 - API: Danh sách đơn gia nhập chờ duyệt
 
-- [ ] Thêm `GET /api/clubs/{id}/members/pending`.
-- [ ] Chỉ Admin hoặc Organizer phụ trách Club được xem.
-- [ ] Hỗ trợ phân trang và search theo tên/student code.
+- [x] Thêm `GET /api/clubs/{id}/members/pending`.
+- [x] Chỉ Admin hoặc Organizer phụ trách Club được xem.
+- [x] Hỗ trợ phân trang và search theo tên/student code.
+
 
 ### Phase 54 - MVC: Danh sách đơn gia nhập
 
