@@ -20,6 +20,26 @@
         </div>
     </header>
 
+    @if (Model.HighlightedCategoryId is not null &&
+         TempData["CategoryCreatedSuccess"] is string createdMessage)
+    {
+        <div class="category-success"
+             role="status"
+             aria-live="polite"
+             data-category-created-success>
+            <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8 12 2.5 2.5L16 9" />
+                </svg>
+            </span>
+            <div>
+                <strong>Tạo danh mục thành công</strong>
+                <p>@createdMessage Danh mục đã được tải lại từ API và hiển thị bên dưới.</p>
+            </div>
+        </div>
+    }
+
     @if (Model.CanManage)
     {
         <aside class="category-admin surface-card"
@@ -34,19 +54,16 @@
             <div>
                 <p class="category-admin__eyebrow">Quyền Admin</p>
                 <strong>Công cụ quản trị danh mục</strong>
-                <small>Tạo và chỉnh sửa sẽ được mở trong các phase tiếp theo.</small>
+                <small>Tạo lĩnh vực mới; chỉnh sửa sẽ được mở trong phase tiếp theo.</small>
             </div>
-            <button type="button"
-                    class="btn-app btn-app--primary category-admin__action"
-                    disabled
-                    aria-disabled="true"
-                    title="Tính năng sẽ được mở ở Phase 32">
+            <a class="btn-app btn-app--primary category-admin__action"
+               asp-controller="ClubCategories"
+               asp-action="Create">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <path d="M12 5v14M5 12h14" />
                 </svg>
                 Thêm danh mục
-                <span>Sắp mở</span>
-            </button>
+            </a>
         </aside>
     }
 
@@ -119,13 +136,23 @@
         <div class="category-grid" aria-label="Danh sách danh mục câu lạc bộ">
             @foreach (var category in Model.Categories)
             {
-                <article class="category-card category-card--@category.Theme"
+                <article class="category-card category-card--@category.Theme@(Model.HighlightedCategoryId == category.Id ? " is-new" : "")"
                          data-category-id="@category.Id">
                     <div class="category-card__top">
                         <span class="category-card__mark" aria-hidden="true">
                             @category.Initials
                         </span>
-                        <small>@category.SequenceNumber.ToString("00")</small>
+                        @if (Model.HighlightedCategoryId == category.Id)
+                        {
+                            <small class="category-card__new-badge"
+                                   data-created-category>
+                                Vừa tạo
+                            </small>
+                        }
+                        else
+                        {
+                            <small>@category.SequenceNumber.ToString("00")</small>
+                        }
                     </div>
                     <div>
                         <h3>@category.Name</h3>

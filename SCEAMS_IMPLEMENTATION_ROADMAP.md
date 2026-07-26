@@ -360,9 +360,9 @@ Domain entity/enum
 
 ### Phase 32 - MVC: Tạo danh mục CLB
 
-- [ ] Tạo form Admin create category.
-- [ ] Hiển thị lỗi tên trùng.
-- [ ] Xác nhận category mới xuất hiện trên danh sách.
+- [x] Tạo form Admin create category.
+- [x] Hiển thị lỗi tên trùng.
+- [x] Xác nhận category mới xuất hiện trên danh sách.
 
 ### Phase 33 - API: Sửa danh mục CLB
 

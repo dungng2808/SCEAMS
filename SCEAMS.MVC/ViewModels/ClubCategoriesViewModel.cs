@@ -3,6 +3,7 @@ namespace SCEAMS.MVC.ViewModels;
 public sealed class ClubCategoriesViewModel
 {
     public bool CanManage { get; init; }
+    public int? HighlightedCategoryId { get; init; }
     public string? ErrorMessage { get; init; }
     public IReadOnlyList<ClubCategoryListItemViewModel> Categories { get; init; }
         = [];

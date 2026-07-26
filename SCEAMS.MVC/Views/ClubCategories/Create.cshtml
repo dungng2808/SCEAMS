@@ -1,0 +1,158 @@
+@model SCEAMS.MVC.ViewModels.CreateClubCategoryViewModel
+
+@{
+    ViewData["Title"] = "Tạo danh mục câu lạc bộ";
+}
+
+<section class="profile-edit-page category-create-page"
+         aria-labelledby="category-create-title">
+    <div class="page-heading profile-heading">
+        <div>
+            <p class="eyebrow">Milestone D · Admin</p>
+            <h1 id="category-create-title">Tạo danh mục mới</h1>
+            <p class="page-heading__copy">
+                Thêm một lĩnh vực dùng chung để tổ chức các câu lạc bộ trên SCEAMS.
+            </p>
+        </div>
+        <a class="btn-app btn-app--ghost"
+           asp-controller="ClubCategories"
+           asp-action="Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+            </svg>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="profile-edit-layout category-create-layout">
+        <section class="profile-edit-card surface-card"
+                 aria-labelledby="category-create-form-title">
+            <div class="profile-card__heading">
+                <span class="profile-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                        <path d="M7 10v5.5c2.8 2 7.2 2 10 0V10" />
+                        <path d="M19 15v6M16 18h6" />
+                    </svg>
+                </span>
+                <div>
+                    <p>Thông tin danh mục</p>
+                    <h2 id="category-create-form-title">Nội dung hiển thị</h2>
+                </div>
+            </div>
+
+            <form asp-controller="ClubCategories"
+                  asp-action="Create"
+                  method="post"
+                  novalidate
+                  data-auth-form
+                  data-category-create-form
+                  data-loading-label="Đang tạo danh mục...">
+                <div asp-validation-summary="ModelOnly"
+                     class="profile-edit-summary"
+                     role="alert"
+                     aria-live="polite"></div>
+
+                <div class="profile-edit-fields">
+                    <div class="profile-edit-field">
+                        <label asp-for="Name">
+                            Tên danh mục
+                            <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <div class="profile-edit-input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M4 6h16M4 12h10M4 18h7" />
+                            </svg>
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   autocomplete="off"
+                                   maxlength="150"
+                                   autofocus
+                                   placeholder="Ví dụ: Hoạt động cộng đồng" />
+                        </div>
+                        <span asp-validation-for="Name"
+                              class="field-error"
+                              role="alert"></span>
+                        <p class="profile-edit-field__hint">
+                            Tên phải là duy nhất; hệ thống không phân biệt chữ hoa và chữ thường.
+                        </p>
+                    </div>
+
+                    <div class="profile-edit-field">
+                        <label asp-for="Description">
+                            Mô tả
+                            <small>Tùy chọn</small>
+                        </label>
+                        <div class="profile-edit-input category-create-textarea">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M4 5h16M4 10h16M4 15h10M4 20h7" />
+                            </svg>
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="6"
+                                      maxlength="1000"
+                                      placeholder="Mô tả ngắn về lĩnh vực hoạt động của các câu lạc bộ trong danh mục..."></textarea>
+                        </div>
+                        <div class="category-create-field-meta">
+                            <span asp-validation-for="Description"
+                                  class="field-error"
+                                  role="alert"></span>
+                            <small>Tối đa 1.000 ký tự</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-edit-actions category-create-actions">
+                    <a class="btn-app btn-app--ghost"
+                       asp-controller="ClubCategories"
+                       asp-action="Index">
+                        Hủy
+                    </a>
+                    <button type="submit"
+                            class="btn-app btn-app--primary profile-save-button"
+                            data-submit-button>
+                        <span data-submit-label>Tạo danh mục</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="profile-edit-side" aria-label="Hướng dẫn tạo danh mục">
+            <section class="profile-edit-security surface-card">
+                <span class="profile-edit-security__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
+                        <path d="m9 12 2 2 4-4" />
+                    </svg>
+                </span>
+                <h2>Đặt tên dễ nhận biết</h2>
+                <p>
+                    Danh mục xuất hiện với mọi người dùng và được dùng để phân nhóm câu lạc bộ.
+                </p>
+                <ul>
+                    <li>Chọn tên ngắn, rõ nghĩa và bao quát.</li>
+                    <li>Không lặp lại một lĩnh vực đã có.</li>
+                    <li>Mô tả mục đích thay vì liệt kê từng câu lạc bộ.</li>
+                </ul>
+            </section>
+
+            <div class="profile-edit-tip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 11v5M12 8h.01" />
+                </svg>
+                <p>
+                    Sau khi tạo thành công, SCEAMS tải lại danh sách từ API và đánh dấu danh mục mới để bạn xác nhận.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}

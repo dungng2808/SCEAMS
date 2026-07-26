@@ -471,10 +471,9 @@ count, and renders responsive category cards without exposing access tokens to
 the browser. A **Danh mục CLB** link is available in the main navigation and
 footer.
 
-Only an authenticated Admin sees the management toolbar. Its create action is
-intentionally disabled until the category-creation flow is implemented in
-Phase 32; other roles and public visitors do not receive the toolbar markup.
-An empty API result renders a dedicated `Chưa có danh mục câu lạc bộ` state,
+Only an authenticated Admin sees the management toolbar and category-creation
+action; other roles and public visitors do not receive the toolbar markup. An
+empty API result renders a dedicated `Chưa có danh mục câu lạc bộ` state,
 while connection failures show retry and system-health actions.
 
 ## Admin create club-category API
@@ -505,6 +504,27 @@ A successful request returns `201 Created` with the compact `id`, `name` and
 non-Admin roles receive `403`, and invalid input returns `400`. Ready-to-run
 Phase 31 requests are available in `SCEAMS.API/SCEAMS.API.http` and the
 Postman **Club Categories** folder.
+
+## MVC create club category
+
+After signing in as Admin, select **Thêm danh mục** on the shared category page
+or open:
+
+```text
+https://localhost:7034/ClubCategories/Create
+```
+
+The responsive form validates the required name and the API limits for name
+and description before submitting through the authenticated server-side
+client. Its anti-forgery token protects the POST request. Public visitors are
+redirected to Login and authenticated non-Admin roles are sent to the styled
+access-denied page.
+
+API validation errors stay on the form. In particular, a case-insensitive
+duplicate name is attached to the `Name` field as
+`Tên danh mục này đã tồn tại.` On success, MVC redirects to
+`/ClubCategories`, reloads the categories from the public API, displays a
+success notification and marks the newly created card with **Vừa tạo**.
 
 ## MVC account lock and unlock
 
