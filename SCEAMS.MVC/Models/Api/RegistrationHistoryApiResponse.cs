@@ -5,9 +5,11 @@ public sealed class RegistrationHistoryApiResponse
     public int Id { get; init; }
     public int EventId { get; init; }
     public string EventTitle { get; init; } = string.Empty;
+    [System.Text.Json.Serialization.JsonConverter(typeof(EventStatusJsonConverter))]
     public string EventStatus { get; init; } = string.Empty;
     public DateTime StartTime { get; init; }
     public DateTime EndTime { get; init; }
+    [System.Text.Json.Serialization.JsonConverter(typeof(RegistrationStatusJsonConverter))]
     public string RegistrationStatus { get; init; } = string.Empty;
     public DateTime RegisteredAt { get; init; }
     public DateTime? CancelledAt { get; init; }

@@ -90,6 +90,7 @@ public sealed class RegistrationRepository
         var query = DbSet
             .AsNoTracking()
             .Include(registration => registration.Student)
+            .Include(registration => registration.Event)
             .Include(registration => registration.Attendance)
                 .ThenInclude(attendance => attendance!.CheckedInByUser)
             .Where(registration => registration.EventId == eventId);
