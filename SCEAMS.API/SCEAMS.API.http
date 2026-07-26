@@ -585,6 +585,34 @@ Authorization: Bearer {{AdminAccessToken}}
 
 ###
 
+# Phase 47 - PUT /api/clubs/{id} (Organizer/Admin updates club details)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/1
+Content-Type: application/json
+Authorization: Bearer {{OrganizerAccessToken}}
+
+{
+  "name": "FPT AI & Data Science Club",
+  "description": "Câu lạc bộ nghiên cứu Trí tuệ nhân tạo, Học máy và Khoa học dữ liệu tại FPT University.",
+  "categoryId": 1
+}
+
+###
+
+# Phase 47 - PUT /api/clubs/{id} (Forbidden when Organizer tries to edit a club they don't own)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/2
+Content-Type: application/json
+Authorization: Bearer {{OrganizerAccessToken}}
+
+{
+  "name": "Attempted Unauthorized Edit",
+  "description": "This request should be rejected with 403 Forbidden.",
+  "categoryId": 1
+}
+
+###
+
+
+
 
 
 

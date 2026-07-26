@@ -28,4 +28,10 @@ public interface IClubService
         RejectClubRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ClubDetailResponseDto>> UpdateClubAsync(
+        int id,
+        UpdateClubRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

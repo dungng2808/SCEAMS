@@ -466,9 +466,10 @@ Domain entity/enum
 
 ### Phase 47 - API: Cập nhật thông tin CLB
 
-- [ ] Thêm `PUT /api/clubs/{id}`.
-- [ ] Admin được sửa mọi Club; Organizer chỉ sửa Club mình phụ trách.
-- [ ] Không đổi owner/status bằng endpoint này.
+- [x] Thêm `PUT /api/clubs/{id}`.
+- [x] Admin được sửa mọi Club; Organizer chỉ sửa Club mình phụ trách.
+- [x] Không đổi owner/status bằng endpoint này.
+
 
 ### Phase 48 - MVC: Sửa thông tin CLB
 

@@ -299,4 +299,91 @@ public sealed class ClubService : IClubService
 
         return Result<ClubDetailResponseDto>.Ok(dto);
     }
+
+    public async Task<Result<ClubDetailResponseDto>> UpdateClubAsync(
+        int id,
+        UpdateClubRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (!int.TryParse(userIdClaim, out var currentUserId) || currentUserId <= 0)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                "Không xác định được danh tính người dùng từ token xác thực.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var club = await _unitOfWork.Clubs.GetByIdWithDetailsAsync(id, cancellationToken);
+        if (club == null)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                $"Câu lạc bộ với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var isAdmin = user.IsInRole(nameof(UserRole.Admin));
+        var isOwner = club.CreatedByUserId == currentUserId;
+
+        if (!isAdmin && !isOwner)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                "Bạn không có quyền chỉnh sửa thông tin câu lạc bộ này.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        var category = await _unitOfWork.ClubCategories.GetByIdAsync(request.CategoryId, cancellationToken);
+        if (category == null)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                $"Danh mục với ID {request.CategoryId} không tồn tại.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var clubNameTrimmed = request.Name.Trim();
+        var existingClubs = _unitOfWork.Clubs.GetQueryable();
+        var nameConflict = await existingClubs.AnyAsync(
+            c => c.Id != id && c.Name.ToLower() == clubNameTrimmed.ToLower(),
+            cancellationToken);
+
+        if (nameConflict)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                $"Câu lạc bộ với tên '{clubNameTrimmed}' đã tồn tại.",
+                StatusCodes.Status409Conflict);
+        }
+
+        club.Name = clubNameTrimmed;
+        club.Description = request.Description?.Trim();
+        club.CategoryId = request.CategoryId;
+
+        _unitOfWork.Clubs.Update(club);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
+            .Where(c => c.Id == id)
+            .SelectMany(c => c.Memberships)
+            .CountAsync(m => m.Status == ClubMembershipStatus.Active, cancellationToken);
+
+        var dto = new ClubDetailResponseDto
+        {
+            Id = club.Id,
+            Name = club.Name,
+            Description = club.Description,
+            CategoryId = club.CategoryId,
+            CategoryName = category.Name,
+            Status = club.Status,
+            CreatedByUserId = club.CreatedByUserId,
+            CreatedByUserName = club.CreatedByUser?.FullName ?? string.Empty,
+            ActiveMemberCount = activeMemberCount,
+            CreatedAt = club.CreatedAt,
+            ReviewedAt = club.ReviewedAt,
+            RejectionReason = club.RejectionReason,
+            DissolvedAt = club.DissolvedAt
+        };
+
+        return Result<ClubDetailResponseDto>.Ok(dto);
+    }
 }

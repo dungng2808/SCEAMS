@@ -63,6 +63,23 @@ public sealed class ClubsController : ApiControllerBase
             result.Data);
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = $"{nameof(UserRole.Organizer)},{nameof(UserRole.Admin)}")]
+    [ProducesResponseType<ClubDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> UpdateClub(
+        int id,
+        [FromBody] UpdateClubRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _clubService.UpdateClubAsync(id, request, User, cancellationToken);
+        return ToActionResult(result);
+    }
+
     [HttpPut("{id:int}/approve")]
     [Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Staff)}")]
     [ProducesResponseType<ClubDetailResponseDto>(StatusCodes.Status200OK)]

@@ -3696,11 +3696,116 @@
             "description": "Phase 45 returns 400 Bad Request when rejecting a club without providing a non-whitespace reason."
           },
           "response": []
+        },
+        {
+          "name": "Phase 47 - Update Club - Owner/Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"FPT AI & Data Science Club\",\n  \"description\": \"Researching AI, Machine Learning, and Data Science.\",\n  \"categoryId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1"
+              ]
+            },
+            "description": "Phase 47 allows Admin or the Organizer owner to update club details without changing status or owner ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 47 - Update Club - Non-Owner Forbidden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{organizerAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Edit Attempt\",\n  \"description\": \"Should fail with 403 Forbidden.\",\n  \"categoryId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "2"
+              ]
+            },
+            "description": "Phase 47 returns 403 Forbidden when an Organizer tries to edit a club they do not own."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 
