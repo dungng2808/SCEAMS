@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -41,7 +42,14 @@ var jwtOptions = builder.Configuration
         "Jwt configuration is missing.");
 jwtOptions.Validate();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddOData(options => options
+        .Select()
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .Count()
+        .SetMaxTop(50));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -129,6 +137,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<
     IClubCategoryService,
     ClubCategoryService>();
+builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<

@@ -396,9 +396,10 @@ Domain entity/enum
 
 ### Phase 37 - API: Danh sách CLB có OData
 
-- [ ] Thêm `GET /api/clubs` hỗ trợ `$filter`, `$orderby`, `$top`, `$skip`, `$select`, `$expand` phù hợp.
-- [ ] Public chỉ thấy Club `Approved`; Admin/Staff có thể thấy theo status.
-- [ ] Giới hạn `$top` để tránh truy vấn quá lớn.
+- [x] Thêm `GET /api/clubs` hỗ trợ `$filter`, `$orderby`, `$top`, `$skip`, `$select`, `$expand` phù hợp.
+- [x] Public chỉ thấy Club `Approved`; Admin/Staff có thể thấy theo status.
+- [x] Giới hạn `$top` để tránh truy vấn quá lớn.
+
 
 ### Phase 38 - MVC: Danh sách và tìm kiếm CLB
 

@@ -491,3 +491,24 @@ Content-Type: application/json
 }
 
 ###
+
+# Phase 37 - GET /api/clubs (Public access: returns only Approved clubs)
+GET {{SCEAMS.API_HostAddress}}/api/clubs
+Accept: application/json
+
+###
+
+# Phase 37 - GET /api/clubs with OData filter, orderby, top and skip
+GET {{SCEAMS.API_HostAddress}}/api/clubs?$filter=CategoryId eq 1&$orderby=Name asc&$top=10&$skip=0
+Accept: application/json
+
+###
+
+# Phase 37 - GET /api/clubs for Admin (Admin can filter by any status)
+GET {{SCEAMS.API_HostAddress}}/api/clubs?$filter=Status eq 'PendingApproval'
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+

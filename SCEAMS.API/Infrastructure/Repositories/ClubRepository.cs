@@ -25,4 +25,10 @@ public sealed class ClubRepository
                 club => club.Id == id,
                 cancellationToken);
     }
+
+    public IQueryable<Club> GetQueryable()
+    {
+        return DbSet.AsNoTracking();
+    }
 }
+
