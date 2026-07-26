@@ -679,6 +679,45 @@ public sealed class EventsController : Controller
         return RedirectToAction(nameof(Detail), new { id = eventId });
     }
 
+    [Authorize(Roles = "Student")]
+    [HttpPost("{id:int}/Feedback")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Feedback(
+        int id,
+        SubmitFeedbackViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _eventApiClient.SubmitFeedbackAsync(
+                id,
+                new SubmitFeedbackApiRequest
+                {
+                    Rating = model.Rating,
+                    Comment = model.Comment?.Trim()
+                },
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            TempData[result.IsSuccess ? "SuccessMessage" : "EventErrorMessage"] =
+                result.IsSuccess
+                    ? "Feedback đã được gửi thành công."
+                    : result.ErrorMessage ?? "Không thể gửi feedback.";
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to submit feedback for event {EventId}.", id);
+            TempData["EventErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
     [Authorize(Roles = "Admin,Organizer")]
     [HttpGet("{eventId:int}/Registrations")]
     public async Task<IActionResult> Registrations(
@@ -968,6 +1007,8 @@ public sealed class EventsController : Controller
             CancellationReason = eventItem.CancellationReason,
             CurrentRegistrationStatus = eventItem.CurrentRegistrationStatus,
             CurrentRegistrationId = eventItem.CurrentRegistrationId,
+            CanFeedback = eventItem.CanFeedback,
+            CurrentFeedback = eventItem.CurrentFeedback,
             Permissions = new EventPermissionsViewModel
             {
                 CanEdit = eventItem.Permissions.CanEdit,

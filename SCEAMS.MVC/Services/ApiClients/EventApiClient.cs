@@ -520,6 +520,61 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<SubmitFeedbackApiResult> SubmitFeedbackAsync(
+        int eventId,
+        SubmitFeedbackApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            $"api/events/{eventId}/feedback",
+            request,
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var feedback = await response.Content
+                .ReadFromJsonAsync<EventFeedbackApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new SubmitFeedbackApiResult
+            {
+                IsSuccess = feedback is not null,
+                Feedback = feedback,
+                ErrorMessage = feedback is null
+                    ? "API trả về feedback không hợp lệ."
+                    : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var message = ExtractMessage(content);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new SubmitFeedbackApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new SubmitFeedbackApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền gửi feedback."
+            },
+            HttpStatusCode.NotFound => new SubmitFeedbackApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = message ?? "Event không tồn tại."
+            },
+            HttpStatusCode.Conflict => new SubmitFeedbackApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = message ?? "Bạn chưa đủ điều kiện hoặc đã gửi feedback."
+            },
+            _ => new SubmitFeedbackApiResult
+            {
+                ErrorMessage = message ?? "Không thể gửi feedback."
+            }
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

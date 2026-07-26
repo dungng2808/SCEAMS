@@ -1,3 +1,5 @@
+using SCEAMS.MVC.Models.Api;
+
 namespace SCEAMS.MVC.ViewModels;
 
 public sealed class EventDetailViewModel
@@ -20,6 +22,8 @@ public sealed class EventDetailViewModel
     public string? CancellationReason { get; init; }
     public string? CurrentRegistrationStatus { get; init; }
     public int? CurrentRegistrationId { get; init; }
+    public bool CanFeedback { get; init; }
+    public EventFeedbackApiResponse? CurrentFeedback { get; init; }
     public EventPermissionsViewModel Permissions { get; init; } = new();
     public bool IsNotFound { get; init; }
     public string? ErrorMessage { get; init; }

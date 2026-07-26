@@ -28,6 +28,8 @@ public sealed class EventDetailApiResponse
     public string? CancellationReason { get; init; }
     public string? CurrentRegistrationStatus { get; init; }
     public int? CurrentRegistrationId { get; init; }
+    public bool CanFeedback { get; init; }
+    public EventFeedbackApiResponse? CurrentFeedback { get; init; }
     public EventActionPermissionsApiResponse Permissions { get; init; } = new();
 }
 

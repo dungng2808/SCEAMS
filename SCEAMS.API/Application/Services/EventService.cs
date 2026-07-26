@@ -117,6 +117,25 @@ public sealed class EventService : IEventService
                 cancellationToken)
             : null;
         var currentRegistrationStatus = currentRegistration?.Status.ToString();
+        FeedbackResponseDto? currentFeedback = null;
+        if (isStudent)
+        {
+            var feedback = (await _unitOfWork.Feedbacks.FindAsync(
+                item => item.EventId == id &&
+                        item.StudentId == (GetUserId(user) ?? 0),
+                cancellationToken)).FirstOrDefault();
+            if (feedback is not null)
+            {
+                currentFeedback = new FeedbackResponseDto
+                {
+                    Id = feedback.Id,
+                    EventId = feedback.EventId,
+                    Rating = feedback.Rating,
+                    Comment = feedback.Comment,
+                    CreatedAt = feedback.CreatedAt
+                };
+            }
+        }
         var now = DateTime.UtcNow;
         var canManage = isAdminOrStaff || (isOrganizer && isOwner);
 
@@ -143,6 +162,10 @@ public sealed class EventService : IEventService
             CancellationReason = eventEntity.CancellationReason,
             CurrentRegistrationStatus = currentRegistrationStatus,
             CurrentRegistrationId = currentRegistration?.Id,
+            CanFeedback = isStudent &&
+                          currentRegistrationStatus == RegistrationStatus.Attended.ToString() &&
+                          currentFeedback is null,
+            CurrentFeedback = currentFeedback,
             Permissions = new EventActionPermissionsDto
             {
                 CanEdit = canManage && eventEntity.Status is

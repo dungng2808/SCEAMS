@@ -25,6 +25,8 @@ public sealed class EventDetailResponseDto
     public string? CancellationReason { get; init; }
     public string? CurrentRegistrationStatus { get; init; }
     public int? CurrentRegistrationId { get; init; }
+    public bool CanFeedback { get; init; }
+    public FeedbackResponseDto? CurrentFeedback { get; init; }
     public EventActionPermissionsDto Permissions { get; init; } = new();
 }
 

@@ -146,6 +146,34 @@
                     </form>
                     <small style="display:block;margin-top:.5rem;color:var(--sceams-text-soft);">Hạn hủy: @Model.StartTime.AddHours(-24).ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
                 }
+                @if (Model.CanFeedback)
+                {
+                    <form asp-controller="Events" asp-action="Feedback" asp-route-id="@Model.Id" method="post" style="margin-top:1.25rem;">
+                        @Html.AntiForgeryToken()
+                        <p class="eyebrow">Feedback Event</p>
+                        <label for="feedback-rating" style="display:block;font-weight:700;margin:.35rem 0;">Rating</label>
+                        <select id="feedback-rating" name="Rating" required class="form-control" style="width:100%;padding:.6rem;border:1px solid var(--sceams-border);border-radius:var(--sceams-radius-sm);">
+                            <option value="">Chọn rating</option>
+                            @for (var rating = 5; rating >= 1; rating--)
+                            {
+                                <option value="@rating">@rating / 5</option>
+                            }
+                        </select>
+                        <label for="feedback-comment" style="display:block;font-weight:700;margin:.65rem 0 .35rem;">Nhận xét</label>
+                        <textarea id="feedback-comment" name="Comment" rows="3" maxlength="2000" class="form-control" placeholder="Chia sẻ trải nghiệm của bạn..." style="width:100%;padding:.6rem;border:1px solid var(--sceams-border);border-radius:var(--sceams-radius-sm);font-family:inherit;resize:vertical;"></textarea>
+                        <button type="submit" class="btn-app btn-app--primary" style="margin-top:.75rem;">Gửi feedback</button>
+                    </form>
+                }
+                else if (Model.CurrentFeedback is not null)
+                {
+                    <div class="alert alert-success" role="status" style="margin-top:1.25rem;">
+                        <strong>Feedback đã gửi · @Model.CurrentFeedback.Rating/5</strong>
+                        @if (!string.IsNullOrWhiteSpace(Model.CurrentFeedback.Comment))
+                        {
+                            <p style="margin:.35rem 0 0;">@Model.CurrentFeedback.Comment</p>
+                        }
+                    </div>
+                }
                 @if (Model.Permissions.CanApprove)
                 {
                     <form asp-controller="Events" asp-action="Approve" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Duyệt Event này? API sẽ kiểm tra overlap Venue.');" style="margin-top: .75rem;">

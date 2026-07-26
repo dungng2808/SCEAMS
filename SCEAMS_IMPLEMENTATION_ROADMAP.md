@@ -820,9 +820,9 @@ Domain entity/enum
 
 ### Phase 102 - MVC: Form gửi Feedback
 
-- [ ] Chỉ hiện form khi API xác nhận đủ điều kiện.
-- [ ] Gửi rating và comment; hiển thị lỗi chưa Attended/trùng feedback.
-- [ ] Sau khi gửi, khóa form và hiển thị feedback đã gửi.
+- [x] Chỉ hiện form khi API xác nhận đủ điều kiện.
+- [x] Gửi rating và comment; hiển thị lỗi chưa Attended/trùng feedback.
+- [x] Sau khi gửi, khóa form và hiển thị feedback đã gửi.
 
 ### Phase 103 - API: Xem tổng hợp Feedback
 

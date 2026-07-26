@@ -1303,6 +1303,13 @@ API chỉ cho Student có registration `Attended` gửi feedback, mỗi Student 
 một feedback/Event. Rating bắt buộc 1–5, comment tối đa 2.000 ký tự; gửi trùng
 hoặc chưa điểm danh trả `409`.
 
+## MVC gửi Feedback
+
+Event detail chỉ hiển thị form Feedback khi API trả `canFeedback = true` (Student
+đã `Attended` và chưa gửi trước đó). Form có rating 1–5, comment tối đa 2.000
+ký tự và anti-forgery token. Sau khi gửi thành công, form bị thay bằng feedback
+đã lưu; lỗi chưa điểm danh hoặc gửi trùng được hiển thị trên trang.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

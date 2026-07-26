@@ -48,6 +48,11 @@ public interface IEventApiClient
         int registrationId,
         CancellationToken cancellationToken = default);
 
+    Task<SubmitFeedbackApiResult> SubmitFeedbackAsync(
+        int eventId,
+        SubmitFeedbackApiRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);
