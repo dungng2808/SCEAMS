@@ -666,9 +666,9 @@ Domain entity/enum
 
 ### Phase 77 - API: Cập nhật Event
 
-- [ ] Thêm `PUT /api/events/{id}`.
-- [ ] Organizer chỉ sửa Event mình tạo ở trạng thái cho phép; Admin theo BR8.
-- [ ] Không cho sửa thông tin chính khi Completed/Cancelled.
+- [x] Thêm `PUT /api/events/{id}`.
+- [x] Organizer chỉ sửa Event mình tạo ở trạng thái cho phép; Admin theo BR8.
+- [x] Không cho sửa thông tin chính khi Completed/Cancelled.
 
 ### Phase 78 - MVC: Form sửa Event
 

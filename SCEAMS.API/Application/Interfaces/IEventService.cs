@@ -17,4 +17,10 @@ public interface IEventService
         CreateEventRequestDto request,
         ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
+
+    Task<Result<EventDetailResponseDto>> UpdateEventAsync(
+        int id,
+        UpdateEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default);
 }

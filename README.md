@@ -1025,6 +1025,17 @@ Form chỉ nạp Club Approved do Organizer hiện tại phụ trách và Venue 
 trì, đồng thời nhập thời gian, deadline và capacity. Tạo thành công sẽ chuyển
 thẳng tới trang chi tiết Event Draft.
 
+## API cập nhật Event
+
+```text
+PUT http://localhost:5195/api/events/{id}
+Authorization: Bearer <access-token>
+```
+
+Organizer chỉ sửa Event thuộc scope của mình khi còn Draft; Admin/Staff được xử
+lý theo quyền nội bộ. API kiểm tra lại Venue, khoảng thời gian, capacity và số
+đăng ký hợp lệ; Event Completed/Cancelled không thể sửa.
+
 ## API Organizer tạo Event Draft
 
 Organizer tạo Event bằng:

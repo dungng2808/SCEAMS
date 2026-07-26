@@ -268,6 +268,114 @@ public sealed class EventService : IEventService
             : detail;
     }
 
+    public async Task<Result<EventDetailResponseDto>> UpdateEventAsync(
+        int id,
+        UpdateEventRequestDto request,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var eventEntity = await _unitOfWork.Events.GetByIdAsync(id, cancellationToken);
+        if (eventEntity == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Event không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var currentUserId = GetUserId(user);
+        var isAdminOrStaff = user.IsInRole(nameof(UserRole.Admin)) ||
+                             user.IsInRole(nameof(UserRole.Staff));
+        var isOrganizer = user.IsInRole(nameof(UserRole.Organizer));
+        var club = await _unitOfWork.Clubs.GetByIdWithDetailsAsync(
+            eventEntity.ClubId,
+            cancellationToken);
+        var isOwner = currentUserId.HasValue &&
+                      (eventEntity.CreatedByUserId == currentUserId.Value ||
+                       (club?.CreatedByUserId == currentUserId.Value));
+
+        if (!isAdminOrStaff && (!isOrganizer || !isOwner))
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Bạn không có quyền sửa Event này.",
+                StatusCodes.Status403Forbidden);
+        }
+
+        if (eventEntity.Status is EventStatus.Completed or EventStatus.Cancelled)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không thể sửa Event đã Completed hoặc Cancelled.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (isOrganizer && !isAdminOrStaff && eventEntity.Status != EventStatus.Draft)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Organizer chỉ được sửa Event ở trạng thái Draft.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var venue = await _unitOfWork.Venues.GetByIdAsync(
+            request.VenueId,
+            cancellationToken);
+        if (venue == null)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Venue không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (venue.IsUnderMaintenance)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "Không thể chuyển Event tới Venue đang bảo trì.",
+                StatusCodes.Status409Conflict);
+        }
+
+        if (request.StartTime >= request.EndTime)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "StartTime phải nhỏ hơn EndTime.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.RegistrationDeadline > request.StartTime)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                "RegistrationDeadline phải trước hoặc bằng StartTime.",
+                StatusCodes.Status400BadRequest);
+        }
+
+        if (request.Capacity > venue.Capacity)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Capacity không được vượt quá sức chứa Venue ({venue.Capacity}).",
+                StatusCodes.Status400BadRequest);
+        }
+
+        var registeredCount = await _unitOfWork.Events
+            .GetConfirmedRegistrationCountAsync(id, cancellationToken);
+        if (request.Capacity < registeredCount)
+        {
+            return Result<EventDetailResponseDto>.Fail(
+                $"Capacity không được nhỏ hơn số đăng ký hợp lệ hiện tại ({registeredCount}).",
+                StatusCodes.Status409Conflict);
+        }
+
+        eventEntity.Title = request.Title.Trim();
+        eventEntity.Description = string.IsNullOrWhiteSpace(request.Description)
+            ? null
+            : request.Description.Trim();
+        eventEntity.VenueId = request.VenueId;
+        eventEntity.StartTime = request.StartTime;
+        eventEntity.EndTime = request.EndTime;
+        eventEntity.RegistrationDeadline = request.RegistrationDeadline;
+        eventEntity.Capacity = request.Capacity;
+        eventEntity.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return await GetEventByIdAsync(id, user, cancellationToken);
+    }
+
     private static int? GetUserId(ClaimsPrincipal user)
     {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier)

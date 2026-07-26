@@ -5531,6 +5531,30 @@
             "description": "Phase 75 Organizer tạo Event Draft cho Club Approved mình phụ trách và Venue không bảo trì."
           },
           "response": []
+        },
+        {
+          "name": "Phase 77 - Update Event - Organizer Draft",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{organizerAccessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Phase 77 Updated Draft\",\"description\":\"Updated before submit.\",\"venueId\":1,\"startTime\":\"2026-08-15T10:00:00Z\",\"endTime\":\"2026-08-15T13:00:00Z\",\"registrationDeadline\":\"2026-08-13T23:59:00Z\",\"capacity\":70}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events", "{{eventId}}"]
+            },
+            "description": "Phase 77 Organizer cập nhật Event Draft của mình."
+          },
+          "response": []
         }
       ]
     }
