@@ -784,9 +784,9 @@ Domain entity/enum
 
 ### Phase 96 - MVC: Lịch sử đăng ký
 
-- [ ] Tạo trang My Registrations.
-- [ ] Hiển thị Event, thời gian, registration status và attendance status.
-- [ ] Từ đây có thể vào chi tiết hoặc hủy khi hợp lệ.
+- [x] Tạo trang My Registrations.
+- [x] Hiển thị Event, thời gian, registration status và attendance status.
+- [x] Từ đây có thể vào chi tiết hoặc hủy khi hợp lệ.
 
 ### Phase 97 - API: Danh sách người đăng ký của Event
 

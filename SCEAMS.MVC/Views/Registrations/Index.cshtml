@@ -1,0 +1,124 @@
+@model SCEAMS.MVC.ViewModels.RegistrationHistoryViewModel
+
+@{
+    ViewData["Title"] = "Lịch sử đăng ký";
+}
+
+<section class="clubs-page" aria-labelledby="registrations-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone I · Student</p>
+            <h1 id="registrations-title">Lịch sử đăng ký Event</h1>
+            <p>Theo dõi Event đã đăng ký, trạng thái điểm danh và thao tác hủy.</p>
+        </div>
+        <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Index">Khám phá Event</a>
+    </header>
+
+    <form class="users-filters surface-card" asp-controller="Registrations" asp-action="Index" method="get" aria-label="Lọc lịch sử đăng ký">
+        <div class="users-filter">
+            <label for="status">Trạng thái đăng ký</label>
+            <select id="status" name="status">
+                <option value="">Tất cả</option>
+                @foreach (var option in new[] { "Pending", "Confirmed", "Attended", "CancelledByStudent" })
+                {
+                    <option value="@option" selected="@(string.Equals(Model.Status, option, StringComparison.OrdinalIgnoreCase))">@option</option>
+                }
+            </select>
+        </div>
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">Lọc lịch sử</button>
+            <a class="btn-app btn-app--ghost" asp-action="Index">Xóa lọc</a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <p class="eyebrow">Kết nối gián đoạn</p>
+            <h2>Chưa thể tải lịch sử</h2>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+    else if (Model.Items.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card">
+            <p class="eyebrow">Chưa có dữ liệu</p>
+            <h2>Bạn chưa có registration phù hợp</h2>
+            <p>Hãy khám phá các Event Approved để bắt đầu tham gia.</p>
+            <a class="btn-app btn-app--primary" asp-controller="Events" asp-action="Index">Xem Event</a>
+        </div>
+    }
+    else
+    {
+        <div class="surface-card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table align-middle style-table mb-0" style="width:100%;">
+                    <thead>
+                        <tr style="background:#f8fafc;border-bottom:1px solid var(--sceams-border);">
+                            <th style="padding:1rem 1.5rem;">Event</th>
+                            <th>Thời gian</th>
+                            <th>Registration</th>
+                            <th>Điểm danh</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr style="border-bottom:1px solid var(--sceams-border);">
+                                <td style="padding:1rem 1.5rem;">
+                                    <strong>@item.EventTitle</strong>
+                                    <small style="display:block;color:var(--sceams-text-soft);">#@item.EventId · @item.EventStatus</small>
+                                </td>
+                                <td>@item.StartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td><span class="status-badge @(item.RegistrationStatus == "Confirmed" ? "status-badge--success" : item.RegistrationStatus == "CancelledByStudent" ? "status-badge--danger" : "status-badge--warning")">@item.RegistrationStatus</span></td>
+                                <td>
+                                    @if (item.IsAttended)
+                                    {
+                                        <span class="status-badge status-badge--success">Attended</span>
+                                        @if (item.CheckInTime.HasValue)
+                                        {
+                                            <small style="display:block;color:var(--sceams-text-soft);">@item.CheckInTime.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-badge--neutral">Chưa điểm danh</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div style="display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap;">
+                                        <a class="btn-app btn-app--ghost btn-sm" asp-controller="Events" asp-action="Detail" asp-route-id="@item.EventId">Xem Event</a>
+                                        @if (item.CanCancel)
+                                        {
+                                            <form asp-controller="Events" asp-action="CancelRegistration" asp-route-registrationId="@item.Id" asp-route-eventId="@item.EventId" method="post" onsubmit="return confirm('Xác nhận hủy registration?');" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-app btn-app--ghost btn-sm" style="color:var(--sceams-danger);">Hủy</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--sceams-border);">
+                    <small>Trang @Model.Page / @Model.TotalPages · @Model.TotalItems registration</small>
+                    <div style="display:flex;gap:.5rem;">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Index" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">&larr; Trước</a>
+                        }
+                        @if (Model.HasNextPage)
+                        {
+                            <a class="btn-app btn-app--ghost btn-sm" asp-action="Index" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Sau &rarr;</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>

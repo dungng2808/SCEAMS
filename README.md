@@ -1233,6 +1233,13 @@ API lấy Student từ JWT, không nhận `studentId` từ query. Có thể lọ
 50 bản ghi/trang; response gồm Event, thời gian, registration status và thông
 tin điểm danh nếu đã có.
 
+## MVC lịch sử đăng ký
+
+Student mở `/Registrations` để xem trang **My Registrations**. Trang có lọc
+status, phân trang, Event/thời gian, trạng thái registration và trạng thái điểm
+danh. Mỗi dòng có link tới Event detail; registration `Confirmed` còn trong
+thời hạn sẽ có nút hủy và dùng chung workflow anti-forgery của Event detail.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:
