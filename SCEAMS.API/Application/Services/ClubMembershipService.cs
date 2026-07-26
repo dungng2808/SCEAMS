@@ -186,7 +186,8 @@ public sealed class ClubMembershipService : IClubMembershipService
             var searchTrimmed = search.Trim().ToLower();
             queryable = queryable.Where(m =>
                 m.Student.FullName.ToLower().Contains(searchTrimmed) ||
-                m.Student.Email.ToLower().Contains(searchTrimmed));
+                m.Student.Email.ToLower().Contains(searchTrimmed) ||
+                (m.Student.StudentCode != null && m.Student.StudentCode.ToLower().Contains(searchTrimmed)));
         }
 
         var totalItems = await queryable.CountAsync(cancellationToken);
@@ -268,7 +269,8 @@ public sealed class ClubMembershipService : IClubMembershipService
             var searchTrimmed = search.Trim().ToLower();
             queryable = queryable.Where(m =>
                 m.Student.FullName.ToLower().Contains(searchTrimmed) ||
-                m.Student.Email.ToLower().Contains(searchTrimmed));
+                m.Student.Email.ToLower().Contains(searchTrimmed) ||
+                (m.Student.StudentCode != null && m.Student.StudentCode.ToLower().Contains(searchTrimmed)));
         }
 
         var totalItems = await queryable.CountAsync(cancellationToken);
