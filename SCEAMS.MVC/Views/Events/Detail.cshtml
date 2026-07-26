@@ -226,5 +226,35 @@
                 }
             </aside>
         </div>
+        <section class="surface-card" style="margin-top:1.25rem;" aria-labelledby="feedback-summary-title">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <div>
+                    <p class="eyebrow">Cộng đồng đánh giá</p>
+                    <h2 id="feedback-summary-title" style="margin:0;">Feedback Event</h2>
+                </div>
+                <strong style="font-size:1.5rem;">@(Model.TotalFeedback == 0 ? "—" : $"{Model.AverageRating:0.##}/5")</strong>
+            </div>
+            @if (Model.TotalFeedback == 0)
+            {
+                <p style="margin-bottom:0;color:var(--sceams-text-soft);">Chưa có feedback. Hãy là người đầu tiên chia sẻ trải nghiệm.</p>
+            }
+            else
+            {
+                <p style="color:var(--sceams-text-soft);">@Model.TotalFeedback feedback</p>
+                <div style="display:grid;gap:.75rem;">
+                    @foreach (var feedback in Model.Feedbacks)
+                    {
+                        <article style="padding:.85rem 0;border-top:1px solid var(--sceams-border);">
+                            <strong>@feedback.Rating/5</strong>
+                            <small style="color:var(--sceams-text-soft);margin-left:.5rem;">@feedback.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                            @if (!string.IsNullOrWhiteSpace(feedback.Comment))
+                            {
+                                <p style="margin:.35rem 0 0;">@feedback.Comment</p>
+                            }
+                        </article>
+                    }
+                </div>
+            }
+        </section>
     }
 </section>

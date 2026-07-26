@@ -832,9 +832,9 @@ Domain entity/enum
 
 ### Phase 104 - MVC: Hiển thị đánh giá Event
 
-- [ ] Hiển thị average rating và feedback list ở Event detail.
-- [ ] Có empty state khi chưa có feedback.
-- [ ] Xác nhận average cập nhật sau khi Student gửi feedback.
+- [x] Hiển thị average rating và feedback list ở Event detail.
+- [x] Có empty state khi chưa có feedback.
+- [x] Xác nhận average cập nhật sau khi Student gửi feedback.
 
 ---
 

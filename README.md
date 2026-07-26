@@ -1322,6 +1322,13 @@ API trả `averageRating`, `totalFeedback` và danh sách feedback phân trang. 
 rating, comment và thời gian tạo được trả về; không lộ StudentId, email hay
 thông tin cá nhân. Event Draft/Pending của Organizer khác không được public.
 
+## MVC hiển thị Feedback
+
+Event detail tải summary từ API và hiển thị average rating, tổng số feedback và
+danh sách rating/comment/thời gian. Khi chưa có đánh giá, trang có empty state;
+sau khi Student gửi feedback và tải lại detail, average cùng danh sách được cập
+nhật.
+
 ## MVC queue duyệt Event
 
 Admin/Staff mở trang:

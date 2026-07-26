@@ -871,7 +871,23 @@ public sealed class EventsController : Controller
                 });
             }
 
-            return View(MapDetail(result.Event));
+            FeedbackSummaryApiResponse? feedbackSummary = null;
+            try
+            {
+                var feedbackResult = await _eventApiClient.GetFeedbackSummaryAsync(
+                    id,
+                    cancellationToken: cancellationToken);
+                feedbackSummary = feedbackResult.Summary;
+            }
+            catch (Exception feedbackException) when (
+                feedbackException is HttpRequestException or
+                TaskCanceledException or
+                JsonException)
+            {
+                _logger.LogDebug(feedbackException, "Unable to load feedback for event {EventId}.", id);
+            }
+
+            return View(MapDetail(result.Event, feedbackSummary));
         }
         catch (Exception exception) when (
             exception is HttpRequestException or
@@ -985,7 +1001,9 @@ public sealed class EventsController : Controller
         bool IsUnauthorized,
         string? ErrorMessage);
 
-    private static EventDetailViewModel MapDetail(EventDetailApiResponse eventItem)
+    private static EventDetailViewModel MapDetail(
+        EventDetailApiResponse eventItem,
+        FeedbackSummaryApiResponse? feedbackSummary = null)
     {
         return new EventDetailViewModel
         {
@@ -1009,6 +1027,14 @@ public sealed class EventsController : Controller
             CurrentRegistrationId = eventItem.CurrentRegistrationId,
             CanFeedback = eventItem.CanFeedback,
             CurrentFeedback = eventItem.CurrentFeedback,
+            AverageRating = feedbackSummary?.AverageRating ?? 0,
+            TotalFeedback = feedbackSummary?.TotalFeedback ?? 0,
+            Feedbacks = feedbackSummary?.Items.Select(item => new EventFeedbackItemViewModel
+            {
+                Rating = item.Rating,
+                Comment = item.Comment,
+                CreatedAt = item.CreatedAt
+            }).ToList() ?? [],
             Permissions = new EventPermissionsViewModel
             {
                 CanEdit = eventItem.Permissions.CanEdit,

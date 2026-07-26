@@ -53,6 +53,12 @@ public interface IEventApiClient
         SubmitFeedbackApiRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<FeedbackSummaryApiResult> GetFeedbackSummaryAsync(
+        int eventId,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
+
     Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default);

@@ -575,6 +575,36 @@ public sealed class EventApiClient : IEventApiClient
         };
     }
 
+    public async Task<FeedbackSummaryApiResult> GetFeedbackSummaryAsync(
+        int eventId,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            $"api/events/{eventId}/feedback?page={Math.Max(page, 1)}&pageSize={Math.Clamp(pageSize, 1, 50)}",
+            cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var summary = await response.Content
+                .ReadFromJsonAsync<FeedbackSummaryApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new FeedbackSummaryApiResult
+            {
+                IsSuccess = summary is not null,
+                Summary = summary,
+                ErrorMessage = summary is null ? "API trả về feedback summary không hợp lệ." : null
+            };
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return new FeedbackSummaryApiResult
+        {
+            IsNotFound = response.StatusCode == HttpStatusCode.NotFound,
+            ErrorMessage = ExtractMessage(content) ?? "Không thể tải feedback của Event."
+        };
+    }
+
     public async Task<EventDetailApiResult> GetEventByIdAsync(
         int eventId,
         CancellationToken cancellationToken = default)

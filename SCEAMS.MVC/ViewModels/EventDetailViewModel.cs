@@ -24,6 +24,9 @@ public sealed class EventDetailViewModel
     public int? CurrentRegistrationId { get; init; }
     public bool CanFeedback { get; init; }
     public EventFeedbackApiResponse? CurrentFeedback { get; init; }
+    public decimal AverageRating { get; init; }
+    public int TotalFeedback { get; init; }
+    public IReadOnlyList<EventFeedbackItemViewModel> Feedbacks { get; init; } = [];
     public EventPermissionsViewModel Permissions { get; init; } = new();
     public bool IsNotFound { get; init; }
     public string? ErrorMessage { get; init; }
@@ -35,6 +38,13 @@ public sealed class EventDetailViewModel
         "Cancelled" or "Rejected" => "status-badge--danger",
         _ => "status-badge--warning"
     };
+}
+
+public sealed class EventFeedbackItemViewModel
+{
+    public int Rating { get; init; }
+    public string? Comment { get; init; }
+    public DateTime CreatedAt { get; init; }
 }
 
 public sealed class EventPermissionsViewModel
