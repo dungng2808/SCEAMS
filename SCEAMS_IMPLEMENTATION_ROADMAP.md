@@ -438,9 +438,10 @@ Domain entity/enum
 
 ### Phase 43 - API: Duyệt CLB
 
-- [ ] Thêm `PUT /api/clubs/{id}/approve` cho Admin/Staff.
-- [ ] Chỉ Club `PendingApproval` mới được duyệt.
-- [ ] Ghi thời điểm/người duyệt nếu bổ sung audit fields.
+- [x] Thêm `PUT /api/clubs/{id}/approve` cho Admin/Staff.
+- [x] Chỉ Club `PendingApproval` mới được duyệt.
+- [x] Ghi thời điểm/người duyệt nếu bổ sung audit fields.
+
 
 ### Phase 44 - MVC: Duyệt CLB
 

@@ -3492,11 +3492,110 @@
             "description": "Phase 41 returns 403 Forbidden for Student proposing a club."
           },
           "response": []
+        },
+        {
+          "name": "Phase 43 - Approve Club - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/2/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "2",
+                "approve"
+              ]
+            },
+            "description": "Phase 43 allows Admin/Staff to approve a PendingApproval club, recording reviewer ID and timestamp."
+          },
+          "response": []
+        },
+        {
+          "name": "Phase 43 - Approve Club - Conflict (Not Pending)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs/1/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clubs",
+                "1",
+                "approve"
+              ]
+            },
+            "description": "Phase 43 returns 409 Conflict when approving a club that is not in PendingApproval status."
+          },
+          "response": []
         }
       ]
     }
   ]
 }
+
 
 
 

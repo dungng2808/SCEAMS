@@ -167,4 +167,66 @@ public sealed class ClubService : IClubService
 
         return Result<ClubDetailResponseDto>.Created(dto);
     }
+
+    public async Task<Result<ClubDetailResponseDto>> ApproveClubAsync(
+        int id,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken = default)
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (!int.TryParse(userIdClaim, out var reviewerUserId) || reviewerUserId <= 0)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                "Không xác định được danh tính người duyệt từ token xác thực.",
+                StatusCodes.Status401Unauthorized);
+        }
+
+        var club = await _unitOfWork.Clubs.GetByIdWithDetailsAsync(id, cancellationToken);
+        if (club == null)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                $"Câu lạc bộ với ID {id} không tồn tại.",
+                StatusCodes.Status404NotFound);
+        }
+
+        if (club.Status != ClubStatus.PendingApproval)
+        {
+            return Result<ClubDetailResponseDto>.Fail(
+                $"Chỉ câu lạc bộ ở trạng thái Chờ duyệt (PendingApproval) mới có thể được duyệt. Trạng thái hiện tại: {club.Status}.",
+                StatusCodes.Status409Conflict);
+        }
+
+        club.Status = ClubStatus.Approved;
+        club.ReviewedByUserId = reviewerUserId;
+        club.ReviewedAt = DateTime.UtcNow;
+
+        _unitOfWork.Clubs.Update(club);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var activeMemberCount = await _unitOfWork.Clubs.GetQueryable()
+            .Where(c => c.Id == id)
+            .SelectMany(c => c.Memberships)
+            .CountAsync(m => m.Status == ClubMembershipStatus.Active, cancellationToken);
+
+        var dto = new ClubDetailResponseDto
+        {
+            Id = club.Id,
+            Name = club.Name,
+            Description = club.Description,
+            CategoryId = club.CategoryId,
+            CategoryName = club.Category?.Name ?? string.Empty,
+            Status = club.Status,
+            CreatedByUserId = club.CreatedByUserId,
+            CreatedByUserName = club.CreatedByUser?.FullName ?? string.Empty,
+            ActiveMemberCount = activeMemberCount,
+            CreatedAt = club.CreatedAt,
+            ReviewedAt = club.ReviewedAt,
+            RejectionReason = club.RejectionReason,
+            DissolvedAt = club.DissolvedAt
+        };
+
+        return Result<ClubDetailResponseDto>.Ok(dto);
+    }
 }

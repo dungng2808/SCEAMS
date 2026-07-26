@@ -549,6 +549,22 @@ Authorization: Bearer {{StudentAccessToken}}
 
 ###
 
+# Phase 43 - PUT /api/clubs/{id}/approve (Admin/Staff approves a PendingApproval club)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/2/approve
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+# Phase 43 - PUT /api/clubs/{id}/approve (Conflict when approving an already Approved club)
+PUT {{SCEAMS.API_HostAddress}}/api/clubs/1/approve
+Accept: application/json
+Authorization: Bearer {{AdminAccessToken}}
+
+###
+
+
+
 
 
 
