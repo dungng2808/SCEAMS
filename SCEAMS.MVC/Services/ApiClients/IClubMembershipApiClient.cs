@@ -10,4 +10,10 @@ public interface IClubMembershipApiClient
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    Task<DecideClubMembershipApiResult> DecideMembershipAsync(
+        int clubId,
+        int userId,
+        DecideClubMembershipApiRequest request,
+        CancellationToken cancellationToken = default);
 }

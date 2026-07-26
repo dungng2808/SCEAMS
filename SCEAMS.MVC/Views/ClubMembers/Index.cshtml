@@ -120,6 +120,7 @@
                                 <th>Email</th>
                                 <th>Ngày đăng ký</th>
                                 <th>Trạng thái</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -147,6 +148,36 @@
                                         <span class="status-badge @item.StatusBadgeClass">
                                             @item.StatusLabel
                                         </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div style="display: inline-flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                                            <form asp-action="Approve"
+                                                  asp-route-clubId="@Model.ClubId"
+                                                  asp-route-userId="@item.StudentId"
+                                                  method="post"
+                                                  style="margin: 0;"
+                                                  data-confirm-message="Xác nhận duyệt đơn gia nhập của @item.StudentName?"
+                                                  onsubmit="return confirm(this.dataset.confirmMessage);">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="search" value="@Model.Search" />
+                                                <input type="hidden" name="page" value="@Model.Page" />
+                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                <button type="submit" class="btn-app btn-app--primary btn-sm">Duyệt</button>
+                                            </form>
+                                            <form asp-action="Reject"
+                                                  asp-route-clubId="@Model.ClubId"
+                                                  asp-route-userId="@item.StudentId"
+                                                  method="post"
+                                                  style="margin: 0;"
+                                                  data-confirm-message="Xác nhận từ chối đơn gia nhập của @item.StudentName?"
+                                                  onsubmit="return confirm(this.dataset.confirmMessage);">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="search" value="@Model.Search" />
+                                                <input type="hidden" name="page" value="@Model.Page" />
+                                                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                                <button type="submit" class="btn-app btn-app--ghost btn-sm" style="color: var(--sceams-danger);">Từ chối</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SCEAMS.MVC.Models.Api;
 using SCEAMS.MVC.Services.ApiClients;
 using SCEAMS.MVC.ViewModels;
 
@@ -147,6 +148,135 @@ public sealed class ClubMembersController : Controller
                 ClubId = clubId,
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
+        }
+    }
+
+    [HttpPost("{userId:int}/Approve")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(
+        int clubId,
+        int userId,
+        string? search = null,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await DecideMembershipAsync(
+            clubId,
+            userId,
+            approve: true,
+            rejectionReason: null,
+            search,
+            page,
+            pageSize,
+            cancellationToken);
+    }
+
+    [HttpPost("{userId:int}/Reject")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reject(
+        int clubId,
+        int userId,
+        string? rejectionReason = null,
+        string? search = null,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await DecideMembershipAsync(
+            clubId,
+            userId,
+            approve: false,
+            rejectionReason,
+            search,
+            page,
+            pageSize,
+            cancellationToken);
+    }
+
+    private async Task<IActionResult> DecideMembershipAsync(
+        int clubId,
+        int userId,
+        bool approve,
+        string? rejectionReason,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _membershipApiClient.DecideMembershipAsync(
+                clubId,
+                userId,
+                new DecideClubMembershipApiRequest(approve, rejectionReason),
+                cancellationToken);
+
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            if (result.IsForbidden)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage
+                    ?? "Bạn không có quyền xử lý đơn gia nhập của câu lạc bộ này.";
+            }
+            else if (result.IsNotFound)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage
+                    ?? "Không tìm thấy đơn gia nhập cần xử lý.";
+            }
+            else if (result.IsConflict)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage
+                    ?? "Đơn gia nhập đã được xử lý bởi người khác hoặc không còn chờ duyệt.";
+            }
+            else if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage
+                    ?? "Không thể xử lý đơn gia nhập vào lúc này.";
+            }
+            else
+            {
+                var actionLabel = approve ? "duyệt" : "từ chối";
+                TempData["SuccessMessage"] = $"Đã {actionLabel} đơn gia nhập thành công. Danh sách đã được cập nhật.";
+            }
+
+            return RedirectToAction(
+                nameof(Index),
+                new
+                {
+                    clubId,
+                    tab = "pending",
+                    search,
+                    page = Math.Max(page, 1),
+                    pageSize = Math.Clamp(pageSize, 1, 50)
+                });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            JsonException)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unable to decide membership for user #{UserId} in club #{ClubId}.",
+                userId,
+                clubId);
+
+            TempData["ErrorMessage"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+            return RedirectToAction(
+                nameof(Index),
+                new
+                {
+                    clubId,
+                    tab = "pending",
+                    search,
+                    page = Math.Max(page, 1),
+                    pageSize = Math.Clamp(pageSize, 1, 50)
+                });
         }
     }
 

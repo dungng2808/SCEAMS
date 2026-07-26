@@ -84,5 +84,71 @@ public sealed class ClubMembershipApiClient : IClubMembershipApiClient
         };
     }
 
+    public async Task<DecideClubMembershipApiResult> DecideMembershipAsync(
+        int clubId,
+        int userId,
+        DecideClubMembershipApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PutAsJsonAsync(
+            $"api/clubs/{clubId}/members/{userId}/decision",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var membership = await response.Content
+                .ReadFromJsonAsync<ClubMembershipApiResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new DecideClubMembershipApiResult
+            {
+                IsSuccess = true,
+                Membership = membership
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DecideClubMembershipApiResult
+            {
+                IsNotFound = true,
+                ErrorMessage = "Không tìm thấy câu lạc bộ hoặc đơn gia nhập cần xử lý."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return new DecideClubMembershipApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new DecideClubMembershipApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = "Bạn không có quyền xử lý đơn gia nhập của câu lạc bộ này."
+            };
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            return new DecideClubMembershipApiResult
+            {
+                IsConflict = true,
+                ErrorMessage = "Đơn gia nhập này đã được xử lý bởi người khác hoặc không còn ở trạng thái chờ duyệt."
+            };
+        }
+
+        return new DecideClubMembershipApiResult
+        {
+            ErrorMessage = "Không thể xử lý đơn gia nhập vào lúc này."
+        };
+    }
+
     private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);
 }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace SCEAMS.MVC.Models.Api;
 
 public sealed class RequestJoinClubApiResult
@@ -21,5 +23,7 @@ public sealed class ClubMembershipApiResponse
     public string ClubName { get; set; } = string.Empty;
     public string RoleInClub { get; set; } = "Member";
     public DateTime JoinDate { get; set; }
+
+    [JsonConverter(typeof(JsonStringOrIntConverter))]
     public string Status { get; set; } = string.Empty;
 }

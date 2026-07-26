@@ -532,9 +532,9 @@ Domain entity/enum
 
 ### Phase 56 - MVC: Duyệt/từ chối đơn gia nhập
 
-- [ ] Thêm hai action riêng với xác nhận.
-- [ ] Cập nhật danh sách ngay sau khi API thành công.
-- [ ] Hiển thị lỗi khi đơn đã được người khác xử lý.
+- [x] Thêm hai action riêng với xác nhận.
+- [x] Cập nhật danh sách ngay sau khi API thành công.
+- [x] Hiển thị lỗi khi đơn đã được người khác xử lý.
 
 ### Phase 57 - API: Loại thành viên khỏi CLB
 

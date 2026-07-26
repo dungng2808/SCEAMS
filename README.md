@@ -755,5 +755,19 @@ membership returns `409`. Phase 55 requests are in the Postman **Clubs**
 folder; set `decisionClubId` and `decisionUserId` to a pending application
 before running the approve or reject request.
 
+## MVC xử lý đơn gia nhập
+
+Tại trang quản lý thành viên:
+
+```text
+https://localhost:7034/Clubs/{clubId}/Members
+```
+
+Organizer sở hữu Club, Admin và Staff nhìn thấy nút **Duyệt** và **Từ chối**
+cho từng đơn Pending. Mỗi action dùng form POST có anti-forgery token và hộp
+xác nhận; sau khi API trả thành công, MVC redirect về cùng trang để tải lại
+danh sách. Nếu người khác đã xử lý đơn trước đó, API trả `409` và MVC hiển thị
+thông báo lỗi mà không tự xóa dòng trên giao diện.
+
 Implementation progress is tracked in
 `SCEAMS_IMPLEMENTATION_ROADMAP.md`.
