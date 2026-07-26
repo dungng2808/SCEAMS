@@ -11,4 +11,12 @@ public interface IAuthApiClient
     Task<RegisterStudentApiResult> RegisterStudentAsync(
         RegisterStudentApiRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<RefreshTokenApiResult> RefreshTokenAsync(
+        RefreshTokenApiRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> RevokeTokenAsync(
+        RefreshTokenApiRequest request,
+        CancellationToken cancellationToken = default);
 }

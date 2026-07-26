@@ -192,6 +192,22 @@ public sealed class AuthService : IAuthService
             "Token refreshed successfully.");
     }
 
+    public async Task<Result> RevokeAsync(
+        RefreshTokenRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var refreshTokenHash =
+            _refreshTokenService.ComputeHash(
+                request.RefreshToken.Trim());
+
+        await _unitOfWork.Users.RevokeRefreshTokenAsync(
+            refreshTokenHash,
+            cancellationToken);
+
+        return Result.NoContent(
+            "Refresh token revoked.");
+    }
+
     private static Result<RefreshTokenResponseDto>
         InvalidRefreshToken()
     {

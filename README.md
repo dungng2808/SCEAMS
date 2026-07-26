@@ -187,14 +187,20 @@ Open the MVC login page:
 http://localhost:5206/Account/Login
 ```
 
-After a successful API login, MVC stores the JWT only in server-side Session.
-The browser receives an opaque HttpOnly session cookie and an encrypted,
-HttpOnly ASP.NET authentication cookie containing safe identity claims. The raw
-JWT is not written to JavaScript, localStorage or a browser cookie.
+After a successful API login, MVC stores access and refresh tokens in
+server-side Session and an encrypted, HttpOnly ASP.NET authentication ticket.
+The tokens are never exposed to JavaScript or localStorage.
 
-`BearerTokenHandler` reads the non-expired token from Session and automatically
-adds `Authorization: Bearer <token>` to typed API-client requests. Logout clears
-both Session and the MVC authentication cookie.
+`BearerTokenHandler` automatically adds `Authorization: Bearer <token>` to
+typed API-client requests. If an API request returns `401`, the handler rotates
+the refresh token and retries the original request exactly once, including its
+body. Concurrent expired requests share one refresh operation. If refresh
+fails, MVC clears authentication and redirects to login with the original
+return URL.
+
+Logout calls `POST /api/auth/revoke` before clearing Session and the encrypted
+authentication cookie. Local logout still completes if the API is temporarily
+unavailable.
 
 Each demo role has a separate authenticated landing URL:
 
@@ -203,9 +209,10 @@ Each demo role has a separate authenticated landing URL:
 - `/Dashboard/Organizer`
 - `/Dashboard/Student`
 
-The current development Session store is in memory, so active sessions are
-intentionally cleared when the MVC process restarts. A distributed cache can
-replace it later without changing the controller or handler flow.
+The current development Session store is in memory. If it is lost during a
+process restart, the encrypted authentication ticket provides the token
+fallback while it remains valid. A distributed cache can replace the in-memory
+store later without changing the controller or handler flow.
 
 ## Current-user profile API
 

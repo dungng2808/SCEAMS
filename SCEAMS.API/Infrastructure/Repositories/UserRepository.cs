@@ -63,6 +63,24 @@ public sealed class UserRepository
         return affectedRows == 1;
     }
 
+    public async Task RevokeRefreshTokenAsync(
+        string refreshTokenHash,
+        CancellationToken cancellationToken = default)
+    {
+        await DbSet
+            .Where(user =>
+                user.RefreshTokenHash == refreshTokenHash)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(
+                        user => user.RefreshTokenHash,
+                        (string?)null)
+                    .SetProperty(
+                        user => user.RefreshTokenExpiresAt,
+                        (DateTime?)null),
+                cancellationToken);
+    }
+
     public Task<bool> EmailExistsAsync(
         string email,
         CancellationToken cancellationToken = default)

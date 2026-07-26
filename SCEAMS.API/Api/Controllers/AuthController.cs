@@ -67,4 +67,19 @@ public sealed class AuthController : ApiControllerBase
 
         return ToActionResult(result);
     }
+
+    [HttpPost("revoke")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Revoke(
+        [FromBody] RefreshTokenRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _authService.RevokeAsync(
+            request,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
 }

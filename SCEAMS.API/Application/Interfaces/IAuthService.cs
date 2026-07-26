@@ -16,4 +16,8 @@ public interface IAuthService
     Task<Result<RefreshTokenResponseDto>> RefreshAsync(
         RefreshTokenRequestDto request,
         CancellationToken cancellationToken = default);
+
+    Task<Result> RevokeAsync(
+        RefreshTokenRequestDto request,
+        CancellationToken cancellationToken = default);
 }

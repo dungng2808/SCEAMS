@@ -30,7 +30,7 @@
                     <path d="M12 3 4 7v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V7l-8-4Z" />
                     <path d="m9 12 2 2 4-4" />
                 </svg>
-                JWT đang được lưu an toàn trong Session phía server
+                Token được mã hóa và tự làm mới khi access token hết hạn
             </div>
         </article>
 
@@ -58,7 +58,7 @@
     <div class="dashboard-session-bar">
         <div>
             <strong>Muốn kết thúc phiên?</strong>
-            <span>Đăng xuất sẽ xóa cả cookie đăng nhập và JWT trong Session.</span>
+            <span>Đăng xuất sẽ revoke refresh token và xóa toàn bộ phiên cục bộ.</span>
         </div>
         <form asp-controller="Account"
               asp-action="Logout"

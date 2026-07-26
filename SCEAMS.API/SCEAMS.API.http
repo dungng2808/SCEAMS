@@ -36,6 +36,16 @@ Content-Type: application/json
 
 ###
 
+# Revocation is idempotent and returns 204.
+POST {{SCEAMS.API_HostAddress}}/api/auth/revoke
+Content-Type: application/json
+
+{
+  "refreshToken": "{{RefreshToken}}"
+}
+
+###
+
 POST {{SCEAMS.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using SCEAMS.MVC.Handlers;
 using SCEAMS.MVC.Options;
 using SCEAMS.MVC.Services.ApiClients;
+using SCEAMS.MVC.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<BearerTokenHandler>();
+builder.Services.AddSingleton<RefreshTokenCoordinator>();
 
 builder.Services
     .AddOptions<ApiSettings>()
@@ -66,8 +68,7 @@ builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(
 
         client.BaseAddress = new Uri(settings.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
-    })
-    .AddHttpMessageHandler<BearerTokenHandler>();
+    });
 builder.Services.AddHttpClient<IUserApiClient, UserApiClient>(
     (serviceProvider, client) =>
     {

@@ -154,6 +154,44 @@ public sealed class AuthApiClient : IAuthApiClient
         };
     }
 
+    public async Task<RefreshTokenApiResult> RefreshTokenAsync(
+        RefreshTokenApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/auth/refresh",
+            request,
+            cancellationToken);
+
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            return new RefreshTokenApiResult();
+        }
+
+        var tokenResponse = await response.Content
+            .ReadFromJsonAsync<RefreshTokenApiResponse>(
+                cancellationToken: cancellationToken);
+
+        return new RefreshTokenApiResult
+        {
+            IsSuccess = tokenResponse is not null,
+            Response = tokenResponse
+        };
+    }
+
+    public async Task<bool> RevokeTokenAsync(
+        RefreshTokenApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/auth/revoke",
+            request,
+            cancellationToken);
+
+        return response.StatusCode ==
+            HttpStatusCode.NoContent;
+    }
+
     private static string TranslateConflict(string message)
     {
         return message.StartsWith(

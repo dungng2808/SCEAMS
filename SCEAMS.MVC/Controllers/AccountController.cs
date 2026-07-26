@@ -186,6 +186,34 @@ public sealed class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        var refreshToken = HttpContext.Session.GetString(
+            SessionKeys.RefreshToken);
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            refreshToken = await HttpContext.GetTokenAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthenticationTokenNames.RefreshToken);
+        }
+
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+        {
+            try
+            {
+                await _authApiClient.RevokeTokenAsync(
+                    new RefreshTokenApiRequest(refreshToken),
+                    HttpContext.RequestAborted);
+            }
+            catch (Exception exception) when (
+                exception is HttpRequestException or
+                TaskCanceledException)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Unable to revoke the refresh token during logout.");
+            }
+        }
+
         HttpContext.Session.Clear();
         await HttpContext.SignOutAsync(
             CookieAuthenticationDefaults.AuthenticationScheme);
@@ -208,6 +236,9 @@ public sealed class AccountController : Controller
         HttpContext.Session.SetString(
             SessionKeys.AccessToken,
             response.AccessToken);
+        HttpContext.Session.SetString(
+            SessionKeys.RefreshToken,
+            response.RefreshToken);
 
         var claims = new[]
         {
@@ -229,30 +260,49 @@ public sealed class AccountController : Controller
             claims,
             CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
-        var expiresAtUtc = new DateTimeOffset(
+        var accessTokenExpiresAtUtc = new DateTimeOffset(
             response.ExpiresAtUtc.ToUniversalTime());
+        var refreshTokenExpiresAtUtc = new DateTimeOffset(
+            response.RefreshTokenExpiresAtUtc
+                .ToUniversalTime());
         var authenticationProperties = new AuthenticationProperties
         {
             AllowRefresh = false,
             IsPersistent = false,
-            ExpiresUtc = expiresAtUtc
+            ExpiresUtc = refreshTokenExpiresAtUtc
         };
         authenticationProperties.StoreTokens(
         [
             new AuthenticationToken
             {
-                Name = "access_token",
+                Name = AuthenticationTokenNames.AccessToken,
                 Value = response.AccessToken
             },
             new AuthenticationToken
             {
-                Name = "token_type",
+                Name = AuthenticationTokenNames.RefreshToken,
+                Value = response.RefreshToken
+            },
+            new AuthenticationToken
+            {
+                Name = AuthenticationTokenNames.TokenType,
                 Value = response.TokenType
             },
             new AuthenticationToken
             {
-                Name = "expires_at",
-                Value = expiresAtUtc.ToString(
+                Name =
+                    AuthenticationTokenNames
+                        .AccessTokenExpiresAt,
+                Value = accessTokenExpiresAtUtc.ToString(
+                    "O",
+                    CultureInfo.InvariantCulture)
+            },
+            new AuthenticationToken
+            {
+                Name =
+                    AuthenticationTokenNames
+                        .RefreshTokenExpiresAt,
+                Value = refreshTokenExpiresAtUtc.ToString(
                     "O",
                     CultureInfo.InvariantCulture)
             }

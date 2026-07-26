@@ -268,9 +268,9 @@ Domain entity/enum
 
 ### Phase 18 - MVC: Tự refresh và logout
 
-- [ ] Khi API trả `401` do access token hết hạn, thử refresh đúng một lần rồi gửi lại request.
-- [ ] Logout phải xóa session và gọi revoke token nếu API hỗ trợ.
-- [ ] Nếu refresh thất bại, chuyển về login với return URL.
+- [x] Khi API trả `401` do access token hết hạn, thử refresh đúng một lần rồi gửi lại request.
+- [x] Logout phải xóa session và gọi revoke token nếu API hỗ trợ.
+- [x] Nếu refresh thất bại, chuyển về login với return URL.
 
 ---
 

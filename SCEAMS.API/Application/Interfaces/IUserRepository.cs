@@ -20,6 +20,10 @@ public interface IUserRepository : IGenericRepository<User>
         DateTime utcNow,
         CancellationToken cancellationToken = default);
 
+    Task RevokeRefreshTokenAsync(
+        string refreshTokenHash,
+        CancellationToken cancellationToken = default);
+
     Task<bool> EmailExistsAsync(
         string email,
         CancellationToken cancellationToken = default);
