@@ -53,7 +53,7 @@ public sealed class EventsController : ApiControllerBase
         var query = _eventService.GetEventsQuery(User);
         if (Request.Headers.TryGetValue("Accept", out var acceptValues) &&
             acceptValues.Any(value =>
-                value.Contains("application/xml", StringComparison.OrdinalIgnoreCase)))
+                value?.Contains("application/xml", StringComparison.OrdinalIgnoreCase) == true))
         {
             var serializer = new XmlSerializer(typeof(List<EventListResponseDto>));
             using var writer = new StringWriter(CultureInfo.InvariantCulture);

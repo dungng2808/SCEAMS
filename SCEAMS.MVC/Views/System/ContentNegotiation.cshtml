@@ -1,0 +1,65 @@
+@model SCEAMS.MVC.ViewModels.ContentNegotiationViewModel
+
+@{
+    ViewData["Title"] = "Demo JSON / XML";
+    var response = Model.Response;
+}
+
+<header class="page-heading">
+    <div>
+        <p class="eyebrow">Milestone K · Content negotiation</p>
+        <h1>Kiểm thử JSON và XML</h1>
+        <p class="page-heading__copy">MVC gửi Accept header tới <code>GET /api/events</code> và hiển thị nguyên văn response để kiểm tra.</p>
+    </div>
+</header>
+
+<form class="users-filters surface-card" asp-controller="System" asp-action="ContentNegotiation" method="get" aria-label="Chọn định dạng response">
+    <div class="users-filter">
+        <label for="format">Định dạng Accept</label>
+        <select id="format" name="format">
+            <option value="json" selected="@(Model.Format == "json")">application/json</option>
+            <option value="xml" selected="@(Model.Format == "xml")">application/xml</option>
+            <option value="unsupported" selected="@(Model.Format == "unsupported")">text/csv (demo 406)</option>
+        </select>
+    </div>
+    <div class="users-filter">
+        <label for="top">Số Event tối đa</label>
+        <input id="top" name="top" type="number" min="1" max="50" value="@Model.Top" />
+    </div>
+    <div class="users-filter__actions">
+        <button type="submit" class="btn-app btn-app--primary">Gửi request</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="category-state category-state--error surface-card" role="alert">
+        <span class="category-state__icon" aria-hidden="true">!</span>
+        <div>
+            <p class="eyebrow">Không thể gửi request</p>
+            <h2>API chưa sẵn sàng</h2>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    </div>
+}
+else if (response is not null)
+{
+    var responseClass = response.IsSuccess ? "state-pill--online" : "state-pill--offline";
+    <section class="surface-card" aria-labelledby="content-negotiation-result">
+        <div class="health-card__top">
+            <div class="health-card__heading">
+                <span>Raw response đã escape an toàn</span>
+                <h2 id="content-negotiation-result">HTTP @response.StatusCode · @response.StatusDescription</h2>
+            </div>
+            <span class="state-pill @responseClass">@response.ContentType</span>
+        </div>
+        @if (response.IsNotAcceptable)
+        {
+            <div class="recovery-message" role="alert">
+                <strong>406 Not Acceptable</strong>
+                <p>API không hỗ trợ định dạng <code>text/csv</code>. Hãy chọn JSON hoặc XML để nhận dữ liệu.</p>
+            </div>
+        }
+        <pre style="margin: 1rem 0 0; max-height: 34rem; overflow: auto; padding: 1rem; border-radius: 0.75rem; background: #0f172a; color: #e2e8f0; white-space: pre-wrap; overflow-wrap: anywhere;"><code>@response.RawResponse</code></pre>
+    </section>
+}

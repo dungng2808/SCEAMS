@@ -1434,3 +1434,12 @@ Accept: application/xml
 
 API dùng response DTO cho danh sách Event và trả `406 Not Acceptable` nếu client
 yêu cầu định dạng không được hỗ trợ.
+
+Trong môi trường Development, Admin/Staff có thể mở:
+
+```text
+https://localhost:7034/System/ContentNegotiation
+```
+
+Trang này gửi `Accept` từ MVC tới API, hiển thị raw response đã được Razor
+escape và có lựa chọn `text/csv` để kiểm tra luồng `406 Not Acceptable`.

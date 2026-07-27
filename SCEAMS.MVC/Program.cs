@@ -60,6 +60,18 @@ builder.Services.AddHttpClient<IHealthApiClient, HealthApiClient>(
     })
     .AddHttpMessageHandler<BearerTokenHandler>();
 builder.Services.AddHttpClient<
+    IContentNegotiationApiClient,
+    ContentNegotiationApiClient>(
+    (serviceProvider, client) =>
+    {
+        var settings = serviceProvider
+            .GetRequiredService<IOptions<ApiSettings>>()
+            .Value;
+
+        client.BaseAddress = new Uri(settings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+    });
+builder.Services.AddHttpClient<
     IClubCategoryApiClient,
     ClubCategoryApiClient>(
     (serviceProvider, client) =>

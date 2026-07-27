@@ -901,9 +901,9 @@ Domain entity/enum
 
 ### Phase 114 - MVC: Trang demo JSON/XML
 
-- [ ] Tạo trang kỹ thuật cho phép chọn JSON hoặc XML.
-- [ ] MVC gửi đúng `Accept` header và hiển thị raw response đã escape an toàn.
-- [ ] Hiển thị response `406 Not Acceptable` khi yêu cầu format không hỗ trợ.
+- [x] Tạo trang kỹ thuật cho phép chọn JSON hoặc XML.
+- [x] MVC gửi đúng `Accept` header và hiển thị raw response đã escape an toàn.
+- [x] Hiển thị response `406 Not Acceptable` khi yêu cầu format không hỗ trợ.
 
 ### Phase 115 - API: Notification gRPC khi Event đổi trạng thái
 

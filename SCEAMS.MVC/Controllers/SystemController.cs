@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SCEAMS.MVC.Services.ApiClients;
 using SCEAMS.MVC.ViewModels;
@@ -8,15 +9,18 @@ namespace SCEAMS.MVC.Controllers;
 public sealed class SystemController : Controller
 {
     private readonly IHealthApiClient _healthApiClient;
+    private readonly IContentNegotiationApiClient _contentNegotiationApiClient;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<SystemController> _logger;
 
     public SystemController(
         IHealthApiClient healthApiClient,
+        IContentNegotiationApiClient contentNegotiationApiClient,
         IWebHostEnvironment environment,
         ILogger<SystemController> logger)
     {
         _healthApiClient = healthApiClient;
+        _contentNegotiationApiClient = contentNegotiationApiClient;
         _environment = environment;
         _logger = logger;
     }
@@ -78,6 +82,63 @@ public sealed class SystemController : Controller
             return View(new DemoAccountsViewModel
             {
                 ErrorMessage = "Không thể xác nhận dữ liệu seed qua API. Hãy kiểm tra API, SQL Server và chạy lại lệnh seed."
+            });
+        }
+    }
+
+    [HttpGet("ContentNegotiation")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> ContentNegotiation(
+        string format = "json",
+        int top = 10,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var normalizedFormat = format.Trim().ToLowerInvariant() switch
+        {
+            "xml" => "xml",
+            "unsupported" => "unsupported",
+            _ => "json"
+        };
+        var acceptMediaType = normalizedFormat switch
+        {
+            "xml" => "application/xml",
+            "unsupported" => "text/csv",
+            _ => "application/json"
+        };
+
+        try
+        {
+            var response = await _contentNegotiationApiClient.GetEventsAsync(
+                acceptMediaType,
+                top,
+                cancellationToken);
+            return View(new ContentNegotiationViewModel
+            {
+                Format = normalizedFormat,
+                Top = Math.Clamp(top, 1, 50),
+                Response = new ContentNegotiationResponseViewModel
+                {
+                    StatusCode = response.StatusCode,
+                    StatusDescription = response.StatusDescription,
+                    ContentType = response.ContentType,
+                    RawResponse = response.RawResponse
+                }
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogWarning(exception, "Unable to run content negotiation demo.");
+            return View(new ContentNegotiationViewModel
+            {
+                Format = normalizedFormat,
+                Top = Math.Clamp(top, 1, 50),
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng kiểm tra API đang chạy."
             });
         }
     }
