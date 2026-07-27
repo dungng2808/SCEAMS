@@ -854,9 +854,9 @@ Domain entity/enum
 
 ### Phase 107 - API: Báo cáo hoạt động CLB
 
-- [ ] Thêm `GET /api/reports/club-activity`.
-- [ ] Admin/Staff xem toàn bộ; Organizer chỉ Club mình.
-- [ ] Trả số Event, registrations, attendance và average rating theo Club.
+- [x] Thêm `GET /api/reports/club-activity`.
+- [x] Admin/Staff xem toàn bộ; Organizer chỉ Club mình.
+- [x] Trả số Event, registrations, attendance và average rating theo Club.
 
 ### Phase 108 - MVC: Dashboard hoạt động CLB
 

@@ -1373,3 +1373,17 @@ https://localhost:7034/Events/{id}
 Trang hiển thị Club, Venue, thời gian, deadline, sức chứa, lý do từ chối/hủy
 và các action được API cấp quyền. Direct URL tới Event Draft/Pending của người
 khác hiển thị 404 và không lộ dữ liệu.
+
+## API báo cáo hoạt động CLB
+
+Admin/Staff xem toàn bộ hoạt động; Organizer chỉ xem các Club thuộc quyền phụ
+trách:
+
+```text
+GET http://localhost:5195/api/reports/club-activity?from=2026-01-01&to=2026-12-31
+Authorization: Bearer <admin-or-organizer-access-token>
+```
+
+Response trả theo từng Club: số Event, số registration hợp lệ, số lượt đã
+điểm danh và rating trung bình. Khoảng ngày lọc theo `StartTime` của Event;
+`from` và `to` là tùy chọn, còn ngày `to` được tính trọn ngày.
