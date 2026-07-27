@@ -82,6 +82,10 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg>
                             <span>Địa điểm</span>
                         </a>
+                        <a class="admin-sidebar__link @ActiveClass("Reports", "EventSummary")" asp-controller="Reports" asp-action="EventSummary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V5M4 19h16"/><path d="m7 15 3-4 3 2 4-6"/></svg>
+                            <span>Báo cáo Event</span>
+                        </a>
                         @if (User.IsInRole("Admin"))
                         {
                             <a class="admin-sidebar__link @ActiveClass("AdminUsers")" asp-controller="AdminUsers" asp-action="Index">

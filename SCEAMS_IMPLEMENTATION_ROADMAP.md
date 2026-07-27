@@ -848,9 +848,9 @@ Domain entity/enum
 
 ### Phase 106 - MVC: Dashboard Event summary
 
-- [ ] Hiển thị bảng hoặc chart theo status.
-- [ ] Có date range filter và total.
-- [ ] Xử lý tập dữ liệu rỗng.
+- [x] Hiển thị bảng hoặc chart theo status.
+- [x] Có date range filter và total.
+- [x] Xử lý tập dữ liệu rỗng.
 
 ### Phase 107 - API: Báo cáo hoạt động CLB
 
