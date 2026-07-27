@@ -28,7 +28,9 @@ public sealed class ReminderController : ControllerBase
             return NotFound();
         }
 
-        await _backgroundService.RunOnceAsync(cancellationToken);
-        return Ok(new { message = "Reminder job đã chạy." });
+        var result = await _backgroundService.RunOnceAsync(cancellationToken);
+        return result is null
+            ? Ok(new { message = "Reminder job không hoàn tất." })
+            : Ok(result);
     }
 }

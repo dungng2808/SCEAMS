@@ -1078,6 +1078,11 @@ PUT http://localhost:5195/api/events/{id}/approve
 Authorization: Bearer <admin-or-staff-access-token>
 ```
 
+Trang `System/NotificationLog` có bộ lọc Event/type/status và nút chạy job
+Development. Kết quả trả số Event quét, reminder gửi, bản ghi bỏ qua do đã có
+dấu và lỗi; chạy nút lần thứ hai sẽ tăng `Skipped` thay vì tạo notification
+trùng.
+
 API chỉ chuyển `PendingApproval -> Approved`, kiểm tra Venue không bảo trì và
 không overlap Event `Approved/Ongoing` khác. Conflict trả `409` với danh sách
 Event, Venue và khung giờ bị trùng.

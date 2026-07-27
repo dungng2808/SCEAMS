@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
 
 namespace SCEAMS.Api.BackgroundServices;
@@ -35,7 +36,8 @@ public sealed class EventReminderBackgroundService : BackgroundService
         }
     }
 
-    public async Task RunOnceAsync(CancellationToken cancellationToken)
+    public async Task<EventReminderResultDto?> RunOnceAsync(
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -51,6 +53,7 @@ public sealed class EventReminderBackgroundService : BackgroundService
                     result.Data.Sent,
                     result.Data.Skipped,
                     result.Data.Failed);
+                return result.Data;
             }
             else
             {
@@ -64,5 +67,7 @@ public sealed class EventReminderBackgroundService : BackgroundService
         {
             _logger.LogError(exception, "Event reminder job crashed.");
         }
+
+        return null;
     }
 }

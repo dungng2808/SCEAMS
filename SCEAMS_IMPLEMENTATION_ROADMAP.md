@@ -927,9 +927,9 @@ Domain entity/enum
 
 ### Phase 118 - MVC: Theo dõi reminder
 
-- [ ] Trang Admin notification log hiển thị reminder đã gửi.
-- [ ] Có filter theo Event/type/status.
-- [ ] Demo chạy job hai lần nhưng không tạo reminder trùng.
+- [x] Trang Admin notification log hiển thị reminder đã gửi.
+- [x] Có filter theo Event/type/status.
+- [x] Demo chạy job hai lần nhưng không tạo reminder trùng.
 
 ### Phase 119 - API: ProblemDetails và global exception handling
 

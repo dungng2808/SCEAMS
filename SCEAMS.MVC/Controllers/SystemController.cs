@@ -14,6 +14,7 @@ public sealed class SystemController : Controller
     private readonly IHealthApiClient _healthApiClient;
     private readonly IContentNegotiationApiClient _contentNegotiationApiClient;
     private readonly INotificationLogApiClient _notificationLogApiClient;
+    private readonly IEventReminderApiClient _eventReminderApiClient;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<SystemController> _logger;
 
@@ -21,12 +22,14 @@ public sealed class SystemController : Controller
         IHealthApiClient healthApiClient,
         IContentNegotiationApiClient contentNegotiationApiClient,
         INotificationLogApiClient notificationLogApiClient,
+        IEventReminderApiClient eventReminderApiClient,
         IWebHostEnvironment environment,
         ILogger<SystemController> logger)
     {
         _healthApiClient = healthApiClient;
         _contentNegotiationApiClient = contentNegotiationApiClient;
         _notificationLogApiClient = notificationLogApiClient;
+        _eventReminderApiClient = eventReminderApiClient;
         _environment = environment;
         _logger = logger;
     }
@@ -204,6 +207,52 @@ public sealed class SystemController : Controller
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
+    }
+
+    [HttpPost("NotificationLog/RunReminder")]
+    [Authorize(Roles = "Admin,Staff")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RunReminder(
+        int? eventId,
+        string? notificationType,
+        bool? success,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var result = await _eventReminderApiClient.RunAsync(cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                await HttpContext.SignOutAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Login", "Account", new { returnUrl = "/System/NotificationLog" });
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            TempData[result.IsSuccess ? "SuccessMessage" : "NotificationLogError"] =
+                result.IsSuccess && result.Summary is not null
+                    ? $"Reminder job: quét {result.Summary.Scanned}, gửi {result.Summary.Sent}, bỏ qua {result.Summary.Skipped}, lỗi {result.Summary.Failed}."
+                    : result.ErrorMessage ?? "Không thể chạy reminder job.";
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to run reminder job from MVC.");
+            TempData["NotificationLogError"] = "Không thể kết nối tới API. Vui lòng thử lại sau.";
+        }
+
+        return RedirectToAction(nameof(NotificationLog), new { eventId, notificationType, success });
     }
 
     private async Task<ApiHealthStatusViewModel> GetApiStatusAsync(

@@ -35,6 +35,30 @@
     </div>
 </form>
 
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="status">@successMessage</div>
+}
+@if (TempData["NotificationLogError"] is string notificationLogError)
+{
+    <div class="alert alert-danger" role="alert">@notificationLogError</div>
+}
+
+<div class="surface-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+    <div>
+        <p class="eyebrow" style="margin-bottom: .25rem;">Development test</p>
+        <strong>Chạy reminder job thủ công</strong>
+        <small class="d-block text-muted">Bấm hai lần để xác nhận lần thứ hai không gửi trùng.</small>
+    </div>
+    <form asp-controller="System" asp-action="RunReminder" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="eventId" value="@Model.EventId" />
+        <input type="hidden" name="notificationType" value="@Model.NotificationType" />
+        <input type="hidden" name="success" value="@Model.Success" />
+        <button type="submit" class="btn-app btn-app--primary">Chạy reminder job</button>
+    </form>
+</div>
+
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
     <div class="category-state category-state--error surface-card" role="alert">
