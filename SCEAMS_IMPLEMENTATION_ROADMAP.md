@@ -866,9 +866,9 @@ Domain entity/enum
 
 ### Phase 109 - API: Báo cáo tỷ lệ tham dự
 
-- [ ] Thêm `GET /api/reports/attendance-rate`.
-- [ ] Tính `Attended / Confirmed` theo Event, tránh chia cho 0.
-- [ ] Admin/Staff xem toàn bộ; Organizer xem Event của mình.
+- [x] Thêm `GET /api/reports/attendance-rate`.
+- [x] Tính `Attended / Confirmed` theo Event, tránh chia cho 0.
+- [x] Admin/Staff xem toàn bộ; Organizer xem Event của mình.
 
 ### Phase 110 - MVC: Báo cáo tỷ lệ tham dự
 

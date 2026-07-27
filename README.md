@@ -1387,3 +1387,18 @@ Authorization: Bearer <admin-or-organizer-access-token>
 Response trả theo từng Club: số Event, số registration hợp lệ, số lượt đã
 điểm danh và rating trung bình. Khoảng ngày lọc theo `StartTime` của Event;
 `from` và `to` là tùy chọn, còn ngày `to` được tính trọn ngày.
+
+## API báo cáo tỷ lệ tham dự
+
+Admin/Staff xem toàn bộ Event; Organizer chỉ xem các Event thuộc Club mình phụ
+trách:
+
+```text
+GET http://localhost:5195/api/reports/attendance-rate?from=2026-01-01&to=2026-12-31
+Authorization: Bearer <admin-or-organizer-access-token>
+```
+
+Mỗi dòng báo cáo trả số registration hợp lệ, số lượt đã điểm danh và tỷ lệ
+`Attended / Confirmed * 100`. Event chưa có registration trả tỷ lệ `0`, không
+phát sinh lỗi chia cho 0. Khoảng ngày được lọc theo `StartTime` và ngày `to`
+được tính trọn ngày.
