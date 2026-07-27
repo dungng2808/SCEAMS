@@ -458,7 +458,7 @@ public sealed class EventsController : Controller
 
             if (result.IsSuccess && result.Event is not null)
             {
-                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được Approved.";
+                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được Approved.{FormatNotificationMessage(result.Event)}";
             }
             else if (result.IsConflict)
             {
@@ -572,7 +572,7 @@ public sealed class EventsController : Controller
 
             if (result.IsSuccess && result.Event is not null)
             {
-                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được hủy.";
+                TempData["SuccessMessage"] = $"Event '{result.Event.Title}' đã được hủy.{FormatNotificationMessage(result.Event)}";
             }
             else
             {
@@ -1027,6 +1027,9 @@ public sealed class EventsController : Controller
             CurrentRegistrationId = eventItem.CurrentRegistrationId,
             CanFeedback = eventItem.CanFeedback,
             CurrentFeedback = eventItem.CurrentFeedback,
+            NotificationCorrelationId = eventItem.NotificationCorrelationId,
+            NotificationDelivered = eventItem.NotificationDelivered,
+            NotificationError = eventItem.NotificationError,
             AverageRating = feedbackSummary?.AverageRating ?? 0,
             TotalFeedback = feedbackSummary?.TotalFeedback ?? 0,
             Feedbacks = feedbackSummary?.Items.Select(item => new EventFeedbackItemViewModel
@@ -1045,6 +1048,18 @@ public sealed class EventsController : Controller
                 CanRegister = eventItem.Permissions.CanRegister
             }
         };
+    }
+
+    private static string FormatNotificationMessage(EventDetailApiResponse eventItem)
+    {
+        if (string.IsNullOrWhiteSpace(eventItem.NotificationCorrelationId))
+        {
+            return string.Empty;
+        }
+
+        return eventItem.NotificationDelivered == true
+            ? $" Notification đã gửi (correlation: {eventItem.NotificationCorrelationId})."
+            : $" Notification chưa gửi được (correlation: {eventItem.NotificationCorrelationId}).";
     }
 
     private static EditEventViewModel MapEdit(EventDetailApiResponse eventItem)

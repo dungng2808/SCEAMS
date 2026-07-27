@@ -1,0 +1,99 @@
+@model SCEAMS.MVC.ViewModels.NotificationLogViewModel
+
+@{
+    ViewData["Title"] = "Notification log";
+}
+
+<header class="page-heading">
+    <div>
+        <p class="eyebrow">Milestone K · gRPC workflow</p>
+        <h1>Notification log</h1>
+        <p class="page-heading__copy">Trang development-only theo dõi kết quả gửi notification sau Approve/Cancel Event.</p>
+    </div>
+</header>
+
+<form class="users-filters surface-card" asp-controller="System" asp-action="NotificationLog" method="get" aria-label="Bộ lọc notification log">
+    <div class="users-filter">
+        <label for="eventId">Event ID</label>
+        <input id="eventId" name="eventId" type="number" min="1" value="@Model.EventId" />
+    </div>
+    <div class="users-filter">
+        <label for="notificationType">Loại notification</label>
+        <input id="notificationType" name="notificationType" value="@Model.NotificationType" placeholder="EventApprovedNotification" />
+    </div>
+    <div class="users-filter">
+        <label for="success">Trạng thái</label>
+        <select id="success" name="success">
+            <option value="" selected="@(!Model.Success.HasValue)">Tất cả</option>
+            <option value="true" selected="@(Model.Success == true)">Thành công</option>
+            <option value="false" selected="@(Model.Success == false)">Thất bại</option>
+        </select>
+    </div>
+    <div class="users-filter__actions">
+        <button type="submit" class="btn-app btn-app--primary">Lọc log</button>
+        <a class="btn-app btn-app--ghost" asp-action="NotificationLog">Xóa lọc</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="category-state category-state--error surface-card" role="alert">
+        <span class="category-state__icon" aria-hidden="true">!</span>
+        <div>
+            <p class="eyebrow">Không thể tải log</p>
+            <h2>API notification chưa sẵn sàng</h2>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    </div>
+}
+else if (Model.Entries.Count == 0)
+{
+    <div class="category-state category-state--empty surface-card" role="status">
+        <span class="category-state__icon" aria-hidden="true">∅</span>
+        <div>
+            <p class="eyebrow">Chưa có notification</p>
+            <h2>Log đang trống</h2>
+            <p>Approve hoặc Cancel một Event để kiểm tra workflow gRPC.</p>
+        </div>
+    </div>
+}
+else
+{
+    <section class="surface-card" style="padding: 0; overflow: hidden;" aria-labelledby="notification-log-table">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--sceams-border);">
+            <p class="eyebrow">In-memory development log</p>
+            <h2 id="notification-log-table" style="margin: 0;">@Model.Entries.Count notification gần nhất</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle style-table mb-0" style="width: 100%;">
+                <thead>
+                    <tr style="background: #f8fafc;">
+                        <th style="padding: 1rem 1.5rem;">Event</th>
+                        <th>Loại</th>
+                        <th>Correlation ID</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Entries)
+                    {
+                        <tr>
+                            <td style="padding: 1rem 1.5rem;"><strong>#@entry.EventId · @entry.EventTitle</strong><small class="d-block text-muted">@entry.EventStatus</small></td>
+                            <td>@entry.NotificationType</td>
+                            <td><code>@entry.CorrelationId</code></td>
+                            <td>@entry.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>
+                                <span class="status-badge @(entry.IsSuccess ? "status-badge--success" : "status-badge--danger")">@(entry.IsSuccess ? "Đã gửi" : "Lỗi")</span>
+                                @if (!string.IsNullOrWhiteSpace(entry.ErrorMessage))
+                                {
+                                    <small class="d-block text-danger">@entry.ErrorMessage</small>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

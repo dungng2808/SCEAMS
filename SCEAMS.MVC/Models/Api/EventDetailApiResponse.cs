@@ -30,6 +30,9 @@ public sealed class EventDetailApiResponse
     public int? CurrentRegistrationId { get; init; }
     public bool CanFeedback { get; init; }
     public EventFeedbackApiResponse? CurrentFeedback { get; init; }
+    public string? NotificationCorrelationId { get; init; }
+    public bool? NotificationDelivered { get; init; }
+    public string? NotificationError { get; init; }
     public EventActionPermissionsApiResponse Permissions { get; init; } = new();
 }
 

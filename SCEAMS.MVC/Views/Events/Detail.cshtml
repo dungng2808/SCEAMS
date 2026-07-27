@@ -44,6 +44,16 @@
         {
             <div class="alert alert-danger" role="alert">@eventErrorMessage</div>
         }
+        @if (!string.IsNullOrWhiteSpace(Model.NotificationCorrelationId))
+        {
+            <div class="alert @(Model.NotificationDelivered == true ? "alert-success" : "alert-warning")" role="status">
+                <strong>Notification correlation:</strong> <code>@Model.NotificationCorrelationId</code>
+                @if (Model.NotificationDelivered != true && !string.IsNullOrWhiteSpace(Model.NotificationError))
+                {
+                    <span> · @Model.NotificationError</span>
+                }
+            </div>
+        }
         <div class="profile-layout">
             <section class="surface-card profile-form" aria-labelledby="event-overview-title">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">

@@ -915,9 +915,9 @@ Domain entity/enum
 
 ### Phase 116 - MVC: Kiểm thử notification từ workflow
 
-- [ ] Sau Approve/Cancel, MVC hiển thị kết quả nghiệp vụ và correlation ID nếu có.
-- [ ] Tạo trang Admin development-only xem notification log giả lập.
-- [ ] Demo được cả trường hợp gRPC chạy và gRPC tạm dừng.
+- [x] Sau Approve/Cancel, MVC hiển thị kết quả nghiệp vụ và correlation ID nếu có.
+- [x] Tạo trang Admin development-only xem notification log giả lập.
+- [x] Demo được cả trường hợp gRPC chạy và gRPC tạm dừng.
 
 ### Phase 117 - API: Nhắc Event trước deadline 24 giờ
 

@@ -1453,3 +1453,13 @@ Client có timeout 3 giây, tối đa một lần retry; mọi retry giữ nguy�
 ID nên server có thể deduplicate. Địa chỉ mặc định là
 `https://localhost:7001`, có thể thay bằng `NotificationGrpc:Address` trong
 User Secrets hoặc biến môi trường.
+
+Admin/Staff có thể xem log giả lập ở môi trường Development:
+
+```text
+https://localhost:7034/System/NotificationLog
+```
+
+Trang hiển thị Event, loại notification, correlation ID, thời gian và lỗi nếu
+gRPC đang tạm dừng. Khi gRPC chạy lại, workflow Approve/Cancel tiếp tục tạo log
+thành công.

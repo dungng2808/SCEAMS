@@ -1,4 +1,7 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SCEAMS.MVC.Services.ApiClients;
 using SCEAMS.MVC.ViewModels;
@@ -10,17 +13,20 @@ public sealed class SystemController : Controller
 {
     private readonly IHealthApiClient _healthApiClient;
     private readonly IContentNegotiationApiClient _contentNegotiationApiClient;
+    private readonly INotificationLogApiClient _notificationLogApiClient;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<SystemController> _logger;
 
     public SystemController(
         IHealthApiClient healthApiClient,
         IContentNegotiationApiClient contentNegotiationApiClient,
+        INotificationLogApiClient notificationLogApiClient,
         IWebHostEnvironment environment,
         ILogger<SystemController> logger)
     {
         _healthApiClient = healthApiClient;
         _contentNegotiationApiClient = contentNegotiationApiClient;
+        _notificationLogApiClient = notificationLogApiClient;
         _environment = environment;
         _logger = logger;
     }
@@ -139,6 +145,63 @@ public sealed class SystemController : Controller
                 Format = normalizedFormat,
                 Top = Math.Clamp(top, 1, 50),
                 ErrorMessage = "Không thể kết nối tới API. Vui lòng kiểm tra API đang chạy."
+            });
+        }
+    }
+
+    [HttpGet("NotificationLog")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> NotificationLog(
+        int? eventId,
+        string? notificationType,
+        bool? success,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var result = await _notificationLogApiClient.GetLogsAsync(
+                eventId,
+                notificationType,
+                success,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                await HttpContext.SignOutAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Login", "Account", new { returnUrl = "/System/NotificationLog" });
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            return View(new NotificationLogViewModel
+            {
+                EventId = eventId,
+                NotificationType = notificationType,
+                Success = success,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Entries = result.Entries
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load notification logs.");
+            return View(new NotificationLogViewModel
+            {
+                EventId = eventId,
+                NotificationType = notificationType,
+                Success = success,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
             });
         }
     }
