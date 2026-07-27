@@ -1443,3 +1443,13 @@ https://localhost:7034/System/ContentNegotiation
 
 Trang này gửi `Accept` từ MVC tới API, hiển thị raw response đã được Razor
 escape và có lựa chọn `text/csv` để kiểm tra luồng `406 Not Acceptable`.
+
+## Notification gRPC
+
+`SCEAMS.NotificationService` cung cấp RPC `PublishEventNotification`. API tạo
+correlation ID cho mỗi lần chuyển Event sang `Approved` hoặc `Cancelled`, gọi
+gRPC qua `INotificationClientService` và trả correlation ID trong response Event.
+Client có timeout 3 giây, tối đa một lần retry; mọi retry giữ nguyên correlation
+ID nên server có thể deduplicate. Địa chỉ mặc định là
+`https://localhost:7001`, có thể thay bằng `NotificationGrpc:Address` trong
+User Secrets hoặc biến môi trường.

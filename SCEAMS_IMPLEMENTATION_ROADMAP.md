@@ -907,11 +907,11 @@ Domain entity/enum
 
 ### Phase 115 - API: Notification gRPC khi Event đổi trạng thái
 
-- [ ] Đặt `.proto` và server implementation trong project `SCEAMS.NotificationService`.
-- [ ] Đặt `INotificationClientService` trong `SCEAMS.API/Application/Interfaces`.
-- [ ] Đặt `NotificationClientService` implementation trong `SCEAMS.API/Infrastructure/GrpcClients`.
-- [ ] `EventService` chỉ gọi interface notification sau khi Event Approved hoặc Cancelled; Controller không gọi gRPC trực tiếp.
-- [ ] Có timeout, retry giới hạn, correlation ID và log; không để retry tạo thông báo trùng.
+- [x] Đặt `.proto` và server implementation trong project `SCEAMS.NotificationService`.
+- [x] Đặt `INotificationClientService` trong `SCEAMS.API/Application/Interfaces`.
+- [x] Đặt `NotificationClientService` implementation trong `SCEAMS.API/Infrastructure/GrpcClients`.
+- [x] `EventService` chỉ gọi interface notification sau khi Event Approved hoặc Cancelled; Controller không gọi gRPC trực tiếp.
+- [x] Có timeout, retry giới hạn, correlation ID và log; không để retry tạo thông báo trùng.
 
 ### Phase 116 - MVC: Kiểm thử notification từ workflow
 

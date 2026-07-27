@@ -13,6 +13,7 @@ using SCEAMS.Infrastructure.Authentication;
 using SCEAMS.Infrastructure.Data;
 using SCEAMS.Infrastructure.Data.Seed;
 using SCEAMS.Infrastructure.Health;
+using SCEAMS.Infrastructure.GrpcClients;
 using SCEAMS.Infrastructure.Repositories;
 using SCEAMS.Infrastructure.Security;
 using SCEAMS.Infrastructure.UnitOfWork;
@@ -147,6 +148,10 @@ builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
+builder.Services.Configure<NotificationGrpcOptions>(
+    builder.Configuration.GetSection(NotificationGrpcOptions.SectionName));
+builder.Services.AddSingleton<INotificationLogStore, NotificationLogStore>();
+builder.Services.AddScoped<INotificationClientService, NotificationClientService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();

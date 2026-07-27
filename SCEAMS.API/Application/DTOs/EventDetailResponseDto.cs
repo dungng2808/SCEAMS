@@ -27,6 +27,9 @@ public sealed class EventDetailResponseDto
     public int? CurrentRegistrationId { get; init; }
     public bool CanFeedback { get; init; }
     public FeedbackResponseDto? CurrentFeedback { get; init; }
+    public string? NotificationCorrelationId { get; init; }
+    public bool? NotificationDelivered { get; init; }
+    public string? NotificationError { get; init; }
     public EventActionPermissionsDto Permissions { get; init; } = new();
 }
 

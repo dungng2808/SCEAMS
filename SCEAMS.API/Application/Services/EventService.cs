@@ -11,10 +11,14 @@ namespace SCEAMS.Application.Services;
 public sealed class EventService : IEventService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationClientService _notificationClientService;
 
-    public EventService(IUnitOfWork unitOfWork)
+    public EventService(
+        IUnitOfWork unitOfWork,
+        INotificationClientService notificationClientService)
     {
         _unitOfWork = unitOfWork;
+        _notificationClientService = notificationClientService;
     }
 
     public IQueryable<EventListResponseDto> GetEventsQuery(ClaimsPrincipal user)
@@ -79,7 +83,10 @@ public sealed class EventService : IEventService
     public async Task<Result<EventDetailResponseDto>> GetEventByIdAsync(
         int id,
         ClaimsPrincipal user,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? notificationCorrelationId = null,
+        bool? notificationDelivered = null,
+        string? notificationError = null)
     {
         var eventEntity = await _unitOfWork.Events.GetByIdWithDetailsAsync(
             id,
@@ -166,6 +173,9 @@ public sealed class EventService : IEventService
                           currentRegistrationStatus == RegistrationStatus.Attended.ToString() &&
                           currentFeedback is null,
             CurrentFeedback = currentFeedback,
+            NotificationCorrelationId = notificationCorrelationId,
+            NotificationDelivered = notificationDelivered,
+            NotificationError = notificationError,
             Permissions = new EventActionPermissionsDto
             {
                 CanEdit = canManage && eventEntity.Status is
@@ -590,7 +600,20 @@ public sealed class EventService : IEventService
         eventEntity.ApprovedAt = DateTime.UtcNow;
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return await GetEventByIdAsync(id, user, cancellationToken);
+        var notification = await _notificationClientService
+            .NotifyEventStatusChangedAsync(
+                eventEntity.Id,
+                eventEntity.Title,
+                EventStatus.Approved,
+                eventEntity.CreatedByUserId,
+                cancellationToken);
+        return await GetEventByIdAsync(
+            id,
+            user,
+            cancellationToken,
+            notification.CorrelationId,
+            notification.Success,
+            notification.ErrorMessage);
     }
 
     public async Task<Result<EventDetailResponseDto>> RejectEventAsync(
@@ -681,8 +704,21 @@ public sealed class EventService : IEventService
         eventEntity.CancellationReason = request.Reason.Trim();
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var notification = await _notificationClientService
+            .NotifyEventStatusChangedAsync(
+                eventEntity.Id,
+                eventEntity.Title,
+                EventStatus.Cancelled,
+                eventEntity.CreatedByUserId,
+                cancellationToken);
 
-        return await GetEventByIdAsync(id, user, cancellationToken);
+        return await GetEventByIdAsync(
+            id,
+            user,
+            cancellationToken,
+            notification.CorrelationId,
+            notification.Success,
+            notification.ErrorMessage);
     }
 
     private static string? ValidateEventForSubmission(

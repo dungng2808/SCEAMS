@@ -11,7 +11,10 @@ public interface IEventService
     Task<Result<EventDetailResponseDto>> GetEventByIdAsync(
         int id,
         ClaimsPrincipal user,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        string? notificationCorrelationId = null,
+        bool? notificationDelivered = null,
+        string? notificationError = null);
 
     Task<Result<EventDetailResponseDto>> CreateEventAsync(
         CreateEventRequestDto request,
