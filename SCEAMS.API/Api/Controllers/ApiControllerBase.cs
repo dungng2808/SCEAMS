@@ -31,14 +31,16 @@ public abstract class ApiControllerBase : ControllerBase
             BuildErrorPayload(result));
     }
 
-    private static object BuildErrorPayload(Result result)
+    private object BuildErrorPayload(Result result)
     {
         var problem = new ProblemDetails
         {
             Status = result.StatusCode,
             Title = GetTitle(result.StatusCode),
-            Detail = result.Message
+            Detail = result.Message,
+            Instance = HttpContext.Request.Path
         };
+        problem.Extensions["traceId"] = HttpContext.TraceIdentifier;
         if (result.ErrorData is not null)
         {
             problem.Extensions["conflicts"] = result.ErrorData;
