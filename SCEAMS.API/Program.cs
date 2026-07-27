@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ using SCEAMS.Infrastructure.GrpcClients;
 using SCEAMS.Infrastructure.Repositories;
 using SCEAMS.Infrastructure.Security;
 using SCEAMS.Infrastructure.UnitOfWork;
+using SCEAMS.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +58,25 @@ builder.Services.AddControllers(options =>
         .Expand()
         .Count()
         .SetMaxTop(50));
+builder.Services.AddProblemDetails();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var problem = new ValidationProblemDetails(context.ModelState)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation failed",
+            Detail = "Request chứa dữ liệu không hợp lệ.",
+            Instance = context.HttpContext.Request.Path
+        };
+        problem.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+        return new BadRequestObjectResult(problem)
+        {
+            ContentTypes = { "application/problem+json" }
+        };
+    };
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -111,6 +132,27 @@ builder.Services
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = "email",
             RoleClaimType = "role"
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                await ProblemDetailsWriter.WriteAsync(
+                    context.HttpContext,
+                    StatusCodes.Status401Unauthorized,
+                    "Unauthorized",
+                    "Yêu cầu xác thực hợp lệ để truy cập tài nguyên này.");
+            },
+            OnForbidden = async context =>
+            {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await ProblemDetailsWriter.WriteAsync(
+                    context.HttpContext,
+                    StatusCodes.Status403Forbidden,
+                    "Forbidden",
+                    "Bạn không có quyền truy cập tài nguyên này.");
+            }
         };
     });
 builder.Services.AddAuthorization();
@@ -183,6 +225,37 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<DatabaseSeeder>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ApiExceptionHandlingMiddleware>();
+app.UseStatusCodePages(async statusContext =>
+{
+    var httpContext = statusContext.HttpContext;
+    if (!httpContext.Request.Path.StartsWithSegments("/api") ||
+        httpContext.Response.StatusCode is not (
+            StatusCodes.Status400BadRequest or
+            StatusCodes.Status401Unauthorized or
+            StatusCodes.Status403Forbidden or
+            StatusCodes.Status404NotFound or
+            StatusCodes.Status409Conflict or
+            StatusCodes.Status406NotAcceptable or
+            StatusCodes.Status500InternalServerError))
+    {
+        return;
+    }
+
+    var statusCode = httpContext.Response.StatusCode;
+    var (title, detail) = statusCode switch
+    {
+        StatusCodes.Status400BadRequest => ("Bad request", "Request không hợp lệ."),
+        StatusCodes.Status401Unauthorized => ("Unauthorized", "Yêu cầu xác thực hợp lệ."),
+        StatusCodes.Status403Forbidden => ("Forbidden", "Bạn không có quyền truy cập."),
+        StatusCodes.Status404NotFound => ("Not found", "Không tìm thấy tài nguyên."),
+        StatusCodes.Status406NotAcceptable => ("Not acceptable", "Định dạng response không được hỗ trợ."),
+        StatusCodes.Status409Conflict => ("Conflict", "Yêu cầu xung đột với trạng thái hiện tại."),
+        _ => ("Internal server error", "Đã xảy ra lỗi ngoài dự kiến.")
+    };
+    await ProblemDetailsWriter.WriteAsync(httpContext, statusCode, title, detail);
+});
 
 if (app.Environment.IsDevelopment())
 {

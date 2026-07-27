@@ -1083,6 +1083,14 @@ Development. Kết quả trả số Event quét, reminder gửi, bản ghi bỏ 
 dấu và lỗi; chạy nút lần thứ hai sẽ tăng `Skipped` thay vì tạo notification
 trùng.
 
+## ProblemDetails và lỗi API
+
+API dùng `ApiExceptionHandlingMiddleware` cùng `ProblemDetails` cho lỗi validation,
+unauthorized, forbidden, not found, conflict, not acceptable và lỗi ngoài dự
+kiến. Response có `status`, `title`, `detail`, `instance` và `traceId`; production
+không trả stack trace, connection string hoặc secret. Các lỗi nghiệp vụ từ
+`ApiControllerBase` cũng dùng cùng format để MVC có thể xử lý thống nhất.
+
 API chỉ chuyển `PendingApproval -> Approved`, kiểm tra Venue không bảo trì và
 không overlap Event `Approved/Ongoing` khác. Conflict trả `409` với danh sách
 Event, Venue và khung giờ bị trùng.

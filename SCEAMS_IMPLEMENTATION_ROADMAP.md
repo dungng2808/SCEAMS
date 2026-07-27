@@ -933,9 +933,9 @@ Domain entity/enum
 
 ### Phase 119 - API: ProblemDetails và global exception handling
 
-- [ ] Đặt global exception handler trong `SCEAMS.API/Api/Middleware` và trả RFC-style `ProblemDetails`.
-- [ ] Map validation, not found, forbidden, conflict và lỗi ngoài dự kiến.
-- [ ] Không lộ stack trace/connection string ở production.
+- [x] Đặt global exception handler trong `SCEAMS.API/Api/Middleware` và trả RFC-style `ProblemDetails`.
+- [x] Map validation, not found, forbidden, conflict và lỗi ngoài dự kiến.
+- [x] Không lộ stack trace/connection string ở production.
 
 ### Phase 120 - MVC: Xử lý lỗi API thống nhất
 

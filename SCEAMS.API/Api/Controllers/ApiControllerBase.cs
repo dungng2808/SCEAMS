@@ -33,8 +33,27 @@ public abstract class ApiControllerBase : ControllerBase
 
     private static object BuildErrorPayload(Result result)
     {
-        return result.ErrorData is null
-            ? new { message = result.Message }
-            : new { message = result.Message, conflicts = result.ErrorData };
+        var problem = new ProblemDetails
+        {
+            Status = result.StatusCode,
+            Title = GetTitle(result.StatusCode),
+            Detail = result.Message
+        };
+        if (result.ErrorData is not null)
+        {
+            problem.Extensions["conflicts"] = result.ErrorData;
+        }
+
+        return problem;
     }
+
+    private static string GetTitle(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "Bad request",
+        StatusCodes.Status401Unauthorized => "Unauthorized",
+        StatusCodes.Status403Forbidden => "Forbidden",
+        StatusCodes.Status404NotFound => "Not found",
+        StatusCodes.Status409Conflict => "Conflict",
+        _ => "Request failed"
+    };
 }
