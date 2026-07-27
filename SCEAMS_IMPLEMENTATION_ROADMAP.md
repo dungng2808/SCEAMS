@@ -939,9 +939,9 @@ Domain entity/enum
 
 ### Phase 120 - MVC: Xử lý lỗi API thống nhất
 
-- [ ] Typed client parse `ProblemDetails`.
-- [ ] Tạo trang/partial lỗi chung cho `400`, `401`, `403`, `404`, `409`, `500`.
-- [ ] Kiểm thử return URL sau `401` và access-denied page sau `403`.
+- [x] Typed client parse `ProblemDetails`.
+- [x] Tạo trang/partial lỗi chung cho `400`, `401`, `403`, `404`, `409`, `500`.
+- [x] Kiểm thử return URL sau `401` và access-denied page sau `403`.
 
 ---
 

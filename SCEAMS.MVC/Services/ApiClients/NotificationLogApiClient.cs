@@ -70,11 +70,8 @@ public sealed class NotificationLogApiClient : INotificationLogApiClient
     {
         try
         {
-            using var document = JsonDocument.Parse(
+            return ApiProblemDetailsParser.GetMessage(
                 await response.Content.ReadAsStringAsync(cancellationToken));
-            return document.RootElement.TryGetProperty("message", out var message)
-                ? message.GetString()
-                : null;
         }
         catch (JsonException)
         {

@@ -822,17 +822,7 @@ public sealed class EventApiClient : IEventApiClient
 
     private static string? ExtractMessage(string content)
     {
-        try
-        {
-            using var document = JsonDocument.Parse(content);
-            return document.RootElement.TryGetProperty("message", out var message)
-                ? message.GetString()
-                : null;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
+        return ApiProblemDetailsParser.GetMessage(content);
     }
 
     private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);

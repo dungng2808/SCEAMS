@@ -1091,6 +1091,11 @@ kiến. Response có `status`, `title`, `detail`, `instance` và `traceId`; prod
 không trả stack trace, connection string hoặc secret. Các lỗi nghiệp vụ từ
 `ApiControllerBase` cũng dùng cùng format để MVC có thể xử lý thống nhất.
 
+MVC dùng `ApiProblemDetailsParser` để đọc cả `detail` theo RFC và `message` của
+các response cũ. Trang lỗi chung nằm ở `Errors/Api/{statusCode}` với partial
+`Views/Shared/_ApiError.cshtml`; status `401` giữ return URL khi chuyển về Login,
+còn `403` chuyển tới Access Denied.
+
 API chỉ chuyển `PendingApproval -> Approved`, kiểm tra Venue không bảo trì và
 không overlap Event `Approved/Ongoing` khác. Conflict trả `409` với danh sách
 Event, Venue và khung giờ bị trùng.

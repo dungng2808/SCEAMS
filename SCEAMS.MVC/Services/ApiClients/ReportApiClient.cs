@@ -240,13 +240,8 @@ public sealed class ReportApiClient : IReportApiClient
         {
             using var document = JsonDocument.Parse(
                 await response.Content.ReadAsStringAsync(cancellationToken));
-            if (document.RootElement.ValueKind == JsonValueKind.Object &&
-                document.RootElement.TryGetProperty("message", out var message))
-            {
-                return message.GetString();
-            }
-
-            return null;
+            return ApiProblemDetailsParser.GetMessage(
+                document.RootElement.GetRawText());
         }
         catch (JsonException)
         {

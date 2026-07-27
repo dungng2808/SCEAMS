@@ -1,0 +1,14 @@
+@model SCEAMS.MVC.ViewModels.ApiErrorViewModel
+
+<div class="category-state category-state--error surface-card" role="alert">
+    <span class="category-state__icon" aria-hidden="true">!</span>
+    <div>
+        <p class="eyebrow">API · @Model.StatusCode</p>
+        <h2>@Model.Title</h2>
+        <p>@Model.Detail</p>
+        @if (!string.IsNullOrWhiteSpace(Model.TraceId))
+        {
+            <small>Trace ID: <code>@Model.TraceId</code></small>
+        }
+    </div>
+</div>

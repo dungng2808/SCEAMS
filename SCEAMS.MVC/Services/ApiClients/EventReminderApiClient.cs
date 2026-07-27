@@ -52,11 +52,8 @@ public sealed class EventReminderApiClient : IEventReminderApiClient
     {
         try
         {
-            using var document = JsonDocument.Parse(
+            return ApiProblemDetailsParser.GetMessage(
                 await response.Content.ReadAsStringAsync(cancellationToken));
-            return document.RootElement.TryGetProperty("message", out var message)
-                ? message.GetString()
-                : null;
         }
         catch (JsonException)
         {
