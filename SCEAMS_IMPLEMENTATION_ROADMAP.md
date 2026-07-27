@@ -894,10 +894,10 @@ Domain entity/enum
 
 ### Phase 113 - API: Content negotiation JSON/XML
 
-- [ ] Đăng ký XML formatter.
-- [ ] Áp dụng `[Produces("application/json", "application/xml")]` cho ít nhất `GET /api/events`.
-- [ ] Test cùng endpoint với `Accept: application/json` và `Accept: application/xml`.
-- [ ] Dùng response DTO để tránh vòng lặp serialization.
+- [x] Đăng ký XML formatter.
+- [x] Áp dụng `[Produces("application/json", "application/xml")]` cho ít nhất `GET /api/events`.
+- [x] Test cùng endpoint với `Accept: application/json` và `Accept: application/xml`.
+- [x] Dùng response DTO để tránh vòng lặp serialization.
 
 ### Phase 114 - MVC: Trang demo JSON/XML
 

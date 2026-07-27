@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+using System.Xml.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -8,7 +11,7 @@ using SCEAMS.Application.Interfaces;
 namespace SCEAMS.Api.Controllers;
 
 [Route("api/events")]
-[Produces("application/json")]
+[Produces("application/json", "application/xml")]
 public sealed class EventsController : ApiControllerBase
 {
     private readonly IEventService _eventService;
@@ -33,6 +36,7 @@ public sealed class EventsController : ApiControllerBase
 
     [HttpGet]
     [AllowAnonymous]
+    [Produces("application/json", "application/xml")]
     [EnableQuery(
         MaxTop = 50,
         PageSize = 50,
@@ -46,7 +50,18 @@ public sealed class EventsController : ApiControllerBase
     [ProducesResponseType<IEnumerable<EventListResponseDto>>(StatusCodes.Status200OK)]
     public IActionResult GetEvents()
     {
-        return Ok(_eventService.GetEventsQuery(User));
+        var query = _eventService.GetEventsQuery(User);
+        if (Request.Headers.TryGetValue("Accept", out var acceptValues) &&
+            acceptValues.Any(value =>
+                value.Contains("application/xml", StringComparison.OrdinalIgnoreCase)))
+        {
+            var serializer = new XmlSerializer(typeof(List<EventListResponseDto>));
+            using var writer = new StringWriter(CultureInfo.InvariantCulture);
+            serializer.Serialize(writer, query.ToList());
+            return Content(writer.ToString(), "application/xml", Encoding.UTF8);
+        }
+
+        return Ok(query);
     }
 
     [HttpGet("{id:int}")]

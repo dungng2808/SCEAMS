@@ -1415,3 +1415,22 @@ Authorization: Bearer <admin-or-staff-access-token>
 Báo cáo chỉ tính Event đã được duyệt, đang diễn ra hoặc đã hoàn thành; tổng
 thời lượng được tính theo giờ từ `StartTime` đến `EndTime`. Ngày `to` bao gồm
 toàn bộ ngày được chọn.
+
+## Content negotiation JSON/XML
+
+`GET /api/events` hỗ trợ chọn định dạng bằng header `Accept`:
+
+```text
+GET https://localhost:5195/api/events?$top=10
+Accept: application/json
+```
+
+Hoặc:
+
+```text
+GET https://localhost:5195/api/events?$top=10
+Accept: application/xml
+```
+
+API dùng response DTO cho danh sách Event và trả `406 Not Acceptable` nếu client
+yêu cầu định dạng không được hỗ trợ.

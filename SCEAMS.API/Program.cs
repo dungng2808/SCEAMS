@@ -43,7 +43,11 @@ var jwtOptions = builder.Configuration
         "Jwt configuration is missing.");
 jwtOptions.Validate();
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        options.ReturnHttpNotAcceptable = true;
+    })
+    .AddXmlSerializerFormatters()
     .AddOData(options => options
         .Select()
         .Filter()
