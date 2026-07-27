@@ -56,7 +56,7 @@ public sealed class EventsController : ApiControllerBase
                 value?.Contains("application/xml", StringComparison.OrdinalIgnoreCase) == true))
         {
             var serializer = new XmlSerializer(typeof(List<EventListResponseDto>));
-            using var writer = new StringWriter(CultureInfo.InvariantCulture);
+            using var writer = new Utf8StringWriter(CultureInfo.InvariantCulture);
             serializer.Serialize(writer, query.ToList());
             return Content(writer.ToString(), "application/xml", Encoding.UTF8);
         }
@@ -326,5 +326,15 @@ public sealed class EventsController : ApiControllerBase
             cancellationToken);
 
         return ToActionResult(result);
+    }
+
+    private sealed class Utf8StringWriter : StringWriter
+    {
+        public Utf8StringWriter(IFormatProvider formatProvider)
+            : base(formatProvider)
+        {
+        }
+
+        public override Encoding Encoding => Encoding.UTF8;
     }
 }
