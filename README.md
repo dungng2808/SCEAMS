@@ -1463,3 +1463,16 @@ https://localhost:7034/System/NotificationLog
 Trang hiển thị Event, loại notification, correlation ID, thời gian và lỗi nếu
 gRPC đang tạm dừng. Khi gRPC chạy lại, workflow Approve/Cancel tiếp tục tạo log
 thành công.
+
+## Reminder deadline đăng ký
+
+API chạy `EventReminderBackgroundService` theo chu kỳ và tìm Event `Approved`
+có `RegistrationDeadline` trong 24 giờ tới. Dấu gửi được lưu trong bảng
+`NotificationDeliveries` với unique key `(EventId, NotificationType)`, vì vậy
+chạy job nhiều lần không tạo reminder trùng. Trong Development, Admin/Staff có
+thể chạy thủ công:
+
+```text
+POST https://localhost:7069/api/reminders/run
+Authorization: Bearer <admin-or-staff-access-token>
+```

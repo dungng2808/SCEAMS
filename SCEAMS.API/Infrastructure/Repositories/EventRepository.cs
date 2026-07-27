@@ -99,6 +99,21 @@ public sealed class EventRepository
             cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Event>> GetEventsWithUpcomingDeadlineAsync(
+        DateTime fromUtc,
+        DateTime toUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Where(eventEntity =>
+                eventEntity.Status == EventStatus.Approved &&
+                eventEntity.RegistrationDeadline > fromUtc &&
+                eventEntity.RegistrationDeadline <= toUtc)
+            .OrderBy(eventEntity => eventEntity.RegistrationDeadline)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Event>> GetActiveEventsForVenueAsync(
         int venueId,
         DateTime fromUtc,

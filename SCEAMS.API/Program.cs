@@ -148,6 +148,13 @@ builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
+builder.Services.Configure<EventReminderOptions>(
+    builder.Configuration.GetSection(EventReminderOptions.SectionName));
+builder.Services.AddScoped<INotificationReminderStore, NotificationReminderStore>();
+builder.Services.AddScoped<IEventReminderService, EventReminderService>();
+builder.Services.AddSingleton<EventReminderBackgroundService>();
+builder.Services.AddHostedService(sp =>
+    sp.GetRequiredService<EventReminderBackgroundService>());
 builder.Services.Configure<NotificationGrpcOptions>(
     builder.Configuration.GetSection(NotificationGrpcOptions.SectionName));
 builder.Services.AddSingleton<INotificationLogStore, NotificationLogStore>();

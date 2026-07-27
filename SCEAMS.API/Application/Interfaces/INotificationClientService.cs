@@ -16,6 +16,12 @@ public interface INotificationClientService
         EventStatus status,
         int recipientUserId,
         CancellationToken cancellationToken = default);
+
+    Task<NotificationDispatchResult> NotifyEventReminderAsync(
+        int eventId,
+        string eventTitle,
+        int recipientUserId,
+        CancellationToken cancellationToken = default);
 }
 
 public interface INotificationLogStore

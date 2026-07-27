@@ -44,4 +44,9 @@ public interface IEventRepository : IGenericRepository<Event>
         DateTime toUtc,
         bool includeInternalStatuses,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Event>> GetEventsWithUpcomingDeadlineAsync(
+        DateTime fromUtc,
+        DateTime toUtc,
+        CancellationToken cancellationToken = default);
 }

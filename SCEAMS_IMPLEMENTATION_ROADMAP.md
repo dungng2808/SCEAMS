@@ -921,9 +921,9 @@ Domain entity/enum
 
 ### Phase 117 - API: Nhắc Event trước deadline 24 giờ
 
-- [ ] Tạo background worker tìm Event sắp tới hạn đăng ký trong 24 giờ.
-- [ ] Gọi gRPC một lần cho mỗi Event/loại thông báo; lưu dấu đã gửi.
-- [ ] Job idempotent và có test clock.
+- [x] Tạo background worker tìm Event sắp tới hạn đăng ký trong 24 giờ.
+- [x] Gọi gRPC một lần cho mỗi Event/loại thông báo; lưu dấu đã gửi.
+- [x] Job idempotent và có test clock.
 
 ### Phase 118 - MVC: Theo dõi reminder
 

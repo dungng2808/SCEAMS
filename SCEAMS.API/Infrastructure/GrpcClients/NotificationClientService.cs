@@ -3,6 +3,7 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
 using SCEAMS.Application.DTOs;
 using SCEAMS.Application.Interfaces;
+using SCEAMS.Application.Services;
 using SCEAMS.Domain.Enums;
 using SCEAMS.NotificationService;
 
@@ -35,14 +36,46 @@ public sealed class NotificationClientService : INotificationClientService, IDis
         int recipientUserId,
         CancellationToken cancellationToken = default)
     {
+        return await SendAsync(
+            eventId,
+            eventTitle,
+            status.ToString(),
+            $"Event{status}Notification",
+            recipientUserId,
+            cancellationToken);
+    }
+
+    public async Task<NotificationDispatchResult> NotifyEventReminderAsync(
+        int eventId,
+        string eventTitle,
+        int recipientUserId,
+        CancellationToken cancellationToken = default)
+    {
+        return await SendAsync(
+            eventId,
+            eventTitle,
+            EventStatus.Approved.ToString(),
+            EventReminderService.NotificationType,
+            recipientUserId,
+            cancellationToken);
+    }
+
+    private async Task<NotificationDispatchResult> SendAsync(
+        int eventId,
+        string eventTitle,
+        string eventStatus,
+        string notificationType,
+        int recipientUserId,
+        CancellationToken cancellationToken)
+    {
         var correlationId = Guid.NewGuid().ToString("N");
         var request = new EventNotificationRequest
         {
             EventId = eventId,
             EventTitle = eventTitle,
-            EventStatus = status.ToString(),
+            EventStatus = eventStatus,
             RecipientUserId = recipientUserId,
-            NotificationType = $"Event{status}Notification",
+            NotificationType = notificationType,
             CorrelationId = correlationId
         };
         var attempts = Math.Clamp(_options.MaxRetries, 0, 3) + 1;
@@ -66,7 +99,7 @@ public sealed class NotificationClientService : INotificationClientService, IDis
                 {
                     EventId = eventId,
                     EventTitle = eventTitle,
-                    EventStatus = status.ToString(),
+                    EventStatus = eventStatus,
                     NotificationType = request.NotificationType,
                     RecipientUserId = recipientUserId,
                     CorrelationId = correlationId,
@@ -111,7 +144,7 @@ public sealed class NotificationClientService : INotificationClientService, IDis
         {
             EventId = eventId,
             EventTitle = eventTitle,
-            EventStatus = status.ToString(),
+            EventStatus = eventStatus,
             NotificationType = request.NotificationType,
             RecipientUserId = recipientUserId,
             CorrelationId = correlationId,

@@ -20,6 +20,7 @@ public class SceamsDbContext : DbContext
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<ChatLog> ChatLogs => Set<ChatLog>();
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

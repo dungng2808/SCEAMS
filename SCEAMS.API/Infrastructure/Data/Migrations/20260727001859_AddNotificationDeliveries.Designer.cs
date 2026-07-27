@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SCEAMS.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SCEAMS.Infrastructure.Data;
 namespace SCEAMS.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(SceamsDbContext))]
-    partial class SceamsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260727001859_AddNotificationDeliveries")]
+    partial class AddNotificationDeliveries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
