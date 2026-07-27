@@ -263,7 +263,8 @@ public sealed class EventApiClient : IEventApiClient
         }
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-        var error = DeserializeOrDefault<ApprovalErrorResponse>(content);
+        var error = DeserializeOrDefault<ApiProblemDetails>(content);
+        var errorMessage = error?.Detail ?? error?.Message ?? error?.Title;
         return response.StatusCode switch
         {
             HttpStatusCode.Unauthorized => new ApproveEventApiResult
@@ -274,22 +275,22 @@ public sealed class EventApiClient : IEventApiClient
             HttpStatusCode.Forbidden => new ApproveEventApiResult
             {
                 IsForbidden = true,
-                ErrorMessage = error?.Message ?? "Bạn không có quyền duyệt Event."
+                ErrorMessage = errorMessage ?? "Bạn không có quyền duyệt Event."
             },
             HttpStatusCode.NotFound => new ApproveEventApiResult
             {
                 IsNotFound = true,
-                ErrorMessage = error?.Message ?? "Event không tồn tại."
+                ErrorMessage = errorMessage ?? "Event không tồn tại."
             },
             HttpStatusCode.Conflict => new ApproveEventApiResult
             {
                 IsConflict = true,
                 Conflicts = error?.Conflicts ?? [],
-                ErrorMessage = error?.Message ?? "Event đang xung đột lịch."
+                ErrorMessage = errorMessage ?? "Event đang xung đột lịch."
             },
             _ => new ApproveEventApiResult
             {
-                ErrorMessage = error?.Message ?? "Không thể duyệt Event."
+                ErrorMessage = errorMessage ?? "Không thể duyệt Event."
             }
         };
     }
@@ -826,10 +827,6 @@ public sealed class EventApiClient : IEventApiClient
     }
 
     private sealed record PagedApiResponse<T>(List<T>? Items, int TotalItems);
-
-    private sealed record ApprovalErrorResponse(
-        string? Message,
-        List<EventApprovalConflictApiResponse>? Conflicts);
 
     private static T? DeserializeOrDefault<T>(string content)
     {

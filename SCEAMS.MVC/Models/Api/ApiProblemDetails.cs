@@ -9,4 +9,5 @@ public sealed class ApiProblemDetails
     public string? Instance { get; init; }
     public string? TraceId { get; init; }
     public string? Message { get; init; }
+    public IReadOnlyList<EventApprovalConflictApiResponse>? Conflicts { get; init; }
 }
