@@ -872,9 +872,9 @@ Domain entity/enum
 
 ### Phase 110 - MVC: Báo cáo tỷ lệ tham dự
 
-- [ ] Hiển thị registered, attended và attendance rate.
-- [ ] Có link tới danh sách registrations của Event.
-- [ ] Kiểm thử Event chưa có registration.
+- [x] Hiển thị registered, attended và attendance rate.
+- [x] Có link tới danh sách registrations của Event.
+- [x] Kiểm thử Event chưa có registration.
 
 ### Phase 111 - API: Báo cáo sử dụng Venue
 

@@ -90,6 +90,10 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 20a6 6 0 0 1 12 0M15 18a4 4 0 0 1 6 2"/></svg>
                             <span>Hoạt động CLB</span>
                         </a>
+                        <a class="admin-sidebar__link @ActiveClass("Reports", "AttendanceRate")" asp-controller="Reports" asp-action="AttendanceRate">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M3 12h18"/><path d="m5 8 4 4 4-6 6 6"/></svg>
+                            <span>Tỷ lệ tham dự</span>
+                        </a>
                         @if (User.IsInRole("Admin"))
                         {
                             <a class="admin-sidebar__link @ActiveClass("AdminUsers")" asp-controller="AdminUsers" asp-action="Index">

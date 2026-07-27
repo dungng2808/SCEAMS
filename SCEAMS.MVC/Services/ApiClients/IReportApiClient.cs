@@ -13,4 +13,9 @@ public interface IReportApiClient
         DateTime? from,
         DateTime? to,
         CancellationToken cancellationToken = default);
+
+    Task<AttendanceRateReportApiResult> GetAttendanceRateAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default);
 }

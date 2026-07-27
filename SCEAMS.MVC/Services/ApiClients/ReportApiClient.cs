@@ -113,6 +113,55 @@ public sealed class ReportApiClient : IReportApiClient
         };
     }
 
+    public async Task<AttendanceRateReportApiResult> GetAttendanceRateAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            BuildQuery("api/reports/attendance-rate", from, to),
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var report = await response.Content
+                .ReadFromJsonAsync<AttendanceRateReportApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new AttendanceRateReportApiResult
+            {
+                IsSuccess = report is not null,
+                Report = report,
+                ErrorMessage = report is null
+                    ? "API trả về báo cáo tỷ lệ tham dự không hợp lệ."
+                    : null
+            };
+        }
+
+        var message = await ExtractMessageAsync(response, cancellationToken);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new AttendanceRateReportApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new AttendanceRateReportApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền xem báo cáo tỷ lệ tham dự."
+            },
+            HttpStatusCode.BadRequest => new AttendanceRateReportApiResult
+            {
+                IsBadRequest = true,
+                ErrorMessage = message ?? "Khoảng thời gian báo cáo không hợp lệ."
+            },
+            _ => new AttendanceRateReportApiResult
+            {
+                ErrorMessage = message ?? "Không thể tải báo cáo tỷ lệ tham dự."
+            }
+        };
+    }
+
     private static string BuildQuery(
         string endpoint,
         DateTime? from,

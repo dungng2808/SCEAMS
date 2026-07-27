@@ -39,7 +39,8 @@ public sealed class ReportsController : Controller
             if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
             {
                 return await EndInvalidSessionAsync(
-                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.",
+                    "/Reports/ClubActivity");
             }
 
             return View(new EventSummaryReportViewModel
@@ -120,7 +121,62 @@ public sealed class ReportsController : Controller
         }
     }
 
-    private async Task<IActionResult> EndInvalidSessionAsync(string message)
+    [HttpGet("AttendanceRate")]
+    [Authorize(Roles = "Admin,Staff,Organizer")]
+    public async Task<IActionResult> AttendanceRate(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _reportApiClient.GetAttendanceRateAsync(
+                from,
+                to,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.",
+                    "/Reports/AttendanceRate");
+            }
+
+            return View(new AttendanceRateReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Items = result.Report?.Items
+                    .Select(item => new AttendanceRateReportItemViewModel
+                    {
+                        EventId = item.EventId,
+                        EventTitle = item.EventTitle,
+                        ClubName = item.ClubName,
+                        StartTime = item.StartTime,
+                        Status = item.Status,
+                        RegisteredCount = item.RegisteredCount,
+                        AttendedCount = item.AttendedCount,
+                        AttendanceRate = item.AttendanceRate
+                    })
+                    .ToList() ?? []
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load attendance rate report.");
+            return View(new AttendanceRateReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
+    private async Task<IActionResult> EndInvalidSessionAsync(
+        string message,
+        string returnUrl = "/Reports/EventSummary")
     {
         await HttpContext.SignOutAsync(
             CookieAuthenticationDefaults.AuthenticationScheme);
@@ -129,6 +185,6 @@ public sealed class ReportsController : Controller
         return RedirectToAction(
             "Login",
             "Account",
-            new { returnUrl = "/Reports/EventSummary" });
+            new { returnUrl });
     }
 }
