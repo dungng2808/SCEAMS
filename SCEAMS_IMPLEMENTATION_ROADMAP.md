@@ -878,9 +878,9 @@ Domain entity/enum
 
 ### Phase 111 - API: Báo cáo sử dụng Venue
 
-- [ ] Thêm `GET /api/reports/venue-usage`.
-- [ ] Trả số Event và tổng số giờ sử dụng theo Venue/date range.
-- [ ] Chỉ Admin/Staff truy cập.
+- [x] Thêm `GET /api/reports/venue-usage`.
+- [x] Trả số Event và tổng số giờ sử dụng theo Venue/date range.
+- [x] Chỉ Admin/Staff truy cập.
 
 ### Phase 112 - MVC: Báo cáo sử dụng Venue
 

@@ -1402,3 +1402,16 @@ Mỗi dòng báo cáo trả số registration hợp lệ, số lượt đã đi�
 `Attended / Confirmed * 100`. Event chưa có registration trả tỷ lệ `0`, không
 phát sinh lỗi chia cho 0. Khoảng ngày được lọc theo `StartTime` và ngày `to`
 được tính trọn ngày.
+
+## API báo cáo sử dụng Venue
+
+Admin/Staff có thể xem số Event và tổng thời lượng sử dụng theo từng Venue:
+
+```text
+GET http://localhost:5195/api/reports/venue-usage?from=2026-01-01&to=2026-12-31
+Authorization: Bearer <admin-or-staff-access-token>
+```
+
+Báo cáo chỉ tính Event đã được duyệt, đang diễn ra hoặc đã hoàn thành; tổng
+thời lượng được tính theo giờ từ `StartTime` đến `EndTime`. Ngày `to` bao gồm
+toàn bộ ngày được chọn.
