@@ -1,0 +1,77 @@
+@model SCEAMS.MVC.ViewModels.ClubActivityReportViewModel
+
+@{
+    ViewData["Title"] = "Hoạt động câu lạc bộ";
+}
+
+<section class="clubs-page" aria-labelledby="club-activity-title">
+    <header class="category-hero">
+        <div class="category-hero__copy">
+            <p class="eyebrow">Milestone J · Báo cáo và thống kê</p>
+            <h1 id="club-activity-title">Hoạt động câu lạc bộ</h1>
+            <p>So sánh Event, registration, điểm danh và chất lượng feedback theo từng Club.</p>
+        </div>
+        <div class="category-hero__summary" aria-label="Số câu lạc bộ">
+            <span>Club có hoạt động</span>
+            <strong>@Model.Items.Count</strong>
+            <small>Phạm vi theo quyền tài khoản</small>
+        </div>
+    </header>
+
+    <form class="users-filters surface-card" asp-controller="Reports" asp-action="ClubActivity" method="get" aria-label="Bộ lọc thời gian hoạt động CLB">
+        <div class="users-filter">
+            <label for="From">Từ ngày</label>
+            <input id="From" name="from" type="date" value="@(Model.From?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="users-filter">
+            <label for="To">Đến ngày</label>
+            <input id="To" name="to" type="date" value="@(Model.To?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="users-filter__actions">
+            <button type="submit" class="btn-app btn-app--primary">Lọc báo cáo</button>
+            <a class="btn-app btn-app--ghost" asp-action="ClubActivity">Xóa lọc</a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="category-state category-state--error surface-card" role="alert">
+            <span class="category-state__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>
+            <div><p class="eyebrow">Không thể tải báo cáo</p><h2>Dữ liệu chưa sẵn sàng</h2><p>@Model.ErrorMessage</p><a class="btn-app btn-app--primary" asp-action="ClubActivity">Thử lại</a></div>
+        </div>
+    }
+    else if (Model.Items.Count == 0)
+    {
+        <div class="category-state category-state--empty surface-card" role="status">
+            <span class="category-state__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" /></svg></span>
+            <div><p class="eyebrow">Tập dữ liệu rỗng</p><h2>Chưa có Club trong khoảng thời gian này</h2><p>Thử mở rộng khoảng ngày hoặc kiểm tra phạm vi quyền Organizer.</p></div>
+        </div>
+    }
+    else
+    {
+        <section class="surface-card" style="padding: 0; overflow: hidden;" aria-labelledby="club-activity-table-title">
+            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--sceams-border);">
+                <p class="eyebrow">Xếp hạng hoạt động</p>
+                <h2 id="club-activity-table-title" style="margin: 0; color: var(--sceams-navy-950);">Club nổi bật theo số Event</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle style-table mb-0" style="width: 100%;">
+                    <thead><tr style="background: #f8fafc; border-bottom: 1px solid var(--sceams-border);"><th style="padding: 1rem 1.5rem;">Club</th><th>Event</th><th>Registration</th><th>Điểm danh</th><th>Tỷ lệ tham dự</th><th class="text-end">Rating</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr style="border-bottom: 1px solid var(--sceams-border);">
+                                <td style="padding: 1rem 1.5rem;"><strong>@item.ClubName</strong><small style="display:block;color:var(--sceams-text-soft);">#@item.ClubId</small></td>
+                                <td><strong>@item.EventCount</strong></td>
+                                <td>@item.RegistrationCount</td>
+                                <td>@item.AttendanceCount</td>
+                                <td>@item.AttendanceRate.ToString("0.##")%</td>
+                                <td class="text-end"><strong>@item.AverageRating.ToString("0.##")</strong><small style="display:block;color:var(--sceams-text-soft);">/ 5</small></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+</section>

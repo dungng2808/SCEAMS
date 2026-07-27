@@ -860,9 +860,9 @@ Domain entity/enum
 
 ### Phase 108 - MVC: Dashboard hoạt động CLB
 
-- [ ] Hiển thị bảng xếp hạng/top Club.
-- [ ] Organizer chỉ thấy dữ liệu đúng scope.
-- [ ] Kiểm thử filter date range.
+- [x] Hiển thị bảng xếp hạng/top Club.
+- [x] Organizer chỉ thấy dữ liệu đúng scope.
+- [x] Kiểm thử filter date range.
 
 ### Phase 109 - API: Báo cáo tỷ lệ tham dự
 

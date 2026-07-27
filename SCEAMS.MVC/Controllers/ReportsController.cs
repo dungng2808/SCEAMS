@@ -70,6 +70,56 @@ public sealed class ReportsController : Controller
         }
     }
 
+    [HttpGet("ClubActivity")]
+    [Authorize(Roles = "Admin,Staff,Organizer")]
+    public async Task<IActionResult> ClubActivity(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _reportApiClient.GetClubActivityAsync(
+                from,
+                to,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.");
+            }
+
+            return View(new ClubActivityReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Items = result.Report?.Items
+                    .Select(item => new ClubActivityReportItemViewModel
+                    {
+                        ClubId = item.ClubId,
+                        ClubName = item.ClubName,
+                        EventCount = item.EventCount,
+                        RegistrationCount = item.RegistrationCount,
+                        AttendanceCount = item.AttendanceCount,
+                        AverageRating = item.AverageRating
+                    })
+                    .ToList() ?? []
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load Club activity report.");
+            return View(new ClubActivityReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     private async Task<IActionResult> EndInvalidSessionAsync(string message)
     {
         await HttpContext.SignOutAsync(

@@ -64,6 +64,55 @@ public sealed class ReportApiClient : IReportApiClient
         };
     }
 
+    public async Task<ClubActivityReportApiResult> GetClubActivityAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            BuildQuery("api/reports/club-activity", from, to),
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var report = await response.Content
+                .ReadFromJsonAsync<ClubActivityReportApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new ClubActivityReportApiResult
+            {
+                IsSuccess = report is not null,
+                Report = report,
+                ErrorMessage = report is null
+                    ? "API trả về báo cáo hoạt động CLB không hợp lệ."
+                    : null
+            };
+        }
+
+        var message = await ExtractMessageAsync(response, cancellationToken);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new ClubActivityReportApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new ClubActivityReportApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền xem báo cáo hoạt động CLB."
+            },
+            HttpStatusCode.BadRequest => new ClubActivityReportApiResult
+            {
+                IsBadRequest = true,
+                ErrorMessage = message ?? "Khoảng thời gian báo cáo không hợp lệ."
+            },
+            _ => new ClubActivityReportApiResult
+            {
+                ErrorMessage = message ?? "Không thể tải báo cáo hoạt động CLB."
+            }
+        };
+    }
+
     private static string BuildQuery(
         string endpoint,
         DateTime? from,

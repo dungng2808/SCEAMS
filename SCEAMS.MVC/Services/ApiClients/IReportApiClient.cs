@@ -8,4 +8,9 @@ public interface IReportApiClient
         DateTime? from,
         DateTime? to,
         CancellationToken cancellationToken = default);
+
+    Task<ClubActivityReportApiResult> GetClubActivityAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default);
 }
