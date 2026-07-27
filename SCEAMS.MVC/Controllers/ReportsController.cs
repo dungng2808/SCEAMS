@@ -174,6 +174,56 @@ public sealed class ReportsController : Controller
         }
     }
 
+    [HttpGet("VenueUsage")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> VenueUsage(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _reportApiClient.GetVenueUsageAsync(
+                from,
+                to,
+                cancellationToken);
+            if (result.IsUnauthorized && User.Identity?.IsAuthenticated == true)
+            {
+                return await EndInvalidSessionAsync(
+                    result.ErrorMessage ?? "Phiên đăng nhập không còn hợp lệ.",
+                    "/Reports/VenueUsage");
+            }
+
+            return View(new VenueUsageReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = result.IsSuccess ? null : result.ErrorMessage,
+                Items = result.Report?.Items
+                    .Select(item => new VenueUsageReportItemViewModel
+                    {
+                        VenueId = item.VenueId,
+                        VenueName = item.VenueName,
+                        Location = item.Location,
+                        EventCount = item.EventCount,
+                        TotalHours = item.TotalHours
+                    })
+                    .ToList() ?? []
+            });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load Venue usage report.");
+            return View(new VenueUsageReportViewModel
+            {
+                From = from,
+                To = to,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     private async Task<IActionResult> EndInvalidSessionAsync(
         string message,
         string returnUrl = "/Reports/EventSummary")

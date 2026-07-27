@@ -18,4 +18,9 @@ public interface IReportApiClient
         DateTime? from,
         DateTime? to,
         CancellationToken cancellationToken = default);
+
+    Task<VenueUsageReportApiResult> GetVenueUsageAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default);
 }

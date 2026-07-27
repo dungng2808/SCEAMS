@@ -884,9 +884,9 @@ Domain entity/enum
 
 ### Phase 112 - MVC: Báo cáo sử dụng Venue
 
-- [ ] Hiển thị bảng/chart Venue usage.
-- [ ] Có date range filter.
-- [ ] Từ report có link sang Venue schedule.
+- [x] Hiển thị bảng/chart Venue usage.
+- [x] Có date range filter.
+- [x] Từ report có link sang Venue schedule.
 
 ---
 

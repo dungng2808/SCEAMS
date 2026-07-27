@@ -162,6 +162,55 @@ public sealed class ReportApiClient : IReportApiClient
         };
     }
 
+    public async Task<VenueUsageReportApiResult> GetVenueUsageAsync(
+        DateTime? from,
+        DateTime? to,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.GetAsync(
+            BuildQuery("api/reports/venue-usage", from, to),
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var report = await response.Content
+                .ReadFromJsonAsync<VenueUsageReportApiResponse>(
+                    cancellationToken: cancellationToken);
+            return new VenueUsageReportApiResult
+            {
+                IsSuccess = report is not null,
+                Report = report,
+                ErrorMessage = report is null
+                    ? "API trả về báo cáo sử dụng Venue không hợp lệ."
+                    : null
+            };
+        }
+
+        var message = await ExtractMessageAsync(response, cancellationToken);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => new VenueUsageReportApiResult
+            {
+                IsUnauthorized = true,
+                ErrorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
+            },
+            HttpStatusCode.Forbidden => new VenueUsageReportApiResult
+            {
+                IsForbidden = true,
+                ErrorMessage = message ?? "Bạn không có quyền xem báo cáo sử dụng Venue."
+            },
+            HttpStatusCode.BadRequest => new VenueUsageReportApiResult
+            {
+                IsBadRequest = true,
+                ErrorMessage = message ?? "Khoảng thời gian báo cáo không hợp lệ."
+            },
+            _ => new VenueUsageReportApiResult
+            {
+                ErrorMessage = message ?? "Không thể tải báo cáo sử dụng Venue."
+            }
+        };
+    }
+
     private static string BuildQuery(
         string endpoint,
         DateTime? from,
