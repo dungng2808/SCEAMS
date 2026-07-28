@@ -5895,6 +5895,28 @@
             "description": "AIChatService retrieval trước khi gọi provider; context rỗng trả thông báo không tìm thấy, provider chưa cấu hình trả 503."
           },
           "response": []
+        },
+        {
+          "name": "Phase 125 - AI FAQ History - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot/history?page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot", "history"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Student chỉ nhận chat log của chính mình theo claim JWT; pageSize tối đa 50."
+          },
+          "response": []
         }
       ]
     }

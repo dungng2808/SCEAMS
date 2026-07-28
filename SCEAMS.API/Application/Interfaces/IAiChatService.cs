@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using SCEAMS.Application.Common;
 using SCEAMS.Application.DTOs.Chatbot;
 
@@ -7,5 +8,6 @@ public interface IAiChatService
 {
     Task<Result<AiChatResponseDto>> AskAsync(
         AiChatRequestDto request,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken = default);
 }

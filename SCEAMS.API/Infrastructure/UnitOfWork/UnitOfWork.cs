@@ -20,7 +20,7 @@ public sealed class UnitOfWork : IUnitOfWork
     private IRegistrationRepository? _registrations;
     private IGenericRepository<Attendance>? _attendances;
     private IGenericRepository<Feedback>? _feedbacks;
-    private IGenericRepository<ChatLog>? _chatLogs;
+    private IChatLogRepository? _chatLogs;
 
     public UnitOfWork(SceamsDbContext context)
     {
@@ -57,8 +57,8 @@ public sealed class UnitOfWork : IUnitOfWork
     public IGenericRepository<Feedback> Feedbacks =>
         _feedbacks ??= new GenericRepository<Feedback>(_context);
 
-    public IGenericRepository<ChatLog> ChatLogs =>
-        _chatLogs ??= new GenericRepository<ChatLog>(_context);
+    public IChatLogRepository ChatLogs =>
+        _chatLogs ??= new ChatLogRepository(_context);
 
     public Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default)

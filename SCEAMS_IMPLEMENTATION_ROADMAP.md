@@ -977,9 +977,9 @@ Domain entity/enum
 
 ### Phase 125 - API: Lưu và xem lịch sử chatbot
 
-- [ ] Lưu `Question`, `AnswerText`, `RelatedEventIds`, `StudentId`, `CreatedAt`.
-- [ ] Thêm `GET /api/chatbot/history` lấy Student từ JWT và phân trang.
-- [ ] Student chỉ xem log của chính mình.
+- [x] Lưu `Question`, `AnswerText`, `RelatedEventIds`, `StudentId`, `CreatedAt`.
+- [x] Thêm `GET /api/chatbot/history` lấy Student từ JWT và phân trang.
+- [x] Student chỉ xem log của chính mình.
 
 ### Phase 126 - MVC: Lịch sử chatbot
 

@@ -14,7 +14,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IRegistrationRepository Registrations { get; }
     IGenericRepository<Attendance> Attendances { get; }
     IGenericRepository<Feedback> Feedbacks { get; }
-    IGenericRepository<ChatLog> ChatLogs { get; }
+    IChatLogRepository ChatLogs { get; }
 
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default);

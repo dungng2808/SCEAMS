@@ -1564,3 +1564,18 @@ Trang MVC `/Chatbot` gửi câu hỏi tới `POST /api/chatbot/ask`, hiển th�
 lời và link Event liên quan. Khi request đang chạy, nút submit bị vô hiệu hóa
 và đổi nhãn; timeout, `503` provider unavailable, lỗi API và context rỗng đều
 có trạng thái hiển thị riêng.
+
+### Phase 125 — Lịch sử chatbot
+
+Mỗi câu trả lời thành công (kể cả câu hỏi không có Event phù hợp) được lưu vào
+bảng `ChatLogs` với `Question`, `AnswerText`, danh sách ID Event liên quan,
+Student lấy từ claim JWT và `CreatedAt` UTC. Student có thể xem lịch sử của
+chính mình bằng endpoint phân trang:
+
+```text
+GET https://localhost:7069/api/chatbot/history?page=1&pageSize=10
+Authorization: Bearer <student-access-token>
+```
+
+Server bỏ qua mọi Student ID nếu client cố gửi lên; query luôn dùng Student ID
+trong JWT và giới hạn `pageSize` tối đa 50.

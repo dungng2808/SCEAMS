@@ -12,13 +12,16 @@ public sealed class ChatbotController : ApiControllerBase
 {
     private readonly IEventFaqRetrievalService _retrievalService;
     private readonly IAiChatService _aiChatService;
+    private readonly IChatHistoryService _chatHistoryService;
 
     public ChatbotController(
         IEventFaqRetrievalService retrievalService,
-        IAiChatService aiChatService)
+        IAiChatService aiChatService,
+        IChatHistoryService chatHistoryService)
     {
         _retrievalService = retrievalService;
         _aiChatService = aiChatService;
+        _chatHistoryService = chatHistoryService;
     }
 
     [HttpPost("retrieval")]
@@ -49,6 +52,25 @@ public sealed class ChatbotController : ApiControllerBase
     {
         var result = await _aiChatService.AskAsync(
             request,
+            User,
+            cancellationToken);
+
+        return ToActionResult(result);
+    }
+
+    [HttpGet("history")]
+    [ProducesResponseType<ChatHistoryPageDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> History(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _chatHistoryService.GetForCurrentStudentAsync(
+            User,
+            page,
+            pageSize,
             cancellationToken);
 
         return ToActionResult(result);
