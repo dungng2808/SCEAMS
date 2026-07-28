@@ -4779,6 +4779,10 @@ svg {
 .chatbot-state--error { border-color: #fecaca; }
 .chatbot-state--error .chatbot-state__icon { background: var(--sceams-danger-soft); color: var(--sceams-danger); }
 .chatbot-state p:not(.eyebrow) { color: var(--sceams-text-soft); margin: 0.35rem 0 1rem; }
+.chatbot-answer { align-items: flex-start; background: linear-gradient(135deg, #f8fbff, #ffffff); display: flex; gap: 1rem; margin-bottom: 1.5rem; padding: 1.5rem; }
+.chatbot-answer__icon { align-items: center; background: var(--sceams-blue-100); border-radius: 0.8rem; color: var(--sceams-blue-700); display: flex; flex: 0 0 2.75rem; height: 2.75rem; justify-content: center; }
+.chatbot-answer__icon svg { height: 1.4rem; width: 1.4rem; }
+.chatbot-answer__text { color: var(--sceams-text); font-size: 1.05rem; line-height: 1.65; margin: 0.5rem 0 0; max-width: 66ch; white-space: pre-wrap; }
 
 @media (max-width: 767.98px) {
   .chatbot-hero { align-items: flex-start; flex-direction: column; }

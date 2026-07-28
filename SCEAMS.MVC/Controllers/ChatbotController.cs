@@ -42,7 +42,7 @@ public sealed class ChatbotController : Controller
 
         try
         {
-            var result = await _eventFaqApiClient.RetrieveEventsAsync(
+            var result = await _eventFaqApiClient.AskAsync(
                 new EventFaqRetrievalApiRequest(model.Question.Trim()),
                 cancellationToken);
 
@@ -73,6 +73,7 @@ public sealed class ChatbotController : Controller
             {
                 Question = model.Question,
                 HasSearched = true,
+                Answer = result.Answer,
                 RelatedEvents = result.Events.Select(MapEvent).ToList()
             });
         }
@@ -86,7 +87,9 @@ public sealed class ChatbotController : Controller
             {
                 Question = model.Question,
                 HasSearched = true,
-                ErrorMessage = "Không thể kết nối tới API. Hãy kiểm tra API đang chạy và thử lại."
+                ErrorMessage = exception is TaskCanceledException
+                    ? "Trợ lý phản hồi quá lâu. Vui lòng thử lại sau ít phút."
+                    : "Không thể kết nối tới API. Hãy kiểm tra API đang chạy và thử lại."
             });
         }
     }

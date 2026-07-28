@@ -7,9 +7,9 @@
 <main class="chatbot-page" id="main-content">
     <section class="chatbot-hero" aria-labelledby="chatbot-title">
         <div class="chatbot-hero__copy">
-            <p class="eyebrow">Milestone L · Student</p>
+            <p class="eyebrow">Milestone L · AI FAQ Assistant</p>
             <h1 id="chatbot-title">Tìm Event bằng câu hỏi tự nhiên</h1>
-            <p>Nhập điều bạn đang muốn tham gia. Trợ lý sẽ tìm các Event Approved phù hợp, theo thời gian và số chỗ còn lại.</p>
+            <p>Nhập điều bạn đang muốn tham gia. Trợ lý trả lời dựa trên Event Approved và luôn hiển thị nguồn Event để bạn kiểm tra trước khi đăng ký.</p>
         </div>
         <div class="chatbot-hero__badge" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -45,7 +45,7 @@
                     <path d="m21 3-7.5 18-3.5-7-7-3.5L21 3Z" />
                     <path d="M10 14 21 3" />
                 </svg>
-                <span data-submit-label>Tìm Event</span>
+                <span data-submit-label>Hỏi trợ lý</span>
             </button>
         </form>
     </section>
@@ -62,26 +62,25 @@
             </div>
         </section>
     }
-    else if (Model.HasSearched && Model.RelatedEvents.Count == 0)
-    {
-        <section class="chatbot-state chatbot-state--empty surface-card" aria-live="polite">
-            <div class="chatbot-state__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-            </div>
-            <div>
-                <p class="eyebrow">Chưa tìm thấy Event phù hợp</p>
-                <h2>Thử một cách hỏi khác</h2>
-                <p>Chỉ Event Approved và còn trong tương lai được hiển thị. Bạn có thể đổi keyword hoặc bỏ điều kiện “còn chỗ”.</p>
-                <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Index">Xem toàn bộ Event</a>
-            </div>
-        </section>
-    }
     else if (Model.HasSearched)
     {
-        <section class="chatbot-results" aria-labelledby="chatbot-results-title" aria-live="polite">
+        <section class="chatbot-answer surface-card" aria-labelledby="chatbot-answer-title" aria-live="polite">
+            <div class="chatbot-answer__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a7 7 0 0 0-7 7v2a7 7 0 0 0 14 0v-2a7 7 0 0 0-7-7Z" /><path d="M8 19h8M9 21h6" /></svg>
+            </div>
+            <div>
+                <p class="eyebrow">02 · Câu trả lời từ context Event</p>
+                <h2 id="chatbot-answer-title">Trợ lý Event</h2>
+                <p class="chatbot-answer__text">@Model.Answer</p>
+            </div>
+        </section>
+
+        @if (Model.RelatedEvents.Count > 0)
+        {
+            <section class="chatbot-results" aria-labelledby="chatbot-results-title" aria-live="polite">
             <div class="chatbot-results__heading">
                 <div>
-                    <p class="eyebrow">02 · Kết quả retrieval</p>
+                    <p class="eyebrow">03 · Event liên quan</p>
                     <h2 id="chatbot-results-title">Event phù hợp với “@Model.Question”</h2>
                 </div>
                 <span class="chatbot-count">@Model.RelatedEvents.Count kết quả</span>
@@ -109,7 +108,22 @@
                     </article>
                 }
             </div>
-        </section>
+            </section>
+        }
+        else
+        {
+            <section class="chatbot-state chatbot-state--empty surface-card" aria-live="polite">
+                <div class="chatbot-state__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+                </div>
+                <div>
+                    <p class="eyebrow">Không có Event liên quan</p>
+                    <h2>Thử một cách hỏi khác</h2>
+                    <p>Chỉ Event Approved và còn trong tương lai được dùng làm context. Bạn có thể đổi keyword hoặc bỏ điều kiện “còn chỗ”.</p>
+                    <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Index">Xem toàn bộ Event</a>
+                </div>
+            </section>
+        }
     }
 </main>
 

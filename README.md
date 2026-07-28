@@ -1559,3 +1559,8 @@ AI__Model=<provider-model>
 AI__ApiKey=<secret>
 AI__TimeoutSeconds=15
 ```
+
+Trang MVC `/Chatbot` gửi câu hỏi tới `POST /api/chatbot/ask`, hiển thị câu trả
+lời và link Event liên quan. Khi request đang chạy, nút submit bị vô hiệu hóa
+và đổi nhãn; timeout, `503` provider unavailable, lỗi API và context rỗng đều
+có trạng thái hiển thị riêng.

@@ -9,6 +9,7 @@ public sealed class ChatbotViewModel
     public string Question { get; set; } = string.Empty;
     public IReadOnlyList<ChatbotEventViewModel> RelatedEvents { get; init; } = [];
     public bool HasSearched { get; init; }
+    public string? Answer { get; init; }
     public string? ErrorMessage { get; init; }
 }
 

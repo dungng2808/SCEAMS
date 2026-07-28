@@ -971,9 +971,9 @@ Domain entity/enum
 
 ### Phase 124 - MVC: Giao diện AI FAQ
 
-- [ ] Tạo giao diện hỏi-đáp đơn giản.
-- [ ] Hiển thị `answer` và các `relatedEvents` có link tới chi tiết/đăng ký.
-- [ ] Có loading, timeout, provider unavailable và empty-result state.
+- [x] Tạo giao diện hỏi-đáp đơn giản.
+- [x] Hiển thị `answer` và các `relatedEvents` có link tới chi tiết/đăng ký.
+- [x] Có loading, timeout, provider unavailable và empty-result state.
 
 ### Phase 125 - API: Lưu và xem lịch sử chatbot
 
