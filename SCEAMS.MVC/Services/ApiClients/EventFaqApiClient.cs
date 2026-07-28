@@ -82,6 +82,9 @@ public sealed class EventFaqApiClient : IEventFaqApiClient
         return new AiChatApiResult
         {
             StatusCode = (int)response.StatusCode,
+            RetryAfterSeconds = response.Headers.RetryAfter?.Delta is { } delta
+                ? Math.Max(1, (int)Math.Ceiling(delta.TotalSeconds))
+                : null,
             ErrorMessage = ApiProblemDetailsParser.GetMessage(content) ??
                 response.StatusCode switch
                 {

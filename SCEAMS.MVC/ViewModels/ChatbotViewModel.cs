@@ -11,6 +11,7 @@ public sealed class ChatbotViewModel
     public bool HasSearched { get; init; }
     public string? Answer { get; init; }
     public string? ErrorMessage { get; init; }
+    public DateTimeOffset? RateLimitUntilUtc { get; init; }
 }
 
 public sealed class ChatbotEventViewModel

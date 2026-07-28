@@ -1595,3 +1595,7 @@ client.
 API đếm các chat log thành công của Student trong cửa sổ trượt một giờ. Từ câu
 hỏi thứ 11, `POST /api/chatbot/ask` trả `429 Too Many Requests`, header
 `Retry-After` tính theo chat log cũ nhất và không chạy retrieval/provider.
+
+MVC đọc header này tại `/Chatbot`, hiển thị countdown và vô hiệu hóa nút hỏi
+trong thời gian chờ; khi hết thời gian, form tự mở lại để Student thử câu hỏi
+mới.

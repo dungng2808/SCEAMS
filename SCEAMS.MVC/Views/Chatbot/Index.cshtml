@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Trợ lý Event";
+    var isRateLimited = Model.RateLimitUntilUtc > DateTimeOffset.UtcNow;
 }
 
 <main class="chatbot-page" id="main-content">
@@ -40,7 +41,7 @@
                 <span asp-validation-for="Question" class="field-validation-error" id="chatbot-error"></span>
                 <small id="chatbot-hint">Tối đa 500 ký tự · hỗ trợ keyword, hôm nay, tuần này, tháng này và còn chỗ.</small>
             </div>
-            <button class="btn-app btn-app--primary chatbot-submit" type="submit" id="chatbot-submit">
+            <button class="btn-app btn-app--primary chatbot-submit" type="submit" id="chatbot-submit" disabled="@(isRateLimited ? "disabled" : null)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <path d="m21 3-7.5 18-3.5-7-7-3.5L21 3Z" />
                     <path d="M10 14 21 3" />
@@ -58,7 +59,16 @@
                 <p class="eyebrow">Không thể hoàn tất truy vấn</p>
                 <h2>API đang gián đoạn</h2>
                 <p>@Model.ErrorMessage</p>
-                <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('chatbot-form').submit();">Thử lại</button>
+                @if (Model.RateLimitUntilUtc is not null)
+                {
+                    <p class="chatbot-rate-limit" id="chatbot-rate-limit" data-retry-until="@Model.RateLimitUntilUtc.Value.ToUnixTimeMilliseconds()" aria-live="polite">
+                        Bạn có thể hỏi lại sau <strong data-rate-limit-countdown>đang tính thời gian…</strong>.
+                    </p>
+                }
+                @if (!isRateLimited)
+                {
+                    <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('chatbot-form').submit();">Thử lại</button>
+                }
             </div>
         </section>
     }
@@ -134,7 +144,33 @@
             const form = document.getElementById('chatbot-form');
             const submit = document.getElementById('chatbot-submit');
             if (!form || !submit) return;
+            const rateLimit = document.getElementById('chatbot-rate-limit');
+            const countdown = rateLimit?.querySelector('[data-rate-limit-countdown]');
+            const retryUntil = Number(rateLimit?.dataset.retryUntil ?? 0);
+            const updateRateLimit = () => {
+                if (!countdown || !retryUntil) return true;
+                const remaining = Math.max(0, retryUntil - Date.now());
+                if (remaining === 0) {
+                    countdown.textContent = 'bây giờ';
+                    submit.disabled = false;
+                    submit.removeAttribute('aria-disabled');
+                    return false;
+                }
+                const seconds = Math.ceil(remaining / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const rest = seconds % 60;
+                countdown.textContent = minutes > 0 ? `${minutes} phút ${rest} giây` : `${rest} giây`;
+                submit.disabled = true;
+                submit.setAttribute('aria-disabled', 'true');
+                return true;
+            };
+            if (updateRateLimit()) {
+                const timer = window.setInterval(() => {
+                    if (!updateRateLimit()) window.clearInterval(timer);
+                }, 1000);
+            }
             form.addEventListener('submit', () => {
+                if (retryUntil && Date.now() < retryUntil) return;
                 submit.disabled = true;
                 submit.setAttribute('aria-busy', 'true');
                 const label = submit.querySelector('[data-submit-label]');

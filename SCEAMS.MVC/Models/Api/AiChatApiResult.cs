@@ -7,6 +7,7 @@ public sealed class AiChatApiResult
     public bool IsUnauthorized => StatusCode == 401;
     public bool IsForbidden => StatusCode == 403;
     public bool IsProviderUnavailable => StatusCode == 503;
+    public int? RetryAfterSeconds { get; init; }
     public string Answer { get; init; } = string.Empty;
     public IReadOnlyList<EventFaqEventApiResponse> Events { get; init; } = [];
     public string? ErrorMessage { get; init; }

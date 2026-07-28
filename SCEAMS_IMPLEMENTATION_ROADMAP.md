@@ -995,9 +995,9 @@ Domain entity/enum
 
 ### Phase 128 - MVC: Hiển thị rate limit
 
-- [ ] Parse `429` và hiển thị thời điểm được hỏi lại.
-- [ ] Vô hiệu hóa form trong thời gian cần chờ.
-- [ ] Kiểm thử bằng giới hạn thấp ở development.
+- [x] Parse `429` và hiển thị thời điểm được hỏi lại.
+- [x] Vô hiệu hóa form trong thời gian cần chờ.
+- [x] Kiểm thử bằng giới hạn thấp ở development.
 
 ---
 

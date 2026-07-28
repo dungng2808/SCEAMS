@@ -65,7 +65,10 @@ public sealed class ChatbotController : Controller
                     Question = model.Question,
                     HasSearched = true,
                     ErrorMessage = result.ErrorMessage ??
-                        "Không thể truy vấn Event lúc này."
+                        "Không thể truy vấn Event lúc này.",
+                    RateLimitUntilUtc = result.RetryAfterSeconds is > 0
+                        ? DateTimeOffset.UtcNow.AddSeconds(result.RetryAfterSeconds.Value)
+                        : null
                 });
             }
 
