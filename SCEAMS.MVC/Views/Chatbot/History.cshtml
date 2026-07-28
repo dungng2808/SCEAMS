@@ -1,0 +1,92 @@
+@model SCEAMS.MVC.ViewModels.ChatHistoryViewModel
+
+@{
+    ViewData["Title"] = "Lịch sử hỏi đáp";
+}
+
+<main class="chatbot-page" id="main-content">
+    <header class="chatbot-history-hero" aria-labelledby="chat-history-title">
+        <div>
+            <p class="eyebrow">Milestone L · Student</p>
+            <h1 id="chat-history-title">Lịch sử hỏi đáp</h1>
+            <p>Những câu hỏi và câu trả lời của riêng bạn được lưu để xem lại. Dữ liệu được lấy theo Student ID trong phiên đăng nhập.</p>
+        </div>
+        <a class="btn-app btn-app--primary" asp-action="Index">Hỏi trợ lý</a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <section class="chatbot-state chatbot-state--error surface-card" role="alert">
+            <div class="chatbot-state__icon" aria-hidden="true">!</div>
+            <div>
+                <p class="eyebrow">Kết nối gián đoạn</p>
+                <h2>Chưa thể tải lịch sử</h2>
+                <p>@Model.ErrorMessage</p>
+                <a class="btn-app btn-app--ghost" asp-action="History" asp-route-page="@Model.Page" asp-route-pageSize="@Model.PageSize">Thử lại</a>
+            </div>
+        </section>
+    }
+    else if (Model.Items.Count == 0)
+    {
+        <section class="chatbot-state chatbot-state--empty surface-card" aria-live="polite">
+            <div class="chatbot-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5h16v14H4z" /><path d="M8 9h8M8 13h5" /></svg>
+            </div>
+            <div>
+                <p class="eyebrow">Chưa có lịch sử</p>
+                <h2>Bắt đầu bằng một câu hỏi</h2>
+                <p>Câu trả lời sau mỗi lần hỏi trợ lý sẽ xuất hiện ở đây.</p>
+                <a class="btn-app btn-app--primary" asp-action="Index">Hỏi trợ lý Event</a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section aria-labelledby="chat-history-list-title">
+            <div class="chatbot-results__heading">
+                <div>
+                    <p class="eyebrow">Kho lưu cá nhân</p>
+                    <h2 id="chat-history-list-title">@Model.TotalItems cuộc trò chuyện</h2>
+                </div>
+                <span class="chatbot-count">Trang @Model.Page/@Model.TotalPages</span>
+            </div>
+            <div class="chat-history-list">
+                @foreach (var item in Model.Items)
+                {
+                    <article class="chat-history-card surface-card">
+                        <div class="chat-history-card__top">
+                            <span class="chat-history-card__number">#@item.Id</span>
+                            <time datetime="@item.CreatedAt.ToUniversalTime().ToString("O")">@item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy · HH:mm")</time>
+                        </div>
+                        <h3>@item.Question</h3>
+                        <p class="chat-history-card__answer">@item.AnswerText</p>
+                        @if (item.RelatedEventIds.Count > 0)
+                        {
+                            <div class="chat-history-card__events" aria-label="Event liên quan">
+                                <span>Event liên quan</span>
+                                @foreach (var eventId in item.RelatedEventIds)
+                                {
+                                    <a asp-controller="Events" asp-action="Detail" asp-route-id="@eventId">Xem Event #@eventId</a>
+                                }
+                            </div>
+                        }
+                    </article>
+                }
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="chat-history-pagination" aria-label="Phân trang lịch sử chatbot">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a class="btn-app btn-app--ghost" asp-action="History" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">&larr; Mới hơn</a>
+                    }
+                    <span>Trang @Model.Page/@Model.TotalPages</span>
+                    @if (Model.HasNextPage)
+                    {
+                        <a class="btn-app btn-app--ghost" asp-action="History" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Cũ hơn &rarr;</a>
+                    }
+                </nav>
+            }
+        </section>
+    }
+</main>

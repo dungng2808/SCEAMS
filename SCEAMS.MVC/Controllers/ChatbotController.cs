@@ -94,6 +94,60 @@ public sealed class ChatbotController : Controller
         }
     }
 
+    [HttpGet("History")]
+    public async Task<IActionResult> History(
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        try
+        {
+            var result = await _eventFaqApiClient.GetHistoryAsync(
+                normalizedPage,
+                normalizedPageSize,
+                cancellationToken);
+            if (result.IsUnauthorized)
+            {
+                return await EndInvalidSessionAsync();
+            }
+
+            if (result.IsForbidden)
+            {
+                return RedirectToAction(
+                    nameof(AccountController.AccessDenied),
+                    "Account");
+            }
+
+            if (!result.IsSuccess || result.Page is null)
+            {
+                return View(new ChatHistoryViewModel
+                {
+                    Page = normalizedPage,
+                    PageSize = normalizedPageSize,
+                    ErrorMessage = result.ErrorMessage ??
+                        "Không thể tải lịch sử chatbot."
+                });
+            }
+
+            return View(MapHistory(result.Page));
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or
+            TaskCanceledException or
+            System.Text.Json.JsonException)
+        {
+            _logger.LogWarning(exception, "Unable to load chatbot history from API.");
+            return View(new ChatHistoryViewModel
+            {
+                Page = normalizedPage,
+                PageSize = normalizedPageSize,
+                ErrorMessage = "Không thể kết nối tới API. Vui lòng thử lại sau."
+            });
+        }
+    }
+
     private async Task<IActionResult> EndInvalidSessionAsync()
     {
         await HttpContext.SignOutAsync(
@@ -119,6 +173,27 @@ public sealed class ChatbotController : Controller
             Capacity = item.Capacity,
             RegisteredCount = item.RegisteredCount,
             SlotsRemaining = item.SlotsRemaining
+        };
+    }
+
+    private static ChatHistoryViewModel MapHistory(ChatHistoryPageApiResponse page)
+    {
+        return new ChatHistoryViewModel
+        {
+            Page = page.Page,
+            PageSize = page.PageSize,
+            TotalItems = page.TotalItems,
+            TotalPages = page.TotalPages,
+            HasPreviousPage = page.HasPreviousPage,
+            HasNextPage = page.HasNextPage,
+            Items = page.Items.Select(item => new ChatHistoryItemViewModel
+            {
+                Id = item.Id,
+                Question = item.Question,
+                AnswerText = item.AnswerText,
+                RelatedEventIds = item.RelatedEventIds,
+                CreatedAt = item.CreatedAt
+            }).ToList()
         };
     }
 }

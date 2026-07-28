@@ -92,4 +92,44 @@ public sealed class EventFaqApiClient : IEventFaqApiClient
                 }
         };
     }
+
+    public async Task<ChatHistoryApiResult> GetHistoryAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Clamp(pageSize, 1, 50);
+        using var response = await _httpClient.GetAsync(
+            $"api/chatbot/history?page={normalizedPage}&pageSize={normalizedPageSize}",
+            cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var payload = JsonSerializer.Deserialize<ChatHistoryPageApiResponse>(
+                content,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            return new ChatHistoryApiResult
+            {
+                IsSuccess = payload is not null,
+                StatusCode = (int)response.StatusCode,
+                Page = payload,
+                ErrorMessage = payload is null
+                    ? "API trả về lịch sử chatbot không hợp lệ."
+                    : null
+            };
+        }
+
+        return new ChatHistoryApiResult
+        {
+            StatusCode = (int)response.StatusCode,
+            ErrorMessage = ApiProblemDetailsParser.GetMessage(content) ??
+                response.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized => "Phiên đăng nhập đã hết hạn hoặc không hợp lệ.",
+                    HttpStatusCode.Forbidden => "Bạn không có quyền xem lịch sử chatbot.",
+                    _ => "Không thể tải lịch sử chatbot lúc này."
+                }
+        };
+    }
 }

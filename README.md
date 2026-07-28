@@ -1579,3 +1579,13 @@ Authorization: Bearer <student-access-token>
 
 Server bỏ qua mọi Student ID nếu client cố gửi lên; query luôn dùng Student ID
 trong JWT và giới hạn `pageSize` tối đa 50.
+
+MVC hiển thị lịch sử tại:
+
+```text
+https://localhost:7034/Chatbot/History
+```
+
+Trang có empty/error state, phân trang và link tới Event liên quan. Student A
+không thể đổi query để đọc log của Student B vì API không nhận Student ID từ
+client.

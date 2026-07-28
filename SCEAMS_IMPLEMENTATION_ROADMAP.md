@@ -983,9 +983,9 @@ Domain entity/enum
 
 ### Phase 126 - MVC: Lịch sử chatbot
 
-- [ ] Tạo trang My Chat History.
-- [ ] Hiển thị câu hỏi, câu trả lời, thời gian và related Event.
-- [ ] Kiểm thử Student A không thể xem lịch sử Student B.
+- [x] Tạo trang My Chat History.
+- [x] Hiển thị câu hỏi, câu trả lời, thời gian và related Event.
+- [x] Kiểm thử Student A không thể xem lịch sử Student B.
 
 ### Phase 127 - API: Giới hạn 10 câu hỏi/giờ
 

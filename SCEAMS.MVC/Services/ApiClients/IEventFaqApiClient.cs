@@ -11,4 +11,9 @@ public interface IEventFaqApiClient
     Task<AiChatApiResult> AskAsync(
         EventFaqRetrievalApiRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<ChatHistoryApiResult> GetHistoryAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

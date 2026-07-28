@@ -25,3 +25,24 @@ public sealed class ChatbotEventViewModel
     public int RegisteredCount { get; init; }
     public int SlotsRemaining { get; init; }
 }
+
+public sealed class ChatHistoryViewModel
+{
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+    public int TotalItems { get; init; }
+    public int TotalPages { get; init; }
+    public bool HasPreviousPage { get; init; }
+    public bool HasNextPage { get; init; }
+    public string? ErrorMessage { get; init; }
+    public IReadOnlyList<ChatHistoryItemViewModel> Items { get; init; } = [];
+}
+
+public sealed class ChatHistoryItemViewModel
+{
+    public int Id { get; init; }
+    public string Question { get; init; } = string.Empty;
+    public string AnswerText { get; init; } = string.Empty;
+    public IReadOnlyList<int> RelatedEventIds { get; init; } = [];
+    public DateTime CreatedAt { get; init; }
+}
