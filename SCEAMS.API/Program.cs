@@ -178,6 +178,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<
     IRegistrationRepository,
     RegistrationRepository>();
+builder.Services.AddScoped<IChatLogRepository, ChatLogRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IHealthService, HealthService>();
