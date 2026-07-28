@@ -1,0 +1,131 @@
+@model SCEAMS.MVC.ViewModels.ChatbotViewModel
+
+@{
+    ViewData["Title"] = "Trợ lý Event";
+}
+
+<main class="chatbot-page" id="main-content">
+    <section class="chatbot-hero" aria-labelledby="chatbot-title">
+        <div class="chatbot-hero__copy">
+            <p class="eyebrow">Milestone L · Student</p>
+            <h1 id="chatbot-title">Tìm Event bằng câu hỏi tự nhiên</h1>
+            <p>Nhập điều bạn đang muốn tham gia. Trợ lý sẽ tìm các Event Approved phù hợp, theo thời gian và số chỗ còn lại.</p>
+        </div>
+        <div class="chatbot-hero__badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 3a7 7 0 0 0-7 7v2a7 7 0 0 0 14 0v-2a7 7 0 0 0-7-7Z" />
+                <path d="M8 19h8M9 21h6M9 10h.01M15 10h.01" />
+            </svg>
+            <span>Event Finder</span>
+        </div>
+    </section>
+
+    <section class="chatbot-search surface-card" aria-labelledby="chatbot-search-title">
+        <div class="chatbot-search__heading">
+            <span class="chatbot-step">01</span>
+            <div>
+                <h2 id="chatbot-search-title">Bạn muốn tìm gì?</h2>
+                <p>Thử: “Workshop AI hôm nay còn chỗ” hoặc “sự kiện tháng này”.</p>
+            </div>
+        </div>
+        <form asp-controller="Chatbot" asp-action="Index" method="post" class="chatbot-search__form" id="chatbot-form">
+            @Html.AntiForgeryToken()
+            <div class="chatbot-field">
+                <label asp-for="Question">Câu hỏi của bạn <span aria-hidden="true">*</span></label>
+                <input asp-for="Question"
+                       autocomplete="off"
+                       placeholder="Ví dụ: Workshop kỹ năng tuần này còn chỗ?"
+                       aria-describedby="chatbot-hint chatbot-error"
+                       autofocus />
+                <span asp-validation-for="Question" class="field-validation-error" id="chatbot-error"></span>
+                <small id="chatbot-hint">Tối đa 500 ký tự · hỗ trợ keyword, hôm nay, tuần này, tháng này và còn chỗ.</small>
+            </div>
+            <button class="btn-app btn-app--primary chatbot-submit" type="submit" id="chatbot-submit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="m21 3-7.5 18-3.5-7-7-3.5L21 3Z" />
+                    <path d="M10 14 21 3" />
+                </svg>
+                <span data-submit-label>Tìm Event</span>
+            </button>
+        </form>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <section class="chatbot-state chatbot-state--error surface-card" role="alert" aria-live="assertive">
+            <div class="chatbot-state__icon" aria-hidden="true">!</div>
+            <div>
+                <p class="eyebrow">Không thể hoàn tất truy vấn</p>
+                <h2>API đang gián đoạn</h2>
+                <p>@Model.ErrorMessage</p>
+                <button type="button" class="btn-app btn-app--ghost" onclick="document.getElementById('chatbot-form').submit();">Thử lại</button>
+            </div>
+        </section>
+    }
+    else if (Model.HasSearched && Model.RelatedEvents.Count == 0)
+    {
+        <section class="chatbot-state chatbot-state--empty surface-card" aria-live="polite">
+            <div class="chatbot-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+            </div>
+            <div>
+                <p class="eyebrow">Chưa tìm thấy Event phù hợp</p>
+                <h2>Thử một cách hỏi khác</h2>
+                <p>Chỉ Event Approved và còn trong tương lai được hiển thị. Bạn có thể đổi keyword hoặc bỏ điều kiện “còn chỗ”.</p>
+                <a class="btn-app btn-app--ghost" asp-controller="Events" asp-action="Index">Xem toàn bộ Event</a>
+            </div>
+        </section>
+    }
+    else if (Model.HasSearched)
+    {
+        <section class="chatbot-results" aria-labelledby="chatbot-results-title" aria-live="polite">
+            <div class="chatbot-results__heading">
+                <div>
+                    <p class="eyebrow">02 · Kết quả retrieval</p>
+                    <h2 id="chatbot-results-title">Event phù hợp với “@Model.Question”</h2>
+                </div>
+                <span class="chatbot-count">@Model.RelatedEvents.Count kết quả</span>
+            </div>
+            <div class="chatbot-results__grid">
+                @foreach (var item in Model.RelatedEvents)
+                {
+                    <article class="chatbot-event-card surface-card">
+                        <div class="chatbot-event-card__top">
+                            <span class="status-badge status-badge--success">Approved</span>
+                            <span class="chatbot-event-card__slots @(item.SlotsRemaining > 0 ? "is-open" : "is-full")">
+                                @(item.SlotsRemaining > 0 ? $"Còn {item.SlotsRemaining} chỗ" : "Đã đủ chỗ")
+                            </span>
+                        </div>
+                        <h3>@item.Title</h3>
+                        <dl class="chatbot-event-card__meta">
+                            <div><dt>CLB</dt><dd>@item.ClubName</dd></div>
+                            <div><dt>Thời gian</dt><dd>@item.StartTime.ToLocalTime().ToString("dd/MM/yyyy · HH:mm") – @item.EndTime.ToLocalTime().ToString("HH:mm")</dd></div>
+                            <div><dt>Địa điểm</dt><dd>@item.VenueName</dd></div>
+                        </dl>
+                        <div class="chatbot-event-card__footer">
+                            <small>@item.RegisteredCount/@item.Capacity đã đăng ký</small>
+                            <a class="btn-app btn-app--primary btn-sm" asp-controller="Events" asp-action="Detail" asp-route-id="@item.Id">Xem chi tiết</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const form = document.getElementById('chatbot-form');
+            const submit = document.getElementById('chatbot-submit');
+            if (!form || !submit) return;
+            form.addEventListener('submit', () => {
+                submit.disabled = true;
+                submit.setAttribute('aria-busy', 'true');
+                const label = submit.querySelector('[data-submit-label]');
+                if (label) label.textContent = 'Đang tìm…';
+            }, { once: true });
+        })();
+    </script>
+}

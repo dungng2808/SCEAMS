@@ -957,9 +957,9 @@ Domain entity/enum
 
 ### Phase 122 - MVC: Trang kiểm thử retrieval
 
-- [ ] Tạo trang Student nhập câu hỏi và xem Event retrieval được.
-- [ ] Hiển thị title, club, time, venue và slots remaining.
-- [ ] Xác nhận không có Event Draft/Pending trong kết quả.
+- [x] Tạo trang Student nhập câu hỏi và xem Event retrieval được.
+- [x] Hiển thị title, club, time, venue và slots remaining.
+- [x] Xác nhận không có Event Draft/Pending trong kết quả.
 
 ### Phase 123 - API: Sinh câu trả lời bằng AI provider
 

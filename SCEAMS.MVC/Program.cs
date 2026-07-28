@@ -208,6 +208,17 @@ builder.Services.AddHttpClient<IClubMembershipApiClient, ClubMembershipApiClient
         client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
     })
     .AddHttpMessageHandler<BearerTokenHandler>();
+builder.Services.AddHttpClient<IEventFaqApiClient, EventFaqApiClient>(
+    (serviceProvider, client) =>
+    {
+        var settings = serviceProvider
+            .GetRequiredService<IOptions<ApiSettings>>()
+            .Value;
+
+        client.BaseAddress = new Uri(settings.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+    })
+    .AddHttpMessageHandler<BearerTokenHandler>();
 
 
 var app = builder.Build();

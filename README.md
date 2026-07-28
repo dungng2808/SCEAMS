@@ -1517,3 +1517,14 @@ này`, `tháng này` và điều kiện `còn chỗ`/`còn slot`. Mốc ngày đ
 `title`, `clubName`, `venueName`, `startTime`, `endTime`, `capacity`,
 `registeredCount` và `slotsRemaining`. Câu hỏi không có kết quả vẫn trả `200`
 với `relatedEvents: []` để MVC hiển thị empty state.
+
+Student đăng nhập có thể mở trang MVC:
+
+```text
+https://localhost:7034/Chatbot
+```
+
+Trang dùng typed `IEventFaqApiClient`, tự gắn Bearer token qua handler dùng
+chung, có anti-forgery token, loading feedback khi submit, empty state và lỗi
+kết nối/401/403 rõ ràng. Các liên kết Event trên kết quả đi tới trang chi tiết
+để Student tiếp tục đăng ký.
