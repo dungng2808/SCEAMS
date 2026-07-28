@@ -55,6 +55,13 @@ public sealed class ChatbotController : ApiControllerBase
             User,
             cancellationToken);
 
+        if (!result.Success &&
+            result.StatusCode == StatusCodes.Status429TooManyRequests &&
+            result.ErrorData is RateLimitErrorDto rateLimit)
+        {
+            Response.Headers.RetryAfter = rateLimit.RetryAfterSeconds.ToString();
+        }
+
         return ToActionResult(result);
     }
 

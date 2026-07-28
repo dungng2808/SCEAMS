@@ -11,15 +11,18 @@ public sealed class AiChatService : IAiChatService
     private readonly IEventFaqRetrievalService _retrievalService;
     private readonly IAiProvider _aiProvider;
     private readonly IChatHistoryService _chatHistoryService;
+    private readonly IChatRateLimiter _chatRateLimiter;
 
     public AiChatService(
         IEventFaqRetrievalService retrievalService,
         IAiProvider aiProvider,
-        IChatHistoryService chatHistoryService)
+        IChatHistoryService chatHistoryService,
+        IChatRateLimiter chatRateLimiter)
     {
         _retrievalService = retrievalService;
         _aiProvider = aiProvider;
         _chatHistoryService = chatHistoryService;
+        _chatRateLimiter = chatRateLimiter;
     }
 
     public async Task<Result<AiChatResponseDto>> AskAsync(
@@ -28,6 +31,17 @@ public sealed class AiChatService : IAiChatService
         CancellationToken cancellationToken = default)
     {
         var question = request.Question.Trim();
+        var rateLimit = await _chatRateLimiter.CheckAsync(
+            user,
+            cancellationToken);
+        if (!rateLimit.Success)
+        {
+            return Result<AiChatResponseDto>.Fail(
+                rateLimit.Message,
+                rateLimit.StatusCode,
+                rateLimit.ErrorData!);
+        }
+
         var retrieval = await _retrievalService.RetrieveAsync(
             new EventFaqRetrievalRequestDto { Question = question },
             cancellationToken);

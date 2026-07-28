@@ -40,4 +40,29 @@ public sealed class ChatLogRepository : IChatLogRepository
     {
         return _context.ChatLogs.AddAsync(chatLog, cancellationToken).AsTask();
     }
+
+    public Task<int> CountSinceAsync(
+        int studentId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.ChatLogs.CountAsync(
+            chatLog => chatLog.StudentId == studentId &&
+                chatLog.CreatedAt >= sinceUtc,
+            cancellationToken);
+    }
+
+    public Task<DateTime?> GetOldestSinceAsync(
+        int studentId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.ChatLogs
+            .AsNoTracking()
+            .Where(chatLog => chatLog.StudentId == studentId &&
+                chatLog.CreatedAt >= sinceUtc)
+            .OrderBy(chatLog => chatLog.CreatedAt)
+            .Select(chatLog => (DateTime?)chatLog.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

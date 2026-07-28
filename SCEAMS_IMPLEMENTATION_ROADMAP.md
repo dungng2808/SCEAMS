@@ -989,9 +989,9 @@ Domain entity/enum
 
 ### Phase 127 - API: Giới hạn 10 câu hỏi/giờ
 
-- [ ] Áp dụng BR11 theo Student ID.
-- [ ] Request vượt giới hạn trả `429 Too Many Requests` và `Retry-After`.
-- [ ] Không gọi AI provider khi đã vượt giới hạn.
+- [x] Áp dụng BR11 theo Student ID.
+- [x] Request vượt giới hạn trả `429 Too Many Requests` và `Retry-After`.
+- [x] Không gọi AI provider khi đã vượt giới hạn.
 
 ### Phase 128 - MVC: Hiển thị rate limit
 

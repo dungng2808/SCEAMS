@@ -1589,3 +1589,9 @@ https://localhost:7034/Chatbot/History
 Trang có empty/error state, phân trang và link tới Event liên quan. Student A
 không thể đổi query để đọc log của Student B vì API không nhận Student ID từ
 client.
+
+### Phase 127 — Giới hạn câu hỏi
+
+API đếm các chat log thành công của Student trong cửa sổ trượt một giờ. Từ câu
+hỏi thứ 11, `POST /api/chatbot/ask` trả `429 Too Many Requests`, header
+`Retry-After` tính theo chat log cũ nhất và không chạy retrieval/provider.

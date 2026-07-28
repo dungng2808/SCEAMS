@@ -29,6 +29,17 @@ public class Result
         Message = message,
         StatusCode = statusCode
     };
+
+    public static Result Fail(
+        string message,
+        int statusCode,
+        object errorData) => new()
+    {
+        Success = false,
+        Message = message,
+        StatusCode = statusCode,
+        ErrorData = errorData
+    };
 }
 
 public class Result<T> : Result
@@ -59,7 +70,7 @@ public class Result<T> : Result
         Data = default
     };
 
-    public static Result<T> Fail(
+    public new static Result<T> Fail(
         string message,
         int statusCode,
         object errorData) => new()

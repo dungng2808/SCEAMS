@@ -193,6 +193,7 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventFaqRetrievalService, EventFaqRetrievalService>();
 builder.Services.AddScoped<IAiChatService, AiChatService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+builder.Services.AddScoped<IChatRateLimiter, ChatRateLimiter>();
 builder.Services.Configure<AiProviderOptions>(
     builder.Configuration.GetSection(AiProviderOptions.SectionName));
 builder.Services.AddHttpClient<IAiProvider, HttpAiProvider>(

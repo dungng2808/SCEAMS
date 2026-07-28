@@ -14,4 +14,14 @@ public interface IChatLogRepository
     Task AddAsync(
         ChatLog chatLog,
         CancellationToken cancellationToken = default);
+
+    Task<int> CountSinceAsync(
+        int studentId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default);
+
+    Task<DateTime?> GetOldestSinceAsync(
+        int studentId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default);
 }

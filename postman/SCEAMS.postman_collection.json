@@ -5892,7 +5892,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "chatbot", "ask"]
             },
-            "description": "AIChatService retrieval trước khi gọi provider; context rỗng trả thông báo không tìm thấy, provider chưa cấu hình trả 503."
+            "description": "AIChatService retrieval trước khi gọi provider; context rỗng trả thông báo không tìm thấy, provider chưa cấu hình trả 503. Sau 10 chat log trong một giờ, request trả 429 + Retry-After và không gọi provider."
           },
           "response": []
         },
