@@ -189,6 +189,7 @@ builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IEventFaqRetrievalService, EventFaqRetrievalService>();
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
 builder.Services.Configure<EventReminderOptions>(
     builder.Configuration.GetSection(EventReminderOptions.SectionName));

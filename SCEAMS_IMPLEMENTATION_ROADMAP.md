@@ -951,9 +951,9 @@ Domain entity/enum
 
 ### Phase 121 - API: Retrieval Event không dùng AI
 
-- [ ] Tạo hàm parse keyword, `hôm nay`, `tuần này`, `tháng này` và điều kiện còn chỗ.
-- [ ] Truy vấn tối đa 5-10 Event `Approved`, sắp xếp theo StartTime.
-- [ ] Kiểm thử retrieval bằng dữ liệu cố định và test clock.
+- [x] Tạo hàm parse keyword, `hôm nay`, `tuần này`, `tháng này` và điều kiện còn chỗ.
+- [x] Truy vấn tối đa 5-10 Event `Approved`, sắp xếp theo StartTime.
+- [x] Kiểm thử retrieval bằng dữ liệu cố định và test clock.
 
 ### Phase 122 - MVC: Trang kiểm thử retrieval
 

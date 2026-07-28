@@ -5849,6 +5849,29 @@
             "description": "Phase 103 trả averageRating, totalFeedback và feedback list không lộ Student data nhạy cảm."
           },
           "response": []
+        },
+        {
+          "name": "Phase 121 - AI FAQ Event Retrieval - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Workshop AI hôm nay còn chỗ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot/retrieval",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot", "retrieval"]
+            },
+            "description": "Student retrieval không dùng AI: chỉ Event Approved, tối đa 10 kết quả, hỗ trợ keyword, hôm nay/tuần này/tháng này và còn chỗ."
+          },
+          "response": []
         }
       ]
     }

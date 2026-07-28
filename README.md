@@ -1494,3 +1494,26 @@ thể chạy thủ công:
 POST https://localhost:7069/api/reminders/run
 Authorization: Bearer <admin-or-staff-access-token>
 ```
+
+## AI FAQ — Phase 121: Retrieval Event không dùng AI
+
+Student có thể gửi câu hỏi tự nhiên tới endpoint retrieval để lấy tối đa 10
+Event `Approved` sắp xếp theo `StartTime`. Retrieval không gọi AI provider và
+không trả Event `Draft`, `PendingApproval` hoặc Event đã bắt đầu.
+
+```text
+POST https://localhost:7069/api/chatbot/retrieval
+Authorization: Bearer <student-access-token>
+Content-Type: application/json
+
+{
+  "question": "Workshop AI hôm nay còn chỗ"
+}
+```
+
+Parser hỗ trợ keyword theo title/description/club/venue, mốc `hôm nay`, `tuần
+này`, `tháng này` và điều kiện `còn chỗ`/`còn slot`. Mốc ngày được tính theo
+`Asia/Ho_Chi_Minh`, còn thời gian trong database là UTC. Response gồm
+`title`, `clubName`, `venueName`, `startTime`, `endTime`, `capacity`,
+`registeredCount` và `slotsRemaining`. Câu hỏi không có kết quả vẫn trả `200`
+với `relatedEvents: []` để MVC hiển thị empty state.
