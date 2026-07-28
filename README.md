@@ -1528,3 +1528,34 @@ Trang dùng typed `IEventFaqApiClient`, tự gắn Bearer token qua handler dùn
 chung, có anti-forgery token, loading feedback khi submit, empty state và lỗi
 kết nối/401/403 rõ ràng. Các liên kết Event trên kết quả đi tới trang chi tiết
 để Student tiếp tục đăng ký.
+
+### Phase 123 — Sinh câu trả lời bằng AI provider
+
+Khi đã cấu hình provider, Student có thể gọi:
+
+```text
+POST https://localhost:7069/api/chatbot/ask
+Authorization: Bearer <student-access-token>
+Content-Type: application/json
+
+{
+  "question": "Workshop AI hôm nay còn chỗ không?"
+}
+```
+
+`AiChatService` luôn chạy retrieval trước, chỉ đưa title/club/venue/time/capacity
+và slots còn lại của Event Approved vào context. Nếu context rỗng, API trả câu
+“Không tìm thấy Event Approved phù hợp...” và không gọi provider. Nếu provider
+chưa cấu hình hoặc không khả dụng, API trả `503` mà không lộ API key, prompt
+hoặc stack trace.
+
+Provider được cấu hình bằng User Secrets/environment variables (không commit
+key thật):
+
+```text
+AI__Enabled=true
+AI__Endpoint=<provider-chat-completions-endpoint>
+AI__Model=<provider-model>
+AI__ApiKey=<secret>
+AI__TimeoutSeconds=15
+```

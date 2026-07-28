@@ -5872,6 +5872,29 @@
             "description": "Student retrieval không dùng AI: chỉ Event Approved, tối đa 10 kết quả, hỗ trợ keyword, hôm nay/tuần này/tháng này và còn chỗ."
           },
           "response": []
+        },
+        {
+          "name": "Phase 123 - AI FAQ Ask - Student",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{studentAccessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Workshop AI hôm nay còn chỗ không?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot/ask",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot", "ask"]
+            },
+            "description": "AIChatService retrieval trước khi gọi provider; context rỗng trả thông báo không tìm thấy, provider chưa cấu hình trả 503."
+          },
+          "response": []
         }
       ]
     }

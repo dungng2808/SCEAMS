@@ -963,11 +963,11 @@ Domain entity/enum
 
 ### Phase 123 - API: Sinh câu trả lời bằng AI provider
 
-- [ ] Thêm `POST /api/chatbot/ask`.
-- [ ] Build context chỉ từ Event retrieval; không gửi dữ liệu nhạy cảm.
-- [ ] Provider chỉ được trả lời dựa trên context; context rỗng phải trả “không tìm thấy”.
-- [ ] Đặt AI provider interface trong `Application/Interfaces`, implementation trong `Infrastructure/AI`.
-- [ ] `AIChatService` gọi provider interface; `ChatbotController` không gọi HTTP provider trực tiếp.
+- [x] Thêm `POST /api/chatbot/ask`.
+- [x] Build context chỉ từ Event retrieval; không gửi dữ liệu nhạy cảm.
+- [x] Provider chỉ được trả lời dựa trên context; context rỗng phải trả “không tìm thấy”.
+- [x] Đặt AI provider interface trong `Application/Interfaces`, implementation trong `Infrastructure/AI`.
+- [x] `AIChatService` gọi provider interface; `ChatbotController` không gọi HTTP provider trực tiếp.
 
 ### Phase 124 - MVC: Giao diện AI FAQ
 

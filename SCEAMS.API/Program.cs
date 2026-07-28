@@ -11,6 +11,7 @@ using SCEAMS.Application.Services;
 using SCEAMS.Api.BackgroundServices;
 using SCEAMS.Domain.Entities;
 using SCEAMS.Infrastructure.Authentication;
+using SCEAMS.Infrastructure.AI;
 using SCEAMS.Infrastructure.Data;
 using SCEAMS.Infrastructure.Data.Seed;
 using SCEAMS.Infrastructure.Health;
@@ -190,6 +191,17 @@ builder.Services.AddScoped<IClubMembershipService, ClubMembershipService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IEventFaqRetrievalService, EventFaqRetrievalService>();
+builder.Services.AddScoped<IAiChatService, AiChatService>();
+builder.Services.Configure<AiProviderOptions>(
+    builder.Configuration.GetSection(AiProviderOptions.SectionName));
+builder.Services.AddHttpClient<IAiProvider, HttpAiProvider>(
+    (serviceProvider, client) =>
+    {
+        var options = serviceProvider
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<AiProviderOptions>>()
+            .Value;
+        client.Timeout = TimeSpan.FromSeconds(Math.Clamp(options.TimeoutSeconds, 1, 120));
+    });
 builder.Services.AddScoped<IEventStatusSyncService, EventStatusSyncService>();
 builder.Services.Configure<EventReminderOptions>(
     builder.Configuration.GetSection(EventReminderOptions.SectionName));
