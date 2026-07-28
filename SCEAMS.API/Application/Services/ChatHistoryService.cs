@@ -110,7 +110,8 @@ public sealed class ChatHistoryService : IChatHistoryService
 
     private static int? GetStudentId(ClaimsPrincipal user)
     {
-        var role = user.FindFirstValue(ClaimTypes.Role);
+        var role = user.FindFirstValue(ClaimTypes.Role)
+            ?? user.FindFirstValue("role");
         if (!string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase))
         {
             return null;
