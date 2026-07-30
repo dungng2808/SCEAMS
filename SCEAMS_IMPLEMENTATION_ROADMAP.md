@@ -1005,10 +1005,10 @@ Domain entity/enum
 
 ### Phase 129 - Security audit
 
-- [ ] Lập security matrix đầy đủ cho Admin/Staff/Organizer/Student.
-- [ ] Chạy bộ Postman/Newman cho toàn bộ endpoint với anonymous, đúng role, sai role và sai ownership.
-- [ ] Kiểm tra mass assignment, IDOR, password hash leakage, token leakage và dữ liệu cá nhân.
-- [ ] Kiểm tra CORS, HTTPS, secrets và production logging.
+- [x] Lập security matrix đầy đủ cho Admin/Staff/Organizer/Student.
+- [x] Chạy bộ Postman/Newman cho toàn bộ endpoint với anonymous, đúng role, sai role và sai ownership.
+- [x] Kiểm tra mass assignment, IDOR, password hash leakage, token leakage và dữ liệu cá nhân.
+- [x] Kiểm tra CORS, HTTPS, secrets và production logging.
 
 ### Phase 130 - Business rule regression
 

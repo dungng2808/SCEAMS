@@ -1,0 +1,141 @@
+{
+  "info": {
+    "_postman_id": "4bcde1ce-2c18-4c34-8f14-7f6dc0d0f129",
+    "name": "SCEAMS Security Audit",
+    "description": "Phase 129: anonymous, role, ownership và dữ liệu nhạy cảm.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:7195" },
+    { "key": "adminAccessToken", "value": "" },
+    { "key": "staffAccessToken", "value": "" },
+    { "key": "organizerAccessToken", "value": "" },
+    { "key": "studentAccessToken", "value": "" },
+    { "key": "otherClubId", "value": "" },
+    { "key": "otherEventId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Anonymous must be rejected",
+      "item": [
+        {
+          "name": "User list returns 401",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/users" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('anonymous user list is 401', () => pm.expect(pm.response.code).to.eql(401));",
+            "pm.test('problem details response', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json'));"
+          ]}}]
+        },
+        {
+          "name": "Chat history returns 401",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/chatbot/history" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('anonymous history is 401', () => pm.expect(pm.response.code).to.eql(401));"
+          ]}}]
+        },
+        {
+          "name": "Admin reports return 401",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/reports/event-summary" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('anonymous report is 401', () => pm.expect(pm.response.code).to.eql(401));"
+          ]}}]
+        },
+        {
+          "name": "Notification logs return 401",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/notifications/logs" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('anonymous notification logs is 401', () => pm.expect(pm.response.code).to.eql(401));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Role enforcement",
+      "item": [
+        {
+          "name": "Student cannot list users",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/users" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('student user list is 403', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Organizer cannot view admin reports",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }], "url": "{{baseUrl}}/api/reports/event-summary" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('organizer event summary is 403', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Staff cannot create registration",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{staffAccessToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"eventId\": 1\n}" }, "url": "{{baseUrl}}/api/registrations" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('staff registration is 403', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Student cannot approve event",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/events/1/approve" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('student event approval is 403', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Organizer cannot use chatbot",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"question\": \"Lịch sự kiện?\"\n}" }, "url": "{{baseUrl}}/api/chatbot/retrieval" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('organizer chatbot is 403', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Ownership and IDOR",
+      "item": [
+        {
+          "name": "Organizer cannot update another club",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Unauthorized update\",\n  \"description\": \"ownership test\",\n  \"categoryId\": 1\n}" }, "url": "{{baseUrl}}/api/clubs/{{otherClubId}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('foreign club update is forbidden', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Organizer cannot update another event",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Unauthorized update\",\n  \"description\": \"ownership test\",\n  \"venueId\": 1,\n  \"startTime\": \"2030-01-01T08:00:00Z\",\n  \"endTime\": \"2030-01-01T09:00:00Z\",\n  \"registrationDeadline\": \"2029-12-31T08:00:00Z\",\n  \"capacity\": 10\n}" }, "url": "{{baseUrl}}/api/events/{{otherEventId}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('foreign event update is forbidden', () => pm.expect(pm.response.code).to.eql(403));"
+          ]}}]
+        },
+        {
+          "name": "Student history is scoped to JWT subject",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/chatbot/history" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('student history request succeeds or is empty', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));",
+            "pm.test('history has no password hash', () => pm.expect(pm.response.text()).not.to.match(/passwordHash/i));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "Sensitive response checks",
+      "item": [
+        {
+          "name": "Admin user list has no password hash",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }], "url": "{{baseUrl}}/api/users" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('admin user list is successful', () => pm.expect(pm.response.code).to.eql(200));",
+            "pm.test('user list does not leak password hash', () => pm.expect(pm.response.text()).not.to.match(/passwordHash/i));"
+          ]}}]
+        },
+        {
+          "name": "Current profile has no credential fields",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/users/me" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('profile is successful', () => pm.expect(pm.response.code).to.eql(200));",
+            "pm.test('profile does not leak credentials', () => { const text = pm.response.text(); pm.expect(text).not.to.match(/passwordHash/i); pm.expect(text).not.to.match(/refreshTokenHash/i); });"
+          ]}}]
+        }
+      ]
+    }
+  ]
+}
