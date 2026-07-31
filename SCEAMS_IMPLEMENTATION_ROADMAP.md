@@ -1035,10 +1035,10 @@ Domain entity/enum
 
 ### Phase 132 - OData và content negotiation demo
 
-- [ ] Demo `GET /api/events?$filter=Status eq 'Approved'&$orderby=StartTime&$top=10`.
-- [ ] Demo `$select` và `$expand` hợp lệ trên Events/Clubs.
-- [ ] Demo cùng endpoint với JSON và XML.
-- [ ] Lưu request/response mẫu vào `docs/` và Postman collection.
+- [x] Demo `GET /api/events?$filter=Status eq 'Approved'&$orderby=StartTime&$top=10`.
+- [x] Demo `$select` và `$expand` hợp lệ trên Events/Clubs.
+- [x] Demo cùng endpoint với JSON và XML.
+- [x] Lưu request/response mẫu vào `docs/` và Postman collection.
 
 ### Phase 133 - Dữ liệu demo và tài khoản mẫu
 

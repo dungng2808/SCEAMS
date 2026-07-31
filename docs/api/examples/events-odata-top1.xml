@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfEventListResponseDto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <EventListResponseDto>
+    <Id>1</Id>
+    <Title>AI for Students Workshop</Title>
+    <Status>Approved</Status>
+    <ClubId>1</ClubId>
+    <ClubName>FPT AI Club</ClubName>
+    <VenueId>1</VenueId>
+    <VenueName>Innovation Hall</VenueName>
+    <Capacity>80</Capacity>
+    <RegisteredCount>1</RegisteredCount>
+    <SlotsRemaining>79</SlotsRemaining>
+  </EventListResponseDto>
+</ArrayOfEventListResponseDto>

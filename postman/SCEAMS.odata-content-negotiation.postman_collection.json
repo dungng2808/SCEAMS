@@ -1,0 +1,37 @@
+{
+  "info": {
+    "_postman_id": "fda4a22c-52da-4c5d-bb52-70ad62f2ad90",
+    "name": "SCEAMS OData and content negotiation",
+    "description": "Phase 132: OData filter/select/expand và JSON/XML.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "https://localhost:7195" }],
+  "item": [
+    {
+      "name": "Approved events filter/order/top JSON",
+      "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/events?$filter=Status%20eq%20%27Approved%27&$orderby=StartTime&$top=10" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('OData JSON is 200', () => pm.expect(pm.response.code).to.eql(200));",
+        "pm.test('JSON content type', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'));",
+        "pm.test('result is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+      ] }}]
+    },
+    {
+      "name": "Select and expand JSON",
+      "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/events?$select=Id,Title,StartTime&$expand=Club($select=Id,Name),Venue($select=Id,Name)&$top=1" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('select expand is 200', () => pm.expect(pm.response.code).to.eql(200));",
+        "pm.test('selected shape is present', () => { const body = pm.response.json(); if (body.length) { pm.expect(body[0]).to.have.property('id'); pm.expect(body[0]).to.have.property('club'); } });"
+      ] }}]
+    },
+    {
+      "name": "Top one XML",
+      "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/xml" }], "url": "{{baseUrl}}/api/events?$top=1" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('XML is 200', () => pm.expect(pm.response.code).to.eql(200));",
+        "pm.test('XML content type', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/xml'));",
+        "pm.test('XML root is present', () => pm.expect(pm.response.text()).to.include('<ArrayOfEventListResponseDto'))"
+      ] }}]
+    }
+  ]
+}

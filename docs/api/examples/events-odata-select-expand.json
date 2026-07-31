@@ -1,0 +1,9 @@
+[
+  {
+    "club": { "id": 1, "name": "FPT AI Club" },
+    "venue": { "id": 1, "name": "Innovation Hall" },
+    "id": 1,
+    "title": "AI for Students Workshop",
+    "startTime": "2026-08-09T01:00:00"
+  }
+]
