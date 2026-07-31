@@ -1012,17 +1012,17 @@ Domain entity/enum
 
 ### Phase 130 - Business rule regression
 
-- [ ] Test BR1: chỉ đăng ký Event Approved và chưa quá deadline.
-- [ ] Test BR2: không vượt capacity kể cả request đồng thời.
-- [ ] Test BR3: không đăng ký trùng.
-- [ ] Test BR4: không hủy sau mốc cho phép.
-- [ ] Test BR5: chỉ Attended mới feedback.
-- [ ] Test BR6: Organizer chỉ thao tác Club/Event mình phụ trách.
-- [ ] Test BR7: approve phải chặn trùng lịch Venue.
-- [ ] Test BR8: Completed/Cancelled không sửa thông tin chính.
-- [ ] Test BR9: membership chỉ Active sau khi được duyệt.
-- [ ] Test BR10: chatbot không bịa Event ngoài retrieval.
-- [ ] Test BR11: giới hạn câu hỏi AI.
+- [x] Test BR1: chỉ đăng ký Event Approved và chưa quá deadline.
+- [x] Test BR2: không vượt capacity kể cả request đồng thời.
+- [x] Test BR3: không đăng ký trùng.
+- [x] Test BR4: không hủy sau mốc cho phép.
+- [x] Test BR5: chỉ Attended mới feedback.
+- [x] Test BR6: Organizer chỉ thao tác Club/Event mình phụ trách.
+- [x] Test BR7: approve phải chặn trùng lịch Venue.
+- [x] Test BR8: Completed/Cancelled không sửa thông tin chính.
+- [x] Test BR9: membership chỉ Active sau khi được duyệt.
+- [x] Test BR10: chatbot không bịa Event ngoài retrieval.
+- [x] Test BR11: giới hạn câu hỏi AI.
 
 ### Phase 131 - Kiểm thử end-to-end theo vai trò
 
