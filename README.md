@@ -108,6 +108,13 @@ After starting the API and MVC projects in Development, open:
 The demo-account page is unavailable outside Development and never displays
 passwords.
 
+The seed also creates named `[DEMO]` fixtures for every main Club, Event,
+membership and registration status, including full-capacity, passed-deadline,
+valid-attendance/feedback and Venue-overlap cases. See
+[`docs/demo/DEMO_DATASET.md`](docs/demo/DEMO_DATASET.md) for the fixture list and
+the four role emails. Passwords are always supplied locally through
+`SeedData__*`; no demo password is committed to the repository.
+
 ## Student registration API
 
 Create a Student account with:

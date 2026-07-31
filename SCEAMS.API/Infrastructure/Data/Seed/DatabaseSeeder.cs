@@ -121,6 +121,16 @@ public sealed class DatabaseSeeder
                 now,
                 cancellationToken);
 
+            await EnsureDemoStateDataAsync(
+                category,
+                club,
+                venue,
+                organizer,
+                staff,
+                student,
+                now,
+                cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
 
             _logger.LogInformation(
@@ -392,6 +402,424 @@ public sealed class DatabaseSeeder
 
         await _dbContext.Registrations.AddAsync(
             registration,
+            cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task EnsureDemoStateDataAsync(
+        ClubCategory category,
+        Club approvedClub,
+        Venue venue,
+        User organizer,
+        User reviewer,
+        User student,
+        DateTime createdAt,
+        CancellationToken cancellationToken)
+    {
+        var pendingClub = await EnsureClubStateAsync(
+            DemoSeedData.PendingClubName,
+            ClubStatus.PendingApproval,
+            category,
+            organizer,
+            reviewer,
+            createdAt,
+            cancellationToken);
+        var rejectedClub = await EnsureClubStateAsync(
+            DemoSeedData.RejectedClubName,
+            ClubStatus.Rejected,
+            category,
+            organizer,
+            reviewer,
+            createdAt,
+            cancellationToken);
+        var dissolvedClub = await EnsureClubStateAsync(
+            DemoSeedData.DissolvedClubName,
+            ClubStatus.Dissolved,
+            category,
+            organizer,
+            reviewer,
+            createdAt,
+            cancellationToken);
+
+        await EnsureMembershipStateAsync(
+            student,
+            pendingClub,
+            ClubMembershipStatus.Pending,
+            reviewer,
+            createdAt,
+            cancellationToken);
+        await EnsureMembershipStateAsync(
+            student,
+            rejectedClub,
+            ClubMembershipStatus.Rejected,
+            reviewer,
+            createdAt,
+            cancellationToken);
+        await EnsureMembershipStateAsync(
+            student,
+            dissolvedClub,
+            ClubMembershipStatus.Removed,
+            reviewer,
+            createdAt,
+            cancellationToken);
+
+        var now = DateTime.UtcNow;
+        var approvedEvent = await _dbContext.Events.SingleAsync(
+            eventEntity =>
+                eventEntity.Title == DemoSeedData.EventTitle &&
+                eventEntity.ClubId == approvedClub.Id,
+            cancellationToken);
+        var draftEvent = await EnsureEventStateAsync(
+            DemoSeedData.DraftEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Draft,
+            now.AddDays(30),
+            capacity: 40,
+            createdAt,
+            cancellationToken);
+        var pendingEvent = await EnsureEventStateAsync(
+            DemoSeedData.PendingEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.PendingApproval,
+            now.AddDays(20),
+            capacity: 40,
+            createdAt,
+            cancellationToken);
+        _ = await EnsureEventStateAsync(
+            DemoSeedData.CompletedEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Completed,
+            now.AddDays(-14),
+            capacity: 80,
+            createdAt,
+            cancellationToken);
+        var cancelledEvent = await EnsureEventStateAsync(
+            DemoSeedData.CancelledEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Cancelled,
+            now.AddDays(10),
+            capacity: 80,
+            createdAt,
+            cancellationToken);
+        _ = await EnsureEventStateAsync(
+            DemoSeedData.RejectedEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Rejected,
+            now.AddDays(25),
+            capacity: 40,
+            createdAt,
+            cancellationToken);
+        var fullCapacityEvent = await EnsureEventStateAsync(
+            DemoSeedData.FullCapacityEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Approved,
+            now.AddDays(12),
+            capacity: 1,
+            createdAt,
+            cancellationToken);
+        var deadlinePassedEvent = await EnsureEventStateAsync(
+            DemoSeedData.DeadlinePassedEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.Approved,
+            now.AddDays(8),
+            capacity: 20,
+            createdAt,
+            cancellationToken,
+            registrationDeadline: now.AddDays(-1));
+        var conflictEvent = await EnsureEventStateAsync(
+            DemoSeedData.VenueConflictEventTitle,
+            approvedClub,
+            venue,
+            organizer,
+            EventStatus.PendingApproval,
+            approvedEvent.StartTime.AddMinutes(30),
+            capacity: 20,
+            createdAt,
+            cancellationToken);
+        if (conflictEvent.StartTime != approvedEvent.StartTime.AddMinutes(30))
+        {
+            conflictEvent.StartTime = approvedEvent.StartTime.AddMinutes(30);
+            conflictEvent.EndTime = approvedEvent.EndTime.AddMinutes(30);
+            conflictEvent.RegistrationDeadline = conflictEvent.StartTime.AddDays(-2);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        await EnsureRegistrationStateAsync(
+            student,
+            draftEvent,
+            RegistrationStatus.Pending,
+            now,
+            cancellationToken);
+        await EnsureRegistrationStateAsync(
+            student,
+            cancelledEvent,
+            RegistrationStatus.CancelledByStudent,
+            now,
+            cancellationToken);
+        await EnsureRegistrationStateAsync(
+            student,
+            fullCapacityEvent,
+            RegistrationStatus.Confirmed,
+            now,
+            cancellationToken);
+        await EnsureRegistrationStateAsync(
+            student,
+            deadlinePassedEvent,
+            RegistrationStatus.Confirmed,
+            now,
+            cancellationToken);
+
+        var completedEvent = await _dbContext.Events
+            .SingleAsync(
+                eventEntity =>
+                    eventEntity.Title == DemoSeedData.CompletedEventTitle &&
+                    eventEntity.ClubId == approvedClub.Id,
+                cancellationToken);
+        var attendedRegistration = await EnsureRegistrationStateAsync(
+            student,
+            completedEvent,
+            RegistrationStatus.Attended,
+            now.AddDays(-15),
+            cancellationToken);
+        await EnsureAttendanceAsync(
+            attendedRegistration,
+            reviewer,
+            now.AddDays(-14),
+            cancellationToken);
+        await EnsureFeedbackAsync(
+            student,
+            completedEvent,
+            cancellationToken);
+
+        // Keep named variables in the seed output so reviewers can identify
+        // the intended venue-conflict and capacity/deadline fixtures quickly.
+        _ = pendingEvent;
+        _ = conflictEvent;
+    }
+
+    private async Task<Club> EnsureClubStateAsync(
+        string name,
+        ClubStatus status,
+        ClubCategory category,
+        User organizer,
+        User reviewer,
+        DateTime createdAt,
+        CancellationToken cancellationToken)
+    {
+        var club = await _dbContext.Clubs.SingleOrDefaultAsync(
+            item => item.Name == name,
+            cancellationToken);
+        if (club is not null)
+        {
+            return club;
+        }
+
+        club = new Club
+        {
+            Name = name,
+            Description = "Dữ liệu demo phục vụ kiểm thử workflow.",
+            CategoryId = category.Id,
+            Status = status,
+            CreatedByUserId = organizer.Id,
+            CreatedAt = createdAt,
+            ReviewedByUserId = status == ClubStatus.PendingApproval
+                ? null
+                : reviewer.Id,
+            ReviewedAt = status == ClubStatus.PendingApproval
+                ? null
+                : createdAt,
+            RejectionReason = status == ClubStatus.Rejected
+                ? "Dữ liệu demo trạng thái Rejected."
+                : null,
+            DissolvedAt = status == ClubStatus.Dissolved
+                ? createdAt
+                : null
+        };
+        await _dbContext.Clubs.AddAsync(club, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return club;
+    }
+
+    private async Task EnsureMembershipStateAsync(
+        User student,
+        Club club,
+        ClubMembershipStatus status,
+        User reviewer,
+        DateTime joinedAt,
+        CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.ClubMemberships.AnyAsync(
+            item => item.StudentId == student.Id && item.ClubId == club.Id,
+            cancellationToken);
+        if (exists)
+        {
+            return;
+        }
+
+        await _dbContext.ClubMemberships.AddAsync(
+            new ClubMembership
+            {
+                StudentId = student.Id,
+                ClubId = club.Id,
+                RoleInClub = "Member",
+                JoinDate = joinedAt,
+                Status = status,
+                DecidedByUserId = status == ClubMembershipStatus.Pending
+                    ? null
+                    : reviewer.Id,
+                DecisionAt = status == ClubMembershipStatus.Pending
+                    ? null
+                    : joinedAt,
+                RemovalReason = status == ClubMembershipStatus.Removed
+                    ? "Dữ liệu demo trạng thái Removed."
+                    : null
+            },
+            cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<Event> EnsureEventStateAsync(
+        string title,
+        Club club,
+        Venue venue,
+        User organizer,
+        EventStatus status,
+        DateTime startTime,
+        int capacity,
+        DateTime createdAt,
+        CancellationToken cancellationToken,
+        DateTime? registrationDeadline = null)
+    {
+        var eventEntity = await _dbContext.Events.SingleOrDefaultAsync(
+            item => item.Title == title && item.ClubId == club.Id,
+            cancellationToken);
+        if (eventEntity is not null)
+        {
+            return eventEntity;
+        }
+
+        eventEntity = new Event
+        {
+            ClubId = club.Id,
+            VenueId = venue.Id,
+            Title = title,
+            Description = "Dữ liệu demo phục vụ kiểm thử workflow.",
+            StartTime = startTime,
+            EndTime = startTime.AddHours(2),
+            RegistrationDeadline = registrationDeadline ?? startTime.AddDays(-2),
+            Capacity = capacity,
+            Status = status,
+            CreatedByUserId = organizer.Id,
+            CreatedAt = createdAt,
+            ApprovedByUserId = status is EventStatus.Approved or EventStatus.Ongoing or EventStatus.Completed
+                ? organizer.Id
+                : null,
+            ApprovedAt = status is EventStatus.Approved or EventStatus.Ongoing or EventStatus.Completed
+                ? createdAt
+                : null,
+            RejectionReason = status == EventStatus.Rejected
+                ? "Dữ liệu demo trạng thái Rejected."
+                : null,
+            CancellationReason = status == EventStatus.Cancelled
+                ? "Dữ liệu demo trạng thái Cancelled."
+                : null
+        };
+        await _dbContext.Events.AddAsync(eventEntity, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return eventEntity;
+    }
+
+    private async Task<Registration> EnsureRegistrationStateAsync(
+        User student,
+        Event eventEntity,
+        RegistrationStatus status,
+        DateTime registeredAt,
+        CancellationToken cancellationToken)
+    {
+        var registration = await _dbContext.Registrations.SingleOrDefaultAsync(
+            item => item.StudentId == student.Id && item.EventId == eventEntity.Id,
+            cancellationToken);
+        if (registration is not null)
+        {
+            return registration;
+        }
+
+        registration = new Registration
+        {
+            StudentId = student.Id,
+            EventId = eventEntity.Id,
+            Status = status,
+            RegisteredAt = registeredAt,
+            CancelledAt = status == RegistrationStatus.CancelledByStudent
+                ? registeredAt
+                : null
+        };
+        await _dbContext.Registrations.AddAsync(registration, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return registration;
+    }
+
+    private async Task EnsureAttendanceAsync(
+        Registration registration,
+        User reviewer,
+        DateTime checkInTime,
+        CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.Attendances.AnyAsync(
+            item => item.RegistrationId == registration.Id,
+            cancellationToken);
+        if (exists)
+        {
+            return;
+        }
+
+        await _dbContext.Attendances.AddAsync(
+            new Attendance
+            {
+                RegistrationId = registration.Id,
+                CheckInTime = checkInTime,
+                CheckedInByUserId = reviewer.Id
+            },
+            cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task EnsureFeedbackAsync(
+        User student,
+        Event eventEntity,
+        CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.Feedbacks.AnyAsync(
+            item => item.EventId == eventEntity.Id && item.StudentId == student.Id,
+            cancellationToken);
+        if (exists)
+        {
+            return;
+        }
+
+        await _dbContext.Feedbacks.AddAsync(
+            new Feedback
+            {
+                EventId = eventEntity.Id,
+                StudentId = student.Id,
+                Rating = 5,
+                Comment = "Dữ liệu demo feedback hợp lệ.",
+                CreatedAt = DateTime.UtcNow
+            },
             cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

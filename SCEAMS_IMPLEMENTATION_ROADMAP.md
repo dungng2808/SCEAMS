@@ -1042,10 +1042,10 @@ Domain entity/enum
 
 ### Phase 133 - Dữ liệu demo và tài khoản mẫu
 
-- [ ] Có ít nhất một tài khoản cho mỗi role.
-- [ ] Có dữ liệu cho mọi trạng thái chính của Club, Event, Registration.
-- [ ] Có dữ liệu tạo được venue conflict, capacity full, quá deadline và feedback hợp lệ.
-- [ ] Tài khoản/mật khẩu demo được ghi trong README dành cho giảng viên, không dùng production.
+- [x] Có ít nhất một tài khoản cho mỗi role.
+- [x] Có dữ liệu cho mọi trạng thái chính của Club, Event, Registration.
+- [x] Có dữ liệu tạo được venue conflict, capacity full, quá deadline và feedback hợp lệ.
+- [x] Tài khoản/mật khẩu demo được ghi trong README dành cho giảng viên, không dùng production.
 
 ### Phase 134 - Tài liệu kỹ thuật bắt buộc
 
