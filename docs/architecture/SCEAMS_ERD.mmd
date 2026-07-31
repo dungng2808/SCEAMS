@@ -1,0 +1,80 @@
+erDiagram
+    USERS ||--o{ CLUBS : creates
+    USERS ||--o{ EVENTS : creates
+    USERS ||--o{ CLUB_MEMBERSHIPS : joins
+    USERS ||--o{ REGISTRATIONS : submits
+    USERS ||--o{ FEEDBACKS : writes
+    CLUB_CATEGORIES ||--o{ CLUBS : categorizes
+    CLUBS ||--o{ CLUB_MEMBERSHIPS : has
+    CLUBS ||--o{ EVENTS : hosts
+    VENUES ||--o{ EVENTS : schedules
+    EVENTS ||--o{ REGISTRATIONS : accepts
+    EVENTS ||--o{ FEEDBACKS : receives
+    EVENTS ||--o{ NOTIFICATION_DELIVERIES : notifies
+    REGISTRATIONS ||--o| ATTENDANCES : checked_in
+    USERS ||--o{ CHAT_LOGS : asks
+
+    USERS {
+      int Id PK
+      string Email UK
+      string PasswordHash
+      string Role
+      string RefreshTokenHash
+    }
+    CLUB_CATEGORIES {
+      int Id PK
+      string Name UK
+    }
+    CLUBS {
+      int Id PK
+      int CategoryId FK
+      int CreatedByUserId FK
+      string Status
+    }
+    CLUB_MEMBERSHIPS {
+      int Id PK
+      int ClubId FK
+      int StudentId FK
+      string Status
+    }
+    VENUES {
+      int Id PK
+      string Name
+      string Location
+      int Capacity
+    }
+    EVENTS {
+      int Id PK
+      int ClubId FK
+      int VenueId FK
+      int CreatedByUserId FK
+      string Status
+    }
+    REGISTRATIONS {
+      int Id PK
+      int EventId FK
+      int StudentId FK
+      string Status
+    }
+    ATTENDANCES {
+      int Id PK
+      int RegistrationId FK UK
+      int CheckedInByUserId FK
+    }
+    FEEDBACKS {
+      int Id PK
+      int EventId FK
+      int StudentId FK
+    }
+    NOTIFICATION_DELIVERIES {
+      int Id PK
+      int EventId FK
+      string NotificationType
+      string CorrelationId
+    }
+    CHAT_LOGS {
+      int Id PK
+      int StudentId FK
+      string Question
+      datetime CreatedAt
+    }

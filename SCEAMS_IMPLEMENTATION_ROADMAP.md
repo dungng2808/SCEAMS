@@ -1049,16 +1049,16 @@ Domain entity/enum
 
 ### Phase 134 - Tài liệu kỹ thuật bắt buộc
 
-- [ ] Giới thiệu, mục tiêu và phạm vi SCEAMS.
-- [ ] Actor/use case theo 4 role.
-- [ ] ERD có PK, FK, cardinality và migration/script.
-- [ ] Danh sách business rules và workflow trạng thái.
-- [ ] Sơ đồ một solution có đúng ba project; riêng API có bốn folder layer và trách nhiệm từng layer/service.
-- [ ] Endpoint list gồm method, route, DTO, role và status code.
-- [ ] Security matrix.
-- [ ] OData demo; JSON/XML content negotiation demo.
-- [ ] gRPC service và sequence Web API -> NotificationService.
-- [ ] AI FAQ architecture, giới hạn và bảo vệ dữ liệu.
+- [x] Giới thiệu, mục tiêu và phạm vi SCEAMS.
+- [x] Actor/use case theo 4 role.
+- [x] ERD có PK, FK, cardinality và migration/script.
+- [x] Danh sách business rules và workflow trạng thái.
+- [x] Sơ đồ một solution có đúng ba project; riêng API có bốn folder layer và trách nhiệm từng layer/service.
+- [x] Endpoint list gồm method, route, DTO, role và status code.
+- [x] Security matrix.
+- [x] OData demo; JSON/XML content negotiation demo.
+- [x] gRPC service và sequence Web API -> NotificationService.
+- [x] AI FAQ architecture, giới hạn và bảo vệ dữ liệu.
 
 ### Phase 135 - Hướng dẫn chạy
 
