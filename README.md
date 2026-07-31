@@ -115,6 +115,10 @@ valid-attendance/feedback and Venue-overlap cases. See
 the four role emails. Passwords are always supplied locally through
 `SeedData__*`; no demo password is committed to the repository.
 
+For a clone-and-run checklist with the exact gRPC → API → MVC startup order,
+URLs, environment names and troubleshooting, see
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md).
+
 ## Student registration API
 
 Create a Student account with:

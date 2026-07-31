@@ -1062,11 +1062,11 @@ Domain entity/enum
 
 ### Phase 135 - Hướng dẫn chạy
 
-- [ ] Ghi prerequisites: .NET SDK, SQL Server và cấu hình cần thiết.
-- [ ] Ghi lệnh restore, migration, seed, chạy gRPC, API và MVC theo đúng thứ tự.
-- [ ] Dùng User Secrets/environment variables cho JWT key và AI API key.
-- [ ] Ghi URL Swagger, MVC và tài khoản demo.
-- [ ] Một người khác có thể clone và chạy theo README mà không cần hỏi thêm.
+- [x] Ghi prerequisites: .NET SDK, SQL Server và cấu hình cần thiết.
+- [x] Ghi lệnh restore, migration, seed, chạy gRPC, API và MVC theo đúng thứ tự.
+- [x] Dùng User Secrets/environment variables cho JWT key và AI API key.
+- [x] Ghi URL Swagger, MVC và tài khoản demo.
+- [x] Một người khác có thể clone và chạy theo README mà không cần hỏi thêm.
 
 ### Phase 136 - Gói sản phẩm nộp
 
