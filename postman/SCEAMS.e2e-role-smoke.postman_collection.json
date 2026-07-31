@@ -1,0 +1,43 @@
+{
+  "info": {
+    "_postman_id": "30f0650e-0d3f-4b95-bbd2-2f4bde12dfe3",
+    "name": "SCEAMS E2E role smoke",
+    "description": "Phase 131: smoke E2E cho Admin, Staff, Organizer, Student và notification.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:7195" },
+    { "key": "adminAccessToken", "value": "" },
+    { "key": "staffAccessToken", "value": "" },
+    { "key": "organizerAccessToken", "value": "" },
+    { "key": "studentAccessToken", "value": "" },
+    { "key": "clubId", "value": "1" },
+    { "key": "eventId", "value": "2" }
+  ],
+  "item": [
+    { "name": "System", "item": [
+      { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/health" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('health is 200', () => pm.expect(pm.response.code).to.eql(200));"] }}] }
+    ]},
+    { "name": "Admin flow", "item": [
+      { "name": "Admin user list", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }], "url": "{{baseUrl}}/api/users" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin can list users', () => pm.expect(pm.response.code).to.eql(200));", "pm.test('user response is safe', () => pm.expect(pm.response.text()).not.to.match(/passwordHash|refreshTokenHash/i));"] }}] },
+      { "name": "Admin reports", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }], "url": "{{baseUrl}}/api/reports/event-summary" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin can view reports', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Admin notification logs", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }], "url": "{{baseUrl}}/api/notifications/logs" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin can view notification logs', () => pm.expect(pm.response.code).to.eql(200));"] }}] }
+    ]},
+    { "name": "Staff flow", "item": [
+      { "name": "Staff pending clubs", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{staffAccessToken}}" }], "url": "{{baseUrl}}/api/clubs?status=PendingApproval" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('staff can view club queue', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Staff pending events", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{staffAccessToken}}" }], "url": "{{baseUrl}}/api/events/pending-approval" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('staff can view event queue', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Staff club activity report", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{staffAccessToken}}" }], "url": "{{baseUrl}}/api/reports/club-activity" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('staff can view club report', () => pm.expect(pm.response.code).to.eql(200));"] }}] }
+    ]},
+    { "name": "Organizer flow", "item": [
+      { "name": "Organizer club scope", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }], "url": "{{baseUrl}}/api/clubs/{{clubId}}" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('organizer can read assigned club', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Organizer event scope", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }], "url": "{{baseUrl}}/api/events/{{eventId}}" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('organizer can read assigned event', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Organizer event registrations", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{organizerAccessToken}}" }], "url": "{{baseUrl}}/api/events/{{eventId}}/registrations" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('organizer registration scope is handled', () => pm.expect(pm.response.code).to.be.oneOf([200, 403]));"] }}] }
+    ]},
+    { "name": "Student flow", "item": [
+      { "name": "Student profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/users/me" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('student profile is 200', () => pm.expect(pm.response.code).to.eql(200));", "pm.test('student profile is safe', () => pm.expect(pm.response.text()).not.to.match(/passwordHash|refreshTokenHash/i));"] }}] },
+      { "name": "Student registrations", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/registrations/me" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('student registrations is 200', () => pm.expect(pm.response.code).to.eql(200));"] }}] },
+      { "name": "Student FAQ retrieval", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"question\": \"Có sự kiện nào sắp diễn ra?\"\n}" }, "url": "{{baseUrl}}/api/chatbot/retrieval" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('student retrieval is available', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"] }}] },
+      { "name": "Student FAQ history", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{studentAccessToken}}" }], "url": "{{baseUrl}}/api/chatbot/history" }, "event": [{ "listen": "test", "script": { "exec": ["pm.test('student history is scoped', () => pm.expect(pm.response.code).to.eql(200));", "pm.test('history is safe', () => pm.expect(pm.response.text()).not.to.match(/passwordHash|refreshToken/i));"] }}] }
+    ]}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "SCEAMS E2E role smoke (local)",
+  "values": [
+    { "key": "baseUrl", "value": "https://localhost:7195", "enabled": true },
+    { "key": "adminAccessToken", "value": "", "enabled": true },
+    { "key": "staffAccessToken", "value": "", "enabled": true },
+    { "key": "organizerAccessToken", "value": "", "enabled": true },
+    { "key": "studentAccessToken", "value": "", "enabled": true },
+    { "key": "clubId", "value": "1", "enabled": true },
+    { "key": "eventId", "value": "2", "enabled": true }
+  ]
+}

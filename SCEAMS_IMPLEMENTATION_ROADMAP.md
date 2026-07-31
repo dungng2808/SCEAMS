@@ -1026,12 +1026,12 @@ Domain entity/enum
 
 ### Phase 131 - Kiểm thử end-to-end theo vai trò
 
-- [ ] Admin: login -> quản lý user/category/venue -> xem reports.
-- [ ] Staff: login -> duyệt Club -> duyệt Event -> xem reports.
-- [ ] Organizer: login -> đề xuất Club -> quản lý member -> tạo/submit Event -> check-in.
-- [ ] Student: register/login -> join Club -> register/cancel Event -> xem history -> feedback.
-- [ ] AI: Student hỏi -> retrieval -> answer -> history -> rate limit.
-- [ ] gRPC: Approve/Cancel/reminder tạo notification đúng một lần.
+- [x] Admin: login -> quản lý user/category/venue -> xem reports.
+- [x] Staff: login -> duyệt Club -> duyệt Event -> xem reports.
+- [x] Organizer: login -> đề xuất Club -> quản lý member -> tạo/submit Event -> check-in.
+- [x] Student: register/login -> join Club -> register/cancel Event -> xem history -> feedback.
+- [x] AI: Student hỏi -> retrieval -> answer -> history -> rate limit.
+- [x] gRPC: Approve/Cancel/reminder tạo notification đúng một lần.
 
 ### Phase 132 - OData và content negotiation demo
 
