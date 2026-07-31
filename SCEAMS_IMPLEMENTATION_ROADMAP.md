@@ -1070,17 +1070,17 @@ Domain entity/enum
 
 ### Phase 136 - Gói sản phẩm nộp
 
-- [ ] `dotnet sln list` chỉ có `SCEAMS.API`, `SCEAMS.MVC`, `SCEAMS.NotificationService`.
-- [ ] Trong `SCEAMS.API` có đủ `Api`, `Application`, `Domain`, `Infrastructure`; không có project layer riêng.
-- [ ] Source code sạch; không chứa `bin/`, `obj/`, secrets hoặc file database cá nhân.
-- [ ] Migration hoặc SQL script và dữ liệu mẫu.
-- [ ] ERD ảnh/PDF.
-- [ ] Tài liệu project.
-- [ ] Postman collection/environment.
-- [ ] Mã nguồn MVC client.
-- [ ] Mã nguồn gRPC NotificationService.
-- [ ] File cấu hình mẫu `appsettings.Example.json`.
-- [ ] `dotnet build SCEAMS.sln` và Postman/Newman collection pass từ clean checkout.
+- [x] `dotnet sln list` chỉ có `SCEAMS.API`, `SCEAMS.MVC`, `SCEAMS.NotificationService`.
+- [x] Trong `SCEAMS.API` có đủ `Api`, `Application`, `Domain`, `Infrastructure`; không có project layer riêng.
+- [x] Source code sạch; không chứa `bin/`, `obj/`, secrets hoặc file database cá nhân.
+- [x] Migration hoặc SQL script và dữ liệu mẫu.
+- [x] ERD ảnh/PDF.
+- [x] Tài liệu project.
+- [x] Postman collection/environment.
+- [x] Mã nguồn MVC client.
+- [x] Mã nguồn gRPC NotificationService.
+- [x] File cấu hình mẫu `appsettings.Example.json`.
+- [x] `dotnet build SCEAMS.sln` và Postman/Newman collection pass từ clean checkout.
 
 ---
 
